@@ -1,0 +1,1722 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores application-specific user data, roles, and access configurations, linked to an external authentication system. This entity does not store sensitive authentication credentials like passwords.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "firebaseUid": {
+          "type": "string",
+          "description": "The unique user ID from the Firebase Authentication system. This serves as a foreign key to the external authentication system. (Relationship: External Auth System 1:1 UserProfile)"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user, primarily for display and communication purposes.",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role assigned to the user, determining their access level within the application.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "companyIds": {
+          "type": "array",
+          "description": "An array of unique identifiers for companies or divisions the user has access to. (Relationship: Company N:N UserProfile)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preferredCompanyId": {
+          "type": "string",
+          "description": "The unique identifier of the company or division that the user has currently selected or prefers to work with. (Relationship: Company 1:1 UserProfile)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firebaseUid",
+        "firstName",
+        "lastName",
+        "email",
+        "role",
+        "companyIds",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Company": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Company",
+      "type": "object",
+      "description": "Represents a legal business entity or a division within a larger holding company, supporting multi-company and multi-division accounting. It serves as a container for related financial data.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Company entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The common or trading name of the company or division."
+        },
+        "legalName": {
+          "type": "string",
+          "description": "The full legal name of the company as registered."
+        },
+        "address": {
+          "type": "string",
+          "description": "The physical or mailing address of the company."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The primary contact phone number for the company."
+        },
+        "email": {
+          "type": "string",
+          "description": "The primary contact email address for the company.",
+          "format": "email"
+        },
+        "taxId": {
+          "type": "string",
+          "description": "The tax identification number (e.g., GSTIN, EIN) for the company."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The default currency used for financial transactions and reporting for this company (e.g., 'USD', 'AED')."
+        },
+        "isParentCompany": {
+          "type": "boolean",
+          "description": "A flag indicating if this company acts as a parent company in a multi-company structure."
+        },
+        "parentCompanyId": {
+          "type": "string",
+          "description": "Reference to the parent company's ID if this company is a subsidiary. (Relationship: Company 1:N Company)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the company record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the company record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "legalName",
+        "address",
+        "phone",
+        "email",
+        "taxId",
+        "currency",
+        "isParentCompany",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Department": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Department",
+      "type": "object",
+      "description": "Represents a specific department or cost center within a company, used for allocating expenses and tracking performance.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Department entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company this department belongs to. (Relationship: Company 1:N Department)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the department (e.g., 'HR', 'Sales', 'Construction Division')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the department's function or responsibilities."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the department record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the department record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "name",
+        "description",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ChartOfAccountType": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChartOfAccountType",
+      "type": "object",
+      "description": "Defines the high-level classification types for accounts in a chart of accounts (e.g., Assets, Liabilities, Equity, Income, Expenses).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ChartOfAccountType entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the account type (e.g., 'Asset', 'Liability', 'Income')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of this account type and what it represents."
+        },
+        "accountClass": {
+          "type": "string",
+          "description": "The financial statement classification for this account type (e.g., 'Balance Sheet' for Assets, 'Income Statement' for Income).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the chart of account type was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the chart of account type was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "accountClass",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Account": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Account",
+      "type": "object",
+      "description": "Represents a specific financial account within a company's Chart of Accounts, used for tracking debit and credit entries.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Account entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company this account belongs to. (Relationship: Company 1:N Account)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the account (e.g., 'Cash', 'Accounts Receivable', 'Sales Revenue')."
+        },
+        "accountNumber": {
+          "type": "string",
+          "description": "A unique number assigned to the account within the company's chart of accounts."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the account's purpose."
+        },
+        "chartOfAccountTypeId": {
+          "type": "string",
+          "description": "Reference to the high-level ChartOfAccountType this account falls under. (Relationship: ChartOfAccountType 1:N Account)"
+        },
+        "balance": {
+          "type": "number",
+          "description": "The current balance of the account. This can be a derived field but is often stored for performance."
+        },
+        "isContraAccount": {
+          "type": "boolean",
+          "description": "Indicates if this is a contra account (e.g., Accumulated Depreciation, Sales Returns & Allowances)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the account was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "name",
+        "accountNumber",
+        "description",
+        "chartOfAccountTypeId",
+        "balance",
+        "isContraAccount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "JournalEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JournalEntry",
+      "type": "object",
+      "description": "Represents a single financial transaction, encapsulating all debits and credits required for a balanced double-entry.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the JournalEntry entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company where this journal entry was made. (Relationship: Company 1:N JournalEntry)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date when the financial transaction occurred or was recorded.",
+          "format": "date"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief overall description of the financial transaction."
+        },
+        "referenceNumber": {
+          "type": "string",
+          "description": "An optional external reference number associated with the transaction (e.g., check number, invoice number)."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the journal entry.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "totalDebit": {
+          "type": "number",
+          "description": "The sum of all debit amounts within this journal entry, used for validation to ensure debits equal credits."
+        },
+        "totalCredit": {
+          "type": "number",
+          "description": "The sum of all credit amounts within this journal entry, used for validation to ensure debits equal credits."
+        },
+        "postedByUserId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who created or posted this journal entry. (Relationship: UserProfile 1:N JournalEntry)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the journal entry was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the journal entry was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "date",
+        "description",
+        "status",
+        "totalDebit",
+        "totalCredit",
+        "postedByUserId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "JournalEntryLineItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JournalEntryLineItem",
+      "type": "object",
+      "description": "Represents a single debit or credit line within a JournalEntry, specifying the account affected and the amount.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the JournalEntryLineItem entity."
+        },
+        "journalEntryId": {
+          "type": "string",
+          "description": "Reference to the JournalEntry this line item belongs to. (Relationship: JournalEntry 1:N JournalEntryLineItem)"
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Reference to the Account affected by this line item. (Relationship: Account 1:N JournalEntryLineItem)"
+        },
+        "description": {
+          "type": "string",
+          "description": "A specific description for this individual line item, if different from the overall journal entry description."
+        },
+        "debit": {
+          "type": "number",
+          "description": "The debit amount for this line item. Should be 0 if it's a credit."
+        },
+        "credit": {
+          "type": "number",
+          "description": "The credit amount for this line item. Should be 0 if it's a debit."
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Optional reference to a Project, for allocating expenses or income to specific projects. (Relationship: Project 1:N JournalEntryLineItem)"
+        },
+        "departmentId": {
+          "type": "string",
+          "description": "Optional reference to a Department, for allocating expenses or income to specific departments. (Relationship: Department 1:N JournalEntryLineItem)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the journal entry line item was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the journal entry line item was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "journalEntryId",
+        "accountId",
+        "description",
+        "debit",
+        "credit",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Customer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Customer",
+      "type": "object",
+      "description": "Represents a customer entity that purchases goods or services from the company.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Customer entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company this customer is associated with. (Relationship: Company 1:N Customer)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the customer or their company name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The primary contact email address for the customer.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "The primary contact phone number for the customer."
+        },
+        "address": {
+          "type": "string",
+          "description": "The primary billing or mailing address for the customer."
+        },
+        "taxId": {
+          "type": "string",
+          "description": "The tax identification number of the customer, if applicable."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The preferred currency for transactions with this customer."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the customer record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the customer record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "name",
+        "email",
+        "phone",
+        "address",
+        "currency",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Vendor": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vendor",
+      "type": "object",
+      "description": "Represents a vendor or supplier entity from whom the company purchases goods or services.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Vendor entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company this vendor supplies to. (Relationship: Company 1:N Vendor)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the vendor or their company name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The primary contact email address for the vendor.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "The primary contact phone number for the vendor."
+        },
+        "address": {
+          "type": "string",
+          "description": "The primary billing or mailing address for the vendor."
+        },
+        "taxId": {
+          "type": "string",
+          "description": "The tax identification number of the vendor, if applicable."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The preferred currency for transactions with this vendor."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the vendor record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the vendor record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "name",
+        "email",
+        "phone",
+        "address",
+        "currency",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Invoice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Invoice",
+      "type": "object",
+      "description": "Represents a sales invoice (bill to customer) or a purchase invoice (bill from vendor), tracking amounts, dates, and payment status.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Invoice entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company that issued or received this invoice. (Relationship: Company 1:N Invoice)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of invoice, indicating whether it's a Sales Invoice (money owed to us) or a Purchase Invoice (money we owe).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invoiceNumber": {
+          "type": "string",
+          "description": "A unique, sequential number for the invoice."
+        },
+        "issueDate": {
+          "type": "string",
+          "description": "The date when the invoice was issued.",
+          "format": "date"
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The date by which the invoice payment is due.",
+          "format": "date"
+        },
+        "customerId": {
+          "type": "string",
+          "description": "Optional reference to the Customer for Sales Invoices. (Relationship: Customer 1:N Invoice)"
+        },
+        "vendorId": {
+          "type": "string",
+          "description": "Optional reference to the Vendor for Purchase Invoices. (Relationship: Vendor 1:N Invoice)"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current payment status of the invoice.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "The sum of all line item amounts before tax."
+        },
+        "taxAmount": {
+          "type": "number",
+          "description": "The total amount of tax applied to the invoice."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The grand total amount of the invoice (Subtotal + TaxAmount)."
+        },
+        "amountPaid": {
+          "type": "number",
+          "description": "The total amount of payments received or made against this invoice."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any additional notes or terms related to the invoice."
+        },
+        "journalEntryId": {
+          "type": "string",
+          "description": "Optional reference to the JournalEntry created when this invoice impacts the general ledger. (Relationship: JournalEntry 1:N Invoice)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the invoice was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the invoice was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "type",
+        "invoiceNumber",
+        "issueDate",
+        "dueDate",
+        "status",
+        "subtotal",
+        "taxAmount",
+        "totalAmount",
+        "amountPaid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "InvoiceLineItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InvoiceLineItem",
+      "type": "object",
+      "description": "Represents a single item or service listed on an Invoice, detailing quantity, price, and associated costs/revenues.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InvoiceLineItem entity."
+        },
+        "invoiceId": {
+          "type": "string",
+          "description": "Reference to the Invoice this line item belongs to. (Relationship: Invoice 1:N InvoiceLineItem)"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the item or service provided."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the item or service."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "The price per unit of the item or service."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The total amount for this line item (quantity * unitPrice)."
+        },
+        "taxRate": {
+          "type": "number",
+          "description": "The applicable tax rate for this line item (e.g., 0.05 for 5%)."
+        },
+        "taxAmount": {
+          "type": "number",
+          "description": "The calculated tax amount for this line item."
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Optional reference to the specific revenue or expense Account associated with this line item. (Relationship: Account 1:N InvoiceLineItem)"
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Optional reference to a Project, for allocating this invoice line item to project costs/revenues. (Relationship: Project 1:N InvoiceLineItem)"
+        },
+        "departmentId": {
+          "type": "string",
+          "description": "Optional reference to a Department, for allocating this invoice line item to department costs/revenues. (Relationship: Department 1:N InvoiceLineItem)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the invoice line item was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the invoice line item was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "invoiceId",
+        "description",
+        "quantity",
+        "unitPrice",
+        "amount",
+        "taxRate",
+        "taxAmount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Payment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Payment",
+      "type": "object",
+      "description": "Records a payment made or received against an invoice or other financial obligation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Payment entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company making or receiving this payment. (Relationship: Company 1:N Payment)"
+        },
+        "invoiceId": {
+          "type": "string",
+          "description": "Reference to the Invoice this payment is applied to. (Relationship: Invoice 1:N Payment)"
+        },
+        "paymentDate": {
+          "type": "string",
+          "description": "The date when the payment was made or received.",
+          "format": "date"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The total amount of the payment."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The method by which the payment was made (e.g., 'Cash', 'Bank Transfer', 'Credit Card')."
+        },
+        "referenceNumber": {
+          "type": "string",
+          "description": "A transaction ID, check number, or other reference for the payment."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any additional notes about the payment."
+        },
+        "journalEntryId": {
+          "type": "string",
+          "description": "Optional reference to the JournalEntry created when this payment impacts the general ledger. (Relationship: JournalEntry 1:N Payment)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the payment record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the payment record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "invoiceId",
+        "paymentDate",
+        "amount",
+        "paymentMethod",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ExpenseCategory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ExpenseCategory",
+      "type": "object",
+      "description": "Defines categories for classifying business expenses (e.g., 'Office Supplies', 'Travel').",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ExpenseCategory entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company this expense category is defined for. (Relationship: Company 1:N ExpenseCategory)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the expense category."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of what types of expenses fall under this category."
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Optional reference to the default Account in the Chart of Accounts where expenses in this category are typically posted. (Relationship: Account 1:N ExpenseCategory)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the expense category was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the expense category was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "name",
+        "description",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Expense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Expense",
+      "type": "object",
+      "description": "Records a business expense incurred by the company, including details for categorization and project/department allocation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Expense entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company that incurred this expense. (Relationship: Company 1:N Expense)"
+        },
+        "expenseDate": {
+          "type": "string",
+          "description": "The date when the expense occurred.",
+          "format": "date"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the expense."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The total monetary amount of the expense."
+        },
+        "expenseCategoryId": {
+          "type": "string",
+          "description": "Reference to the ExpenseCategory this expense belongs to. (Relationship: ExpenseCategory 1:N Expense)"
+        },
+        "vendorId": {
+          "type": "string",
+          "description": "Optional reference to the Vendor from whom the expense was incurred. (Relationship: Vendor 1:N Expense)"
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Optional reference to a Project, for allocating this expense to project costs. (Relationship: Project 1:N Expense)"
+        },
+        "departmentId": {
+          "type": "string",
+          "description": "Optional reference to a Department, for allocating this expense to department costs. (Relationship: Department 1:N Expense)"
+        },
+        "isRecurring": {
+          "type": "boolean",
+          "description": "A flag indicating if this is a recurring expense (e.g., monthly subscription)."
+        },
+        "receiptUrl": {
+          "type": "string",
+          "description": "Optional URL to an uploaded digital receipt for the expense.",
+          "format": "uri"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current processing status of the expense.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "journalEntryId": {
+          "type": "string",
+          "description": "Optional reference to the JournalEntry created when this expense impacts the general ledger. (Relationship: JournalEntry 1:N Expense)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the expense record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the expense record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "expenseDate",
+        "description",
+        "amount",
+        "expenseCategoryId",
+        "isRecurring",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Project": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Project",
+      "type": "object",
+      "description": "Manages details for a specific business or construction project, including budgets, costs, and profitability tracking.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Project entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company that owns or is managing this project. (Relationship: Company 1:N Project)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the project."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the project's scope and goals."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The planned or actual start date of the project.",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The planned or actual end date of the project.",
+          "format": "date"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the project.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "budgetAmount": {
+          "type": "number",
+          "description": "The total approved budget for the entire project."
+        },
+        "actualCost": {
+          "type": "number",
+          "description": "The accumulated actual costs incurred for the project to date. This can be a derived field."
+        },
+        "assignedToUserId": {
+          "type": "string",
+          "description": "Optional reference to the UserProfile (typically a Manager) responsible for this project. (Relationship: UserProfile 1:N Project)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the project record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the project record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "name",
+        "description",
+        "startDate",
+        "status",
+        "budgetAmount",
+        "actualCost",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ProjectBudget": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ProjectBudget",
+      "type": "object",
+      "description": "Defines a specific budget item or category within a larger project budget, allowing for detailed tracking of allocated and actual spending.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ProjectBudget entity."
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Reference to the Project this budget item belongs to. (Relationship: Project 1:N ProjectBudget)"
+        },
+        "budgetItemName": {
+          "type": "string",
+          "description": "The name of the budget item (e.g., 'Material Costs', 'Labor Costs', 'Marketing')."
+        },
+        "budgetedAmount": {
+          "type": "number",
+          "description": "The amount allocated for this specific budget item."
+        },
+        "actualAmount": {
+          "type": "number",
+          "description": "The actual amount spent against this budget item to date. This can be aggregated."
+        },
+        "expenseCategoryId": {
+          "type": "string",
+          "description": "Optional reference to an ExpenseCategory that corresponds to this budget item. (Relationship: ExpenseCategory 1:N ProjectBudget)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the project budget item was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the project budget item was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "budgetItemName",
+        "budgetedAmount",
+        "actualAmount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Asset": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Asset",
+      "type": "object",
+      "description": "Tracks company assets, including acquisition details, depreciation, and lifecycle status.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Asset entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company that owns this asset. (Relationship: Company 1:N Asset)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name or description of the asset (e.g., 'Office Building', 'Construction Crane')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the asset, including its characteristics."
+        },
+        "purchaseDate": {
+          "type": "string",
+          "description": "The date when the asset was acquired.",
+          "format": "date"
+        },
+        "purchasePrice": {
+          "type": "number",
+          "description": "The original cost of the asset when purchased."
+        },
+        "assetType": {
+          "type": "string",
+          "description": "The classification of the asset (e.g., tangible, intangible, type of tangible asset).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "usefulLifeYears": {
+          "type": "number",
+          "description": "The estimated number of years the asset is expected to be productive."
+        },
+        "salvageValue": {
+          "type": "number",
+          "description": "The estimated residual value of the asset at the end of its useful life."
+        },
+        "depreciationMethod": {
+          "type": "string",
+          "description": "The method used to calculate depreciation for this asset.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "currentBookValue": {
+          "type": "number",
+          "description": "The current book value of the asset (Purchase Price - Accumulated Depreciation)."
+        },
+        "accumulatedDepreciation": {
+          "type": "number",
+          "description": "The total amount of depreciation recorded for this asset to date."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current operational status of the asset.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "serialNumber": {
+          "type": "string",
+          "description": "The unique serial number or identification code of the asset."
+        },
+        "location": {
+          "type": "string",
+          "description": "The physical location where the asset is primarily used or stored."
+        },
+        "journalEntryId": {
+          "type": "string",
+          "description": "Optional reference to the JournalEntry related to the asset's purchase, disposal, or depreciation. (Relationship: JournalEntry 1:N Asset)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the asset record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the asset record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "name",
+        "description",
+        "purchaseDate",
+        "purchasePrice",
+        "assetType",
+        "usefulLifeYears",
+        "salvageValue",
+        "depreciationMethod",
+        "currentBookValue",
+        "accumulatedDepreciation",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Loan": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Loan",
+      "type": "object",
+      "description": "Tracks details of loans and other liabilities, including principal, interest rates, and payment schedules.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Loan entity."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Reference to the Company that holds this loan or liability. (Relationship: Company 1:N Loan)"
+        },
+        "lenderName": {
+          "type": "string",
+          "description": "The name of the financial institution or entity that provided the loan."
+        },
+        "loanType": {
+          "type": "string",
+          "description": "The type of loan or liability.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "principalAmount": {
+          "type": "number",
+          "description": "The original principal amount of the loan."
+        },
+        "interestRate": {
+          "type": "number",
+          "description": "The annual interest rate of the loan (e.g., 0.05 for 5%)."
+        },
+        "issueDate": {
+          "type": "string",
+          "description": "The date when the loan was issued.",
+          "format": "date"
+        },
+        "maturityDate": {
+          "type": "string",
+          "description": "The date when the loan is scheduled to be fully repaid.",
+          "format": "date"
+        },
+        "paymentFrequency": {
+          "type": "string",
+          "description": "How often loan payments are due.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "totalPayments": {
+          "type": "number",
+          "description": "The total number of scheduled payments over the life of the loan."
+        },
+        "outstandingBalance": {
+          "type": "number",
+          "description": "The current remaining principal balance of the loan."
+        },
+        "nextPaymentDueDate": {
+          "type": "string",
+          "description": "The due date for the next scheduled loan payment.",
+          "format": "date"
+        },
+        "nextPaymentAmount": {
+          "type": "number",
+          "description": "The total amount due for the next scheduled loan payment."
+        },
+        "description": {
+          "type": "string",
+          "description": "A general description or purpose of the loan."
+        },
+        "journalEntryId": {
+          "type": "string",
+          "description": "Optional reference to the JournalEntry created when the loan was initially received. (Relationship: JournalEntry 1:N Loan)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the loan record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the loan record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "companyId",
+        "lenderName",
+        "loanType",
+        "principalAmount",
+        "interestRate",
+        "issueDate",
+        "maturityDate",
+        "paymentFrequency",
+        "totalPayments",
+        "outstandingBalance",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "LoanPayment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "LoanPayment",
+      "type": "object",
+      "description": "Records an individual payment made towards a loan, detailing the principal and interest portions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the LoanPayment entity."
+        },
+        "loanId": {
+          "type": "string",
+          "description": "Reference to the Loan this payment is applied to. (Relationship: Loan 1:N LoanPayment)"
+        },
+        "paymentDate": {
+          "type": "string",
+          "description": "The date when the loan payment was made.",
+          "format": "date"
+        },
+        "principalPaid": {
+          "type": "number",
+          "description": "The portion of the payment applied to reduce the loan's principal balance."
+        },
+        "interestPaid": {
+          "type": "number",
+          "description": "The portion of the payment applied to cover interest charges."
+        },
+        "totalPaymentAmount": {
+          "type": "number",
+          "description": "The total amount of the loan payment (Principal Paid + Interest Paid)."
+        },
+        "outstandingBalanceAfterPayment": {
+          "type": "number",
+          "description": "The remaining principal balance of the loan after this payment was applied."
+        },
+        "referenceNumber": {
+          "type": "string",
+          "description": "An optional reference number for the payment (e.g., bank transaction ID)."
+        },
+        "journalEntryId": {
+          "type": "string",
+          "description": "Optional reference to the JournalEntry created when this loan payment impacts the general ledger. (Relationship: JournalEntry 1:N LoanPayment)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the loan payment record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the loan payment record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "loanId",
+        "paymentDate",
+        "principalPaid",
+        "interestPaid",
+        "totalPaymentAmount",
+        "outstandingBalanceAfterPayment",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/userProfiles/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user-specific data, linked to Firebase Auth UID. The document ID (`userId`) must match the Firebase `request.auth.uid`. Includes 'companyIds' array for user's company affiliations. Authorization is based on `request.auth.uid == userId`.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/chartOfAccountTypes/{chartOfAccountTypeId}",
+        "definition": {
+          "entityName": "ChartOfAccountType",
+          "schema": {
+            "$ref": "#/backend/entities/ChartOfAccountType"
+          },
+          "description": "Stores global, foundational chart of account types (e.g., Assets, Liabilities). This is reference data, not specific to any single company. Generally readable by all authenticated users, with write access for global administrators.",
+          "params": [
+            {
+              "name": "chartOfAccountTypeId",
+              "description": "The unique identifier for the chart of account type."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}",
+        "definition": {
+          "entityName": "Company",
+          "schema": {
+            "$ref": "#/backend/entities/Company"
+          },
+          "description": "Stores details for each company or division. Includes denormalized 'members: { [userId]: \"role\" }' map for authorization independence, defining user roles (Admin, Accountant, Manager, Viewer) within this specific company. All subcollections inherit authorization from this document.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier for the company or division."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/departments/{departmentId}",
+        "definition": {
+          "entityName": "Department",
+          "schema": {
+            "$ref": "#/backend/entities/Department"
+          },
+          "description": "Stores departments within a specific company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "departmentId",
+              "description": "The unique identifier for the department."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/accounts/{accountId}",
+        "definition": {
+          "entityName": "Account",
+          "schema": {
+            "$ref": "#/backend/entities/Account"
+          },
+          "description": "Stores specific financial accounts (Chart of Accounts) for a company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "accountId",
+              "description": "The unique identifier for the financial account."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/customers/{customerId}",
+        "definition": {
+          "entityName": "Customer",
+          "schema": {
+            "$ref": "#/backend/entities/Customer"
+          },
+          "description": "Stores customer details for a specific company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "customerId",
+              "description": "The unique identifier for the customer."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/vendors/{vendorId}",
+        "definition": {
+          "entityName": "Vendor",
+          "schema": {
+            "$ref": "#/backend/entities/Vendor"
+          },
+          "description": "Stores vendor details for a specific company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "vendorId",
+              "description": "The unique identifier for the vendor."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/expenseCategories/{expenseCategoryId}",
+        "definition": {
+          "entityName": "ExpenseCategory",
+          "schema": {
+            "$ref": "#/backend/entities/ExpenseCategory"
+          },
+          "description": "Stores categories for classifying expenses specific to a company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "expenseCategoryId",
+              "description": "The unique identifier for the expense category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/projects/{projectId}",
+        "definition": {
+          "entityName": "Project",
+          "schema": {
+            "$ref": "#/backend/entities/Project"
+          },
+          "description": "Stores details for business or construction projects managed by a company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "projectId",
+              "description": "The unique identifier for the project."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/projects/{projectId}/budgets/{projectBudgetId}",
+        "definition": {
+          "entityName": "ProjectBudget",
+          "schema": {
+            "$ref": "#/backend/entities/ProjectBudget"
+          },
+          "description": "Defines specific budget items within a project. Access is controlled by the parent Company's 'members' map via the parent Project.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the grandparent company."
+            },
+            {
+              "name": "projectId",
+              "description": "The unique identifier of the parent project."
+            },
+            {
+              "name": "projectBudgetId",
+              "description": "The unique identifier for the project budget item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/assets/{assetId}",
+        "definition": {
+          "entityName": "Asset",
+          "schema": {
+            "$ref": "#/backend/entities/Asset"
+          },
+          "description": "Tracks company assets. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "assetId",
+              "description": "The unique identifier for the asset."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/loans/{loanId}",
+        "definition": {
+          "entityName": "Loan",
+          "schema": {
+            "$ref": "#/backend/entities/Loan"
+          },
+          "description": "Tracks loans and liabilities for a company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "loanId",
+              "description": "The unique identifier for the loan."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/loans/{loanId}/payments/{loanPaymentId}",
+        "definition": {
+          "entityName": "LoanPayment",
+          "schema": {
+            "$ref": "#/backend/entities/LoanPayment"
+          },
+          "description": "Records individual payments made towards a loan. Access is controlled by the parent Company's 'members' map via the parent Loan.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the grandparent company."
+            },
+            {
+              "name": "loanId",
+              "description": "The unique identifier of the parent loan."
+            },
+            {
+              "name": "loanPaymentId",
+              "description": "The unique identifier for the loan payment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/journalEntries/{journalEntryId}",
+        "definition": {
+          "entityName": "JournalEntry",
+          "schema": {
+            "$ref": "#/backend/entities/JournalEntry"
+          },
+          "description": "Represents a single financial transaction for a company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "journalEntryId",
+              "description": "The unique identifier for the journal entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/journalEntries/{journalEntryId}/lineItems/{journalEntryLineItemId}",
+        "definition": {
+          "entityName": "JournalEntryLineItem",
+          "schema": {
+            "$ref": "#/backend/entities/JournalEntryLineItem"
+          },
+          "description": "Represents a single debit or credit line within a journal entry. Access is controlled by the parent Company's 'members' map via the parent JournalEntry.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the grandparent company."
+            },
+            {
+              "name": "journalEntryId",
+              "description": "The unique identifier of the parent journal entry."
+            },
+            {
+              "name": "journalEntryLineItemId",
+              "description": "The unique identifier for the journal entry line item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/invoices/{invoiceId}",
+        "definition": {
+          "entityName": "Invoice",
+          "schema": {
+            "$ref": "#/backend/entities/Invoice"
+          },
+          "description": "Represents sales or purchase invoices for a company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique identifier for the invoice."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/invoices/{invoiceId}/lineItems/{invoiceLineItemId}",
+        "definition": {
+          "entityName": "InvoiceLineItem",
+          "schema": {
+            "$ref": "#/backend/entities/InvoiceLineItem"
+          },
+          "description": "Represents a single item or service listed on an invoice. Access is controlled by the parent Company's 'members' map via the parent Invoice.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the grandparent company."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique identifier of the parent invoice."
+            },
+            {
+              "name": "invoiceLineItemId",
+              "description": "The unique identifier for the invoice line item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/invoices/{invoiceId}/payments/{paymentId}",
+        "definition": {
+          "entityName": "Payment",
+          "schema": {
+            "$ref": "#/backend/entities/Payment"
+          },
+          "description": "Records a payment made or received against an invoice. Access is controlled by the parent Company's 'members' map via the parent Invoice.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the grandparent company."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique identifier of the parent invoice."
+            },
+            {
+              "name": "paymentId",
+              "description": "The unique identifier for the payment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companies/{companyId}/expenses/{expenseId}",
+        "definition": {
+          "entityName": "Expense",
+          "schema": {
+            "$ref": "#/backend/entities/Expense"
+          },
+          "description": "Records business expenses incurred by the company. Access is controlled by the parent Company's 'members' map.",
+          "params": [
+            {
+              "name": "companyId",
+              "description": "The unique identifier of the parent company."
+            },
+            {
+              "name": "expenseId",
+              "description": "The unique identifier for the expense."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for Apex Ledger is designed with strong emphasis on Authorization Independence, Structural Segregation, and clear Access Modeling to support a multi-company, multi-division ERP system with robust role-based access control. The core principle is to make authorization decisions explicit and local to the data being accessed, minimizing complex cross-document lookups in security rules.\n\n1.  **User Profiles (`/userProfiles/{userId}`):** User data is stored in a top-level collection, keyed by the Firebase Authentication UID. This adheres to path-based ownership, where `request.auth.uid` must match `{userId}` for profile access. Each `UserProfile` document includes a `companyIds` array, listing all companies the user is associated with. While this list dictates *which companies* a user can access, the *role within each company* is denormalized directly into the respective `Company` document (see below).\n\n2.  **Global Reference Data (`/chartOfAccountTypes/{chartOfAccountTypeId}`):** Entities that are not specific to a single company and represent global classifications (like `ChartOfAccountType`) are placed in their own top-level collection. This segregation simplifies access control, allowing for global read access (or admin-only write access) without complex company-specific checks.\n\n3.  **Multi-Company Hierarchy (`/companies/{companyId}/...`):** All company-specific data and related sub-entities are organized under a `/companies/{companyId}` hierarchy. This is crucial for multi-division accounting. The `Company` document itself (`/companies/{companyId}`) is designed to be the primary authorization point for all data within that company's scope.\n\n    *   **Authorization Independence for Companies:** Each `Company` document includes a denormalized `members` map (`members: { [userId]: \"role\" }`). This map explicitly defines which users have access to the company and their specific role (Admin, Accountant, Manager, Viewer) within that company. This design choice is critical for Authorization Independence: instead of requiring a `get()` call to a user's `UserProfile` to check their `companyIds` list and then infer their role, the `Company` document itself contains the necessary authorization context. Rules for accessing a `Company` document (and its subcollections) can thus atomically check `resource.data.members[request.auth.uid]` without relying on external documents.\n    *   **Authorization Independence for Subcollections:** For all subcollections (e.g., `/companies/{companyId}/departments/{departmentId}`, `/companies/{companyId}/journalEntries/{journalEntryId}/lineItems/{journalEntryLineItemId}`), authorization rules will leverage the `companyId` wildcard in their path. To determine access, these rules will perform a *single, targeted `get()` lookup* to the *immediate parent `Company` document* (`get(/companies/$(companyId))`) to check the `members` map. While this involves a `get()`, it is a highly controlled, fixed-depth lookup to a dedicated authorization field, which is a pragmatic and secure approach for multi-tenant architectures. This strategy avoids denormalizing the entire `members` map into *every single document* within a company's subcollections, which would lead to massive data duplication and increased write amplification.\n\n4.  **Querying and Access Patterns (QAPs):**\n    *   **Path-Based Scoping:** The hierarchical structure naturally scopes `list` and `get` operations. For example, listing invoices requires specifying a `{companyId}` (`/companies/{companyId}/invoices`). This ensures that queries are inherently filtered by company, making security rules simpler to write and debug.\n    *   **Rule Enforcement:** Security rules will enforce that `request.auth.uid` must exist in the `members` map of the requested `Company` document (`get(/companies/$(companyId)).data.members[request.auth.uid] != null`). Further refinement based on the user's `role` within that `members` map (`get(/companies/$(companyId)).data.members[request.auth.uid] == 'admin'`) will grant appropriate read/write/delete permissions. This satisfies QAPs by ensuring that only authorized users can query or retrieve data within their assigned companies and roles.\n    *   **User Profile QAPs:** A user can `get` their own `UserProfile` directly (`request.auth.uid == userId`). `list` operations on `/userProfiles` would typically be restricted to administrators or not allowed for general users to prevent enumeration.\n\nThis structure prioritizes clear ownership (`UserProfile` by `uid`), strong company-level boundaries (all company data under `{companyId}`), and atomic authorization checks at the `Company` level for all related resources, resulting in a scalable, secure, and debuggable Firestore solution."
+  }
+}
