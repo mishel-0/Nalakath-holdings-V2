@@ -74,7 +74,6 @@ export default function ReportsPage() {
     return {
       revenue: totalRev,
       opex: totalExp,
-      liquidity: totalRev - totalExp
     };
   }, [ledger, expenses]);
 
@@ -95,7 +94,7 @@ export default function ReportsPage() {
               </Button>
             </header>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <Card className="glass border-white/5">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm text-muted-foreground">Total Revenue</CardTitle>
@@ -115,17 +114,6 @@ export default function ReportsPage() {
                   <div className="text-2xl font-bold font-mono text-destructive">₹{stats.opex.toLocaleString('en-IN')}</div>
                   <div className="flex items-center gap-1 text-xs text-destructive mt-1">
                     <TrendingDown className="h-3 w-3" /> Syncing
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="glass border-white/5">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">Net Liquidity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold font-mono">₹{stats.liquidity.toLocaleString('en-IN')}</div>
-                  <div className="flex items-center gap-1 text-xs text-green-500 mt-1">
-                    <TrendingUp className="h-3 w-3" /> Calculated
                   </div>
                 </CardContent>
               </Card>

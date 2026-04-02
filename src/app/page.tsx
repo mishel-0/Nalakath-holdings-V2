@@ -250,10 +250,6 @@ export default function Dashboard() {
                       <p className="text-sm font-medium text-primary">Cloud Connection</p>
                       <p className="text-xs text-muted-foreground mt-1">Nalakath Holdings cloud ledger is active and syncing with real-time vouchers.</p>
                     </div>
-                    <div className="p-3 rounded-2xl bg-accent/5 border border-accent/10">
-                      <p className="text-sm font-medium text-accent">Data Integrity</p>
-                      <p className="text-xs text-muted-foreground mt-1">Audit score is currently being computed from 100% real-time voucher and ledger data.</p>
-                    </div>
                   </div>
                 </CardContent>
               </Card>

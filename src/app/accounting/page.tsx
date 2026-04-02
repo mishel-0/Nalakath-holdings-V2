@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -161,26 +162,10 @@ export default function AccountingPage() {
               </CardContent>
             </Card>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-1">
               <Card className="glass border-white/5">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Liquidity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold font-mono">₹2.4 Cr</div>
-                </CardContent>
-              </Card>
-              <Card className="glass border-white/5">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Audit Score</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold font-mono text-green-500">98/100</div>
-                </CardContent>
-              </Card>
-              <Card className="glass border-white/5">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Entries</CardTitle>
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Ledger Entries</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold font-mono">{entries?.length || 0}</div>
