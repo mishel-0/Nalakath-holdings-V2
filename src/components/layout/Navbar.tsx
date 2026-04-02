@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Building2, Bell, Search, User } from "lucide-react";
+import { ChevronDown, Building2, Bell, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +12,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useAuth, useUser } from "@/firebase";
+import { signOut } from "firebase/auth";
 
 const companies = [
   { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
@@ -22,6 +24,12 @@ const companies = [
 
 export function Navbar() {
   const [activeCompany, setActiveCompany] = useState(companies[0]);
+  const { user } = useUser();
+  const auth = useAuth();
+
+  const handleSignOut = () => {
+    signOut(auth);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full glass border-b border-white/10 backdrop-blur-xl">
@@ -40,7 +48,7 @@ export function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/10">
+              <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/10 text-white">
                 <Building2 className="h-4 w-4 text-primary" />
                 <div className="flex flex-col items-start text-xs">
                   <span className="font-semibold leading-none text-left">{activeCompany.name}</span>
@@ -81,9 +89,27 @@ export function Navbar() {
               <Bell className="h-5 w-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
             </Button>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10">
-              <User className="h-5 w-5" />
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10">
+                  <User className="h-5 w-5 text-primary" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 glass">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold">Admin Account</span>
+                    <span className="text-[10px] text-muted-foreground truncate">{user?.email}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
