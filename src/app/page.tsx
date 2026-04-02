@@ -20,11 +20,10 @@ import {
   AlertCircle,
   ChevronRight,
   Plus,
-  ShieldCheck
+  ShieldCheck,
+  Calculator
 } from "lucide-react";
 import {
-  Bar,
-  BarChart,
   ResponsiveContainer,
   XAxis,
   YAxis,
