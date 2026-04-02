@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Apex Ledger - Enterprise ERP',
+  title: 'NALAKATH HOLDINGS LEDGER',
   description: 'Premium iOS-style Accounting & ERP for multi-division holdings.',
 };
 

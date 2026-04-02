@@ -29,10 +29,10 @@ export function Navbar() {
         <div className="flex items-center gap-4 lg:gap-8">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+              <span className="text-black font-bold text-lg">N</span>
             </div>
-            <span className="hidden font-headline text-xl font-bold tracking-tight text-foreground md:inline-block">
-              Apex Ledger
+            <span className="hidden font-headline text-lg font-bold tracking-tight text-foreground md:inline-block uppercase">
+              Nalakath Holdings Ledger
             </span>
           </div>
 

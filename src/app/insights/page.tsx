@@ -26,20 +26,20 @@ import {
 const mockFinancialData = {
   companyName: "Nalakath Holdings",
   financialSummary: {
-    netProfit: 432100,
-    totalRevenue: 1284430,
-    totalExpenses: 852330,
+    netProfit: 4321000,
+    totalRevenue: 12844300,
+    totalExpenses: 8523300,
     profitMargin: 33.6,
   },
   spendingAnalysis: {
     topExpenseCategories: [
-      { category: "Steel & Construction Materials", amount: 450000, percentageOfTotalExpenses: 52 },
-      { category: "Labor & Payroll", amount: 220000, percentageOfTotalExpenses: 26 },
-      { category: "Logistics & Fleet", amount: 110000, percentageOfTotalExpenses: 13 },
+      { category: "Steel & Construction Materials", amount: 4500000, percentageOfTotalExpenses: 52 },
+      { category: "Labor & Payroll", amount: 2200000, percentageOfTotalExpenses: 26 },
+      { category: "Logistics & Fleet", amount: 1100000, percentageOfTotalExpenses: 13 },
     ],
     projectSpendingOverview: [
-      { projectName: "Azure Tower", budget: 12000000, actualSpent: 8400000, variance: 3600000, status: "On Track" },
-      { projectName: "Grand Plaza", budget: 2500000, actualSpent: 2700000, variance: -200000, status: "Over Budget" },
+      { projectName: "Azure Tower", budget: 120000000, actualSpent: 84000000, variance: 36000000, status: "On Track" },
+      { projectName: "Grand Plaza", budget: 25000000, actualSpent: 27000000, variance: -2000000, status: "Over Budget" },
     ],
   },
 };
@@ -78,7 +78,7 @@ export default function InsightsPage() {
               <Button 
                 onClick={generateInsights} 
                 disabled={loading}
-                className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90"
+                className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black"
               >
                 {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 {insights ? "Refresh Insights" : "Generate Insights"}
@@ -95,7 +95,7 @@ export default function InsightsPage() {
                     <h2 className="text-xl font-bold">Unlocking Profit Potential</h2>
                     <p className="text-muted-foreground mt-2">Our AI can analyze your spending patterns across all divisions to find hidden efficiencies and predict cash flow bottlenecks.</p>
                   </div>
-                  <Button onClick={generateInsights} className="rounded-full mt-4">Start Analysis</Button>
+                  <Button onClick={generateInsights} className="rounded-full mt-4 text-black">Start Analysis</Button>
                 </CardContent>
               </Card>
             ) : null}
@@ -122,7 +122,7 @@ export default function InsightsPage() {
                 <section className="p-6 glass rounded-3xl border-primary/20 bg-primary/5">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-primary rounded-2xl">
-                      <Sparkles className="h-6 w-6 text-white" />
+                      <Sparkles className="h-6 w-6 text-black" />
                     </div>
                     <div>
                       <h2 className="text-xl font-bold">Executive Summary</h2>
@@ -142,13 +142,13 @@ export default function InsightsPage() {
                         {suggestion.estimatedImpact && (
                           <div className="flex items-center gap-1.5 text-green-500 font-bold text-sm mt-1">
                             <TrendingDown className="h-4 w-4" />
-                            {suggestion.estimatedImpact}
+                            {suggestion.estimatedImpact.replace('$', '₹')}
                           </div>
                         )}
                       </CardHeader>
                       <CardContent className="flex-1">
                         <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                          {suggestion.description}
+                          {suggestion.description.replace('$', '₹')}
                         </p>
                         {suggestion.actionableSteps && (
                           <div className="space-y-2">
@@ -197,7 +197,7 @@ export default function InsightsPage() {
                             <div className="h-2 w-2 rounded-full bg-destructive" />
                             <div className="flex-1">
                               <p className="text-sm font-semibold">Project Overrun</p>
-                              <p className="text-xs text-muted-foreground">Grand Plaza hospitality project has exceeded its budget by $200k.</p>
+                              <p className="text-xs text-muted-foreground">Grand Plaza hospitality project has exceeded its budget by ₹20,00,000.</p>
                             </div>
                             <Button size="sm" variant="ghost">Audit</Button>
                           </div>
@@ -220,7 +220,7 @@ export default function InsightsPage() {
                                <CheckCircle2 className="h-5 w-5 text-green-500" />
                                <div>
                                  <p className="text-sm font-semibold">Asset Leasing</p>
-                                 <p className="text-xs text-muted-foreground">Leasing idle machinery could yield +$5k/mo.</p>
+                                 <p className="text-xs text-muted-foreground">Leasing idle machinery could yield +₹50k/mo.</p>
                                </div>
                              </div>
                              <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20">High ROI</Badge>
@@ -230,7 +230,7 @@ export default function InsightsPage() {
                                <CheckCircle2 className="h-5 w-5 text-blue-500" />
                                <div>
                                  <p className="text-sm font-semibold">Tax Optimization</p>
-                                 <p className="text-xs text-muted-foreground">Restructuring divisions may save $40k annually.</p>
+                                 <p className="text-xs text-muted-foreground">Restructuring divisions may save ₹4,00,000 annually.</p>
                                </div>
                              </div>
                              <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">Strategy</Badge>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreVertical, HardHat, Wallet, Activity } from "lucide-react";
+import { Plus, HardHat, Activity } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -16,8 +16,8 @@ const projects = [
     id: 1,
     name: "Azure Luxury Tower",
     division: "Construction",
-    budget: 12000000,
-    spent: 8400000,
+    budget: 120000000,
+    spent: 84000000,
     progress: 70,
     status: "On Track",
     image: "https://picsum.photos/seed/tower1/600/400"
@@ -26,8 +26,8 @@ const projects = [
     id: 2,
     name: "Grand Plaza Renovation",
     division: "Hospitality",
-    budget: 2500000,
-    spent: 2700000,
+    budget: 25000000,
+    spent: 27000000,
     progress: 95,
     status: "Over Budget",
     image: "https://picsum.photos/seed/hotel2/600/400"
@@ -36,8 +36,8 @@ const projects = [
     id: 3,
     name: "Logistics Hub Expansion",
     division: "Trading",
-    budget: 4000000,
-    spent: 1200000,
+    budget: 40000000,
+    spent: 12000000,
     progress: 30,
     status: "On Track",
     image: "https://picsum.photos/seed/warehouse1/600/400"
@@ -46,8 +46,8 @@ const projects = [
     id: 4,
     name: "Metro Office Suites",
     division: "Real Estate",
-    budget: 8000000,
-    spent: 4500000,
+    budget: 80000000,
+    spent: 45000000,
     progress: 55,
     status: "On Track",
     image: "https://picsum.photos/seed/office1/600/400"
@@ -67,7 +67,7 @@ export default function ProjectsPage() {
                 <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Projects</h1>
                 <p className="text-muted-foreground">Manage ongoing construction and business ventures.</p>
               </div>
-              <Button className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90">
+              <Button className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black">
                 <Plus className="h-4 w-4" />
                 New Project
               </Button>
@@ -113,7 +113,7 @@ export default function ProjectsPage() {
                       <div className="grid grid-cols-2 gap-4 pt-2">
                         <div className="space-y-1">
                           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Total Budget</p>
-                          <p className="text-sm font-bold">${project.budget.toLocaleString()}</p>
+                          <p className="text-sm font-bold">₹{project.budget.toLocaleString('en-IN')}</p>
                         </div>
                         <div className="space-y-1">
                           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Actual Spent</p>
@@ -121,7 +121,7 @@ export default function ProjectsPage() {
                             "text-sm font-bold",
                             project.spent > project.budget ? "text-destructive" : "text-foreground"
                           )}>
-                            ${project.spent.toLocaleString()}
+                            ₹{project.spent.toLocaleString('en-IN')}
                           </p>
                         </div>
                       </div>
@@ -129,8 +129,8 @@ export default function ProjectsPage() {
                       <div className="pt-4 flex items-center justify-between border-t border-white/5">
                         <div className="flex -space-x-2">
                           {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-8 w-8 rounded-full border-2 border-white glass flex items-center justify-center text-[10px] font-bold">
-                              JD
+                            <div key={i} className="h-8 w-8 rounded-full border-2 border-primary bg-black flex items-center justify-center text-[10px] font-bold text-primary">
+                              NH
                             </div>
                           ))}
                           <div className="h-8 w-8 rounded-full border-2 border-white bg-secondary flex items-center justify-center text-[10px] font-bold text-muted-foreground">

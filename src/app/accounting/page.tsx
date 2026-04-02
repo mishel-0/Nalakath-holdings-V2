@@ -12,11 +12,11 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const transactions = [
-  { id: "TX-9021", date: "Oct 24, 2023", desc: "Consultancy Services", category: "Revenue", account: "Checking", debit: "5,000.00", credit: "-", status: "Verified" },
-  { id: "TX-9022", date: "Oct 24, 2023", desc: "Software Subscription", category: "Expense", account: "Credit Card", debit: "-", credit: "249.00", status: "Verified" },
-  { id: "TX-9023", date: "Oct 25, 2023", desc: "Raw Material - Steel", category: "Cost of Goods", account: "Savings", debit: "-", credit: "12,400.00", status: "Pending" },
-  { id: "TX-9024", date: "Oct 25, 2023", desc: "Quarterly Rental Income", category: "Revenue", account: "Checking", debit: "35,000.00", credit: "-", status: "Verified" },
-  { id: "TX-9025", date: "Oct 26, 2023", desc: "Utilities Bill", category: "Operating Expense", account: "Checking", debit: "-", credit: "1,200.00", status: "Verified" },
+  { id: "TX-9021", date: "Oct 24, 2023", desc: "Consultancy Services", category: "Revenue", account: "Checking", debit: "5,00,000.00", credit: "-", status: "Verified" },
+  { id: "TX-9022", date: "Oct 24, 2023", desc: "Software Subscription", category: "Expense", account: "Credit Card", debit: "-", credit: "24,900.00", status: "Verified" },
+  { id: "TX-9023", date: "Oct 25, 2023", desc: "Raw Material - Steel", category: "Cost of Goods", account: "Savings", debit: "-", credit: "12,40,000.00", status: "Pending" },
+  { id: "TX-9024", date: "Oct 25, 2023", desc: "Quarterly Rental Income", category: "Revenue", account: "Checking", debit: "3,50,000.00", credit: "-", status: "Verified" },
+  { id: "TX-9025", date: "Oct 26, 2023", desc: "Utilities Bill", category: "Operating Expense", account: "Checking", debit: "-", credit: "12,000.00", status: "Verified" },
 ];
 
 export default function AccountingPage() {
@@ -71,8 +71,8 @@ export default function AccountingPage() {
                       <TableHead className="font-semibold text-foreground">Description</TableHead>
                       <TableHead className="font-semibold text-foreground">Category</TableHead>
                       <TableHead className="font-semibold text-foreground">Account</TableHead>
-                      <TableHead className="text-right font-semibold text-foreground">Debit ($)</TableHead>
-                      <TableHead className="text-right font-semibold text-foreground">Credit ($)</TableHead>
+                      <TableHead className="text-right font-semibold text-foreground">Debit (₹)</TableHead>
+                      <TableHead className="text-right font-semibold text-foreground">Credit (₹)</TableHead>
                       <TableHead className="text-center font-semibold text-foreground">Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -110,7 +110,7 @@ export default function AccountingPage() {
                   <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Net Position</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold font-mono">$243,901.40</div>
+                  <div className="text-3xl font-bold font-mono">₹2,43,90,140</div>
                   <p className="text-xs text-muted-foreground mt-1">+1.2% vs last month</p>
                 </CardContent>
               </Card>
@@ -120,7 +120,7 @@ export default function AccountingPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold font-mono text-orange-500">12 Items</div>
-                  <p className="text-xs text-muted-foreground mt-1">Total value: $14,200.00</p>
+                  <p className="text-xs text-muted-foreground mt-1">Total value: ₹1,42,000</p>
                 </CardContent>
               </Card>
               <Card className="glass border-white/5">

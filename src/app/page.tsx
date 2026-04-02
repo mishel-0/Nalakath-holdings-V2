@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   ArrowUpRight, 
   ArrowDownRight, 
-  DollarSign, 
+  IndianRupee, 
   Briefcase, 
   BarChart4, 
   PieChart as PieIcon,
@@ -22,45 +22,43 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Cell,
-  Line,
-  LineChart,
+  Bar as RechartsBar,
 } from "recharts";
 
 const data = [
-  { name: "Jan", revenue: 4000, expenses: 2400 },
-  { name: "Feb", revenue: 3000, expenses: 1398 },
-  { name: "Mar", revenue: 2000, expenses: 9800 },
-  { name: "Apr", revenue: 2780, expenses: 3908 },
-  { name: "May", revenue: 1890, expenses: 4800 },
-  { name: "Jun", revenue: 2390, expenses: 3800 },
+  { name: "Jan", revenue: 400000, expenses: 240000 },
+  { name: "Feb", revenue: 300000, expenses: 139800 },
+  { name: "Mar", revenue: 200000, expenses: 980000 },
+  { name: "Apr", revenue: 278000, expenses: 390800 },
+  { name: "May", revenue: 189000, expenses: 480000 },
+  { name: "Jun", revenue: 239000, expenses: 380000 },
 ];
 
 const stats = [
   {
     title: "Total Revenue",
-    value: "$1,284,430",
+    value: "₹1,28,44,300",
     change: "+12.5%",
     trend: "up",
-    icon: DollarSign,
+    icon: IndianRupee,
   },
   {
     title: "Net Profit",
-    value: "$432,100",
+    value: "₹43,21,000",
     change: "+4.3%",
     trend: "up",
     icon: TrendingUp,
   },
   {
     title: "Project Costs",
-    value: "$852,330",
+    value: "₹85,23,300",
     change: "-2.1%",
     trend: "down",
     icon: Briefcase,
   },
   {
     title: "Cash Balance",
-    value: "$2.4M",
+    value: "₹2.4 Cr",
     change: "+0.8%",
     trend: "up",
     icon: BarChart4,
@@ -122,12 +120,15 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data}>
                       <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                      <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value/1000}k`} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)' }}
+                        contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', color: '#fff' }}
+                        itemStyle={{ color: '#fff' }}
+                        labelStyle={{ color: '#aaa' }}
+                        formatter={(value) => [`₹${Number(value).toLocaleString()}`, '']}
                       />
-                      <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={20} />
-                      <Bar dataKey="expenses" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} barSize={20} />
+                      <RechartsBar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={20} />
+                      <RechartsBar dataKey="expenses" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} barSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -145,8 +146,8 @@ export default function Dashboard() {
                     {[
                       { name: "Construction", value: "45%", color: "bg-primary" },
                       { name: "Hospitality", value: "25%", color: "bg-accent" },
-                      { name: "Real Estate", value: "20%", color: "bg-blue-400" },
-                      { name: "Trading", value: "10%", color: "bg-slate-300" },
+                      { name: "Real Estate", value: "20%", color: "bg-yellow-600" },
+                      { name: "Trading", value: "10%", color: "bg-stone-500" },
                     ].map((div) => (
                       <div key={div.name} className="flex flex-col gap-1">
                         <div className="flex justify-between text-sm">
@@ -174,10 +175,10 @@ export default function Dashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { title: "Material Supply", sub: "Steel Works Ltd", amount: "-$12,400", time: "2h ago" },
-                      { title: "Client Payment", sub: "Azure Tower Project", amount: "+$45,000", time: "5h ago" },
-                      { title: "Office Rent", sub: "Division HQ", amount: "-$8,200", time: "1d ago" },
-                      { title: "Service Revenue", sub: "Grand Plaza Hotel", amount: "+$18,900", time: "1d ago" },
+                      { title: "Material Supply", sub: "Steel Works Ltd", amount: "-₹1,24,000", time: "2h ago" },
+                      { title: "Client Payment", sub: "Azure Tower Project", amount: "+₹4,50,000", time: "5h ago" },
+                      { title: "Office Rent", sub: "Division HQ", amount: "-₹82,000", time: "1d ago" },
+                      { title: "Service Revenue", sub: "Grand Plaza Hotel", amount: "+₹1,89,000", time: "1d ago" },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
                         <div>
@@ -207,7 +208,7 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     <div className="p-3 rounded-2xl bg-primary/5 border border-primary/10">
                       <p className="text-sm font-medium text-primary">Cash Flow Alert</p>
-                      <p className="text-xs text-muted-foreground mt-1">Predicted shortage of $12k in the next 14 days due to upcoming tax liabilities.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Predicted shortage of ₹1,20,000 in the next 14 days due to upcoming tax liabilities.</p>
                     </div>
                     <div className="p-3 rounded-2xl bg-accent/5 border border-accent/10">
                       <p className="text-sm font-medium text-accent">Optimization Hint</p>
