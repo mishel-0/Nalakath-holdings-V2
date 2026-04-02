@@ -52,10 +52,11 @@ export default function LoginPage() {
       }
       router.push('/');
     } catch (error: any) {
+      console.error(error);
       toast({
         variant: "destructive",
         title: "Authentication Failed",
-        description: error.message || "Invalid credentials provided.",
+        description: error.message || "Invalid credentials provided. Please ensure you have registered first.",
       });
     } finally {
       setLoading(false);
@@ -153,7 +154,7 @@ export default function LoginPage() {
                 onClick={() => setIsRegistering(!isRegistering)}
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                {isRegistering ? "Back to Login" : "Register Admin/Staff"}
+                {isRegistering ? "Already have an account? Login" : "Register Admin/Staff"}
               </Button>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
                 <ShieldCheck className="h-3 w-3 text-primary" />
