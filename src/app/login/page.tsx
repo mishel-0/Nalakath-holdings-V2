@@ -116,7 +116,7 @@ export default function LoginPage() {
         </Card>
 
         <p className="text-center mt-8 text-xs text-muted-foreground font-medium uppercase tracking-widest opacity-50">
-          Nalakath Holdings © 2024
+          Nalakath Holdings @2026
         </p>
       </div>
     </div>
