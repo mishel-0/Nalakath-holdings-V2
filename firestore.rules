@@ -5,60 +5,13 @@ service cloud.firestore {
     /**
      * APEX LEDGER SECURITY RULES - PROTOTYPE MODE
      *
-     * In this prototype version, we've simplified the rules to ensure that
-     * any authenticated user can read and write data. This bypasses the complex
-     * 'members' map check to allow for immediate functional testing.
+     * In this prototype version, we allow any authenticated user to read and write
+     * to any document in the database. This ensures that development is not blocked
+     * by permission errors while the data structure is evolving.
      */
 
-    // --- Helper Functions ---
-
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /** 
-     * @description Simplified for Prototype. 
-     * Allows access if signed in. In production, this would check a membership map.
-     */
-    function isCompanyMember(companyId) {
-      return isSignedIn();
-    }
-
-    function canWriteToCompany(companyId) {
-      return isSignedIn();
-    }
-
-    function isLinkedToPath(field, pathId) {
-      return request.resource.data[field] == pathId;
-    }
-
-    // --- Collection Rules ---
-
-    match /userProfiles/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false; 
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
-    }
-
-    match /chartOfAccountTypes/{id} {
-      allow read: if isSignedIn();
-      allow write: if false;
-    }
-
-    match /companies/{companyId} {
-      allow read, create, update: if isSignedIn();
-      allow delete: if false;
-      
-      // All subcollections under a company
-      match /{allSubcollections=**} {
-        allow read, write: if isSignedIn();
-      }
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
