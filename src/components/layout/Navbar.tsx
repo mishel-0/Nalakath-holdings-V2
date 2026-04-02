@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Building2, Bell, Search, User, LogOut } from "lucide-react";
+import { ChevronDown, Building2, Bell, Search, User, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,8 +12,10 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useUser, useDoc, useFirestore } from "@/firebase";
 import { signOut } from "firebase/auth";
+import { doc } from "firebase/firestore";
+import { Badge } from "@/components/ui/badge";
 
 const companies = [
   { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
@@ -26,6 +28,9 @@ export function Navbar() {
   const [activeCompany, setActiveCompany] = useState(companies[0]);
   const { user } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
+
+  const { data: profile } = useDoc(user ? doc(db, "userProfiles", user.uid) : null);
 
   const handleSignOut = () => {
     signOut(auth);
@@ -96,10 +101,16 @@ export function Navbar() {
                   <User className="h-5 w-5 text-primary" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 glass">
+              <DropdownMenuContent align="end" className="w-64 glass">
                 <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold">Admin Account</span>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold">User Account</span>
+                      <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20 h-5">
+                        <Shield className="h-2 w-2 mr-1" />
+                        {profile?.role || "Staff"}
+                      </Badge>
+                    </div>
                     <span className="text-[10px] text-muted-foreground truncate">{user?.email}</span>
                   </div>
                 </DropdownMenuLabel>

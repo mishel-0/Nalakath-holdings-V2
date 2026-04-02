@@ -2,21 +2,25 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, ArrowRight, ShieldCheck, UserPlus } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, UserCog } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('Admin');
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const auth = useAuth();
+  const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -26,8 +30,22 @@ export default function LoginPage() {
 
     try {
       if (isRegistering) {
-        await createUserWithEmailAndPassword(auth, email, password);
-        toast({ title: "Account Created", description: "Admin credentials registered successfully." });
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Create UserProfile in Firestore
+        await setDoc(doc(db, "userProfiles", user.uid), {
+          id: user.uid,
+          firebaseUid: user.uid,
+          email: user.email,
+          role: role,
+          companyIds: ["nalakath-holdings-main"],
+          preferredCompanyId: "nalakath-holdings-main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
+        toast({ title: "Account Created", description: `${role} credentials registered successfully.` });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         toast({ title: "Welcome back", description: "Secure session initiated." });
@@ -59,11 +77,11 @@ export default function LoginPage() {
         <Card className="glass border-white/10 shadow-2xl overflow-hidden">
           <CardHeader className="text-center pt-8">
             <CardTitle className="text-2xl font-headline font-bold tracking-tight">
-              {isRegistering ? "Register Admin" : "Ledger Access"}
+              {isRegistering ? "Register Access" : "Ledger Access"}
             </CardTitle>
             <CardDescription className="text-muted-foreground">
               {isRegistering 
-                ? "Create a new administrator account for Nalakath Holdings." 
+                ? "Create a new account for Nalakath Holdings staff." 
                 : "Enter credentials to access financial records."}
             </CardDescription>
           </CardHeader>
@@ -76,7 +94,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="admin@nalakath.com"
+                    placeholder="staff@nalakath.com"
                     className="pl-10 bg-white/5 border-white/10 rounded-xl h-12 focus-visible:ring-primary/30"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -101,12 +119,30 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {isRegistering && (
+                <div className="space-y-2">
+                  <Label htmlFor="role">Assign Role</Label>
+                  <div className="relative">
+                    <UserCog className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                    <Select onValueChange={setRole} defaultValue={role}>
+                      <SelectTrigger className="pl-10 bg-white/5 border-white/10 rounded-xl h-12 focus-visible:ring-primary/30">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent className="glass">
+                        <SelectItem value="Admin">Administrator</SelectItem>
+                        <SelectItem value="Accountant">Accountant</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
               <Button
                 type="submit"
                 disabled={loading}
                 className="w-full h-12 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition group"
               >
-                {loading ? "Verifying..." : (isRegistering ? "Register Admin" : "Access Ledger")}
+                {loading ? "Verifying..." : (isRegistering ? "Create Account" : "Access Ledger")}
                 {!loading && <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 ios-transition" />}
               </Button>
             </form>
@@ -117,7 +153,7 @@ export default function LoginPage() {
                 onClick={() => setIsRegistering(!isRegistering)}
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                {isRegistering ? "Back to Login" : "Register a new admin account"}
+                {isRegistering ? "Back to Login" : "Register Admin/Staff"}
               </Button>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
                 <ShieldCheck className="h-3 w-3 text-primary" />
