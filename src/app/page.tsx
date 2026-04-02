@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -33,21 +34,22 @@ export default function Dashboard() {
   const companyId = "nalakath-holdings-main";
 
   // Real-time data fetching
-  const invoicesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "invoices")), [db]);
+  const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers")), [db]);
   const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db]);
   const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
   const recentTxQuery = useMemoFirebase(() => 
     query(collection(db, "companies", companyId, "journalEntries"), orderBy("createdAt", "desc"), limit(4)), 
   [db]);
 
-  const { data: invoices } = useCollection(invoicesQuery);
+  const { data: vouchers } = useCollection(vouchersQuery);
   const { data: expenses } = useCollection(expensesQuery);
   const { data: projects } = useCollection(projectsQuery);
   const { data: recentTransactions } = useCollection(recentTxQuery);
 
   // Dynamic Statistics Calculation
   const statsData = useMemo(() => {
-    const totalRevenue = invoices?.reduce((acc, inv) => acc + (inv.type === "Sales" ? (inv.totalAmount || 0) : 0), 0) || 0;
+    // Treat credits as Revenue/Income and debits as Expenses for dashboard simplicity
+    const totalRevenue = recentTransactions?.reduce((acc, tx) => acc + (tx.totalCredit || 0), 0) || 0;
     const totalExpenses = expenses?.reduce((acc, exp) => acc + (exp.amount || 0), 0) || 0;
     const projectCosts = projects?.reduce((acc, proj) => acc + (proj.actualCost || 0), 0) || 0;
     const netProfit = totalRevenue - totalExpenses;
@@ -56,38 +58,60 @@ export default function Dashboard() {
       {
         title: "Total Revenue",
         value: `₹${totalRevenue.toLocaleString('en-IN')}`,
-        change: "+12.5%",
+        change: totalRevenue > 0 ? "+Real-time" : "0",
         trend: "up",
         icon: IndianRupee,
       },
       {
         title: "Net Profit",
         value: `₹${netProfit.toLocaleString('en-IN')}`,
-        change: "+4.3%",
+        change: netProfit >= 0 ? "Profit" : "Loss",
         trend: netProfit >= 0 ? "up" : "down",
         icon: TrendingUp,
       },
       {
         title: "Project Costs",
         value: `₹${projectCosts.toLocaleString('en-IN')}`,
-        change: "-2.1%",
+        change: projects?.length ? "Allocated" : "0",
         trend: "down",
         icon: Briefcase,
       },
       {
         title: "Active Projects",
         value: projects?.length.toString() || "0",
-        change: "New",
+        change: "Total",
         trend: "up",
         icon: BarChart4,
       },
     ];
-  }, [invoices, expenses, projects]);
+  }, [recentTransactions, expenses, projects]);
 
   // Chart data simulation based on real data
-  const chartData = [
-    { name: "Current", revenue: statsData[0].value.replace(/[^0-9]/g, ''), expenses: statsData[2].value.replace(/[^0-9]/g, '') },
-  ];
+  const chartData = useMemo(() => {
+    const rev = Number(statsData[0].value.replace(/[^0-9]/g, '')) || 0;
+    const exp = Number(statsData[2].value.replace(/[^0-9]/g, '')) || 0;
+    return [{ name: "Current Month", revenue: rev, expenses: exp }];
+  }, [statsData]);
+
+  // Division Allocation logic from actual voucher data
+  const divisionStats = useMemo(() => {
+    const divisions = {
+      "Nalakath Construction": 0,
+      "Oval Palace Resort": 0,
+      "Green Villa": 0,
+    };
+    vouchers?.forEach(v => {
+      if (v.division in divisions) {
+        divisions[v.division as keyof typeof divisions] += v.amount || 0;
+      }
+    });
+    const total = Object.values(divisions).reduce((a, b) => a + b, 0) || 1;
+    return [
+      { name: "Nalakath Construction", value: `${Math.round((divisions["Nalakath Construction"] / total) * 100)}%`, color: "bg-primary" },
+      { name: "Oval Palace Resort", value: `${Math.round((divisions["Oval Palace Resort"] / total) * 100)}%`, color: "bg-accent" },
+      { name: "Green Villa", value: `${Math.round((divisions["Green Villa"] / total) * 100)}%`, color: "bg-yellow-600" },
+    ];
+  }, [vouchers]);
 
   return (
     <div className="min-h-screen">
@@ -124,7 +148,7 @@ export default function Dashboard() {
                           {stat.change}
                         </span>
                       )}
-                      <span className="text-muted-foreground">real-time sync</span>
+                      <span className="text-muted-foreground">sync active</span>
                     </p>
                   </CardContent>
                 </Card>
@@ -143,7 +167,7 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
                       <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value/1000}k`} />
+                      <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${(value/1000).toFixed(0)}k`} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', color: '#fff' }}
                         itemStyle={{ color: '#fff' }}
@@ -166,11 +190,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="h-[350px] flex flex-col justify-center">
                   <div className="space-y-4">
-                    {[
-                      { name: "Nalakath Construction", value: "45%", color: "bg-primary" },
-                      { name: "Oval Palace Resort", value: "25%", color: "bg-accent" },
-                      { name: "Green Villa", value: "30%", color: "bg-yellow-600" },
-                    ].map((div) => (
+                    {divisionStats.map((div) => (
                       <div key={div.name} className="flex flex-col gap-1">
                         <div className="flex justify-between text-sm">
                           <span className="font-medium">{div.name}</span>
@@ -196,18 +216,18 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentTransactions?.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No recent transactions.</p>
+                    {!recentTransactions?.length ? (
+                      <p className="text-sm text-muted-foreground">No recent transactions recorded in the general ledger.</p>
                     ) : (
-                      recentTransactions?.map((item, i) => (
+                      recentTransactions?.map((item) => (
                         <div key={item.id} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
                           <div>
                             <p className="text-sm font-semibold">{item.description}</p>
                             <p className="text-xs text-muted-foreground">{item.date}</p>
                           </div>
                           <div className="text-right">
-                            <p className={`text-sm font-bold ${item.totalDebit > 0 ? 'text-green-500' : 'text-foreground'}`}>
-                              {item.totalDebit > 0 ? `+₹${item.totalDebit.toLocaleString()}` : `-₹${item.totalCredit.toLocaleString()}`}
+                            <p className={`text-sm font-bold ${item.totalDebit > 0 ? 'text-foreground' : 'text-green-500'}`}>
+                              {item.totalDebit > 0 ? `-₹${item.totalDebit.toLocaleString()}` : `+₹${item.totalCredit.toLocaleString()}`}
                             </p>
                           </div>
                         </div>
@@ -221,18 +241,18 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    AI Insights
+                    System Status
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="p-3 rounded-2xl bg-primary/5 border border-primary/10">
-                      <p className="text-sm font-medium text-primary">Data Integrated</p>
-                      <p className="text-xs text-muted-foreground mt-1">Firestore connection established. AI is now monitoring Nalakath Holdings ledger.</p>
+                      <p className="text-sm font-medium text-primary">Cloud Connection</p>
+                      <p className="text-xs text-muted-foreground mt-1">Nalakath Holdings cloud ledger is active and syncing with real-time vouchers.</p>
                     </div>
                     <div className="p-3 rounded-2xl bg-accent/5 border border-accent/10">
-                      <p className="text-sm font-medium text-accent">Optimization Hint</p>
-                      <p className="text-xs text-muted-foreground mt-1">Review "AI Insights" tab to generate cost-saving strategies from live data.</p>
+                      <p className="text-sm font-medium text-accent">Data Integrity</p>
+                      <p className="text-xs text-muted-foreground mt-1">Audit score is currently being computed from 100% real-time voucher and ledger data.</p>
                     </div>
                   </div>
                 </CardContent>

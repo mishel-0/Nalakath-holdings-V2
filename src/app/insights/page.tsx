@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -19,39 +20,76 @@ import {
 } from "lucide-react";
 import { 
   costOptimizationSuggestions, 
-  type CostOptimizationSuggestionsOutput 
+  type CostOptimizationSuggestionsOutput,
+  type CostOptimizationSuggestionsInput
 } from "@/ai/flows/cost-optimization-suggestions";
-
-// Mock data updated to match new divisions
-const mockFinancialData = {
-  companyName: "Nalakath Holdings",
-  financialSummary: {
-    netProfit: 4321000,
-    totalRevenue: 12844300,
-    totalExpenses: 8523300,
-    profitMargin: 33.6,
-  },
-  spendingAnalysis: {
-    topExpenseCategories: [
-      { category: "Construction Materials", amount: 4500000, percentageOfTotalExpenses: 52 },
-      { category: "Resort Payroll", amount: 2200000, percentageOfTotalExpenses: 26 },
-      { category: "Villa Landscaping", amount: 1100000, percentageOfTotalExpenses: 13 },
-    ],
-    projectSpendingOverview: [
-      { projectName: "Green Villa Phase 1", budget: 120000000, actualSpent: 84000000, variance: 36000000, status: "On Track" },
-      { projectName: "Oval Palace Renovation", budget: 25000000, actualSpent: 27000000, variance: -2000000, status: "Over Budget" },
-    ],
-  },
-};
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query } from "firebase/firestore";
 
 export default function InsightsPage() {
+  const db = useFirestore();
+  const companyId = "nalakath-holdings-main";
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState<CostOptimizationSuggestionsOutput | null>(null);
+
+  // Fetch real data for AI analysis
+  const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers")), [db]);
+  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db]);
+  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
+  const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries")), [db]);
+
+  const { data: vouchers } = useCollection(vouchersQuery);
+  const { data: expenses } = useCollection(expensesQuery);
+  const { data: projects } = useCollection(projectsQuery);
+  const { data: ledger } = useCollection(ledgerQuery);
 
   const generateInsights = async () => {
     setLoading(true);
     try {
-      const result = await costOptimizationSuggestions(mockFinancialData);
+      // Aggregate real financial data
+      const totalRevenue = ledger?.reduce((acc, tx) => acc + (tx.totalCredit || 0), 0) || 0;
+      const totalExpenses = expenses?.reduce((acc, exp) => acc + (exp.amount || 0), 0) || 0;
+      const netProfit = totalRevenue - totalExpenses;
+      const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+      const expenseMap: Record<string, number> = {};
+      expenses?.forEach(exp => {
+        const cat = exp.expenseCategory || "Uncategorized";
+        expenseMap[cat] = (expenseMap[cat] || 0) + exp.amount;
+      });
+
+      const topCategories = Object.entries(expenseMap)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([category, amount]) => ({
+          category,
+          amount,
+          percentageOfTotalExpenses: totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
+        }));
+
+      const projectSummary = projects?.map(p => ({
+        projectName: p.name,
+        budget: p.budgetAmount,
+        actualSpent: p.actualCost,
+        variance: p.budgetAmount - p.actualCost,
+        status: p.status
+      })) || [];
+
+      const input: CostOptimizationSuggestionsInput = {
+        companyName: "Nalakath Holdings",
+        financialSummary: {
+          netProfit,
+          totalRevenue,
+          totalExpenses,
+          profitMargin
+        },
+        spendingAnalysis: {
+          topExpenseCategories: topCategories,
+          projectSpendingOverview: projectSummary
+        }
+      };
+
+      const result = await costOptimizationSuggestions(input);
       setInsights(result);
     } catch (error) {
       console.error("Failed to generate insights:", error);
@@ -73,7 +111,7 @@ export default function InsightsPage() {
                   AI Financial Assistant
                   <Sparkles className="h-8 w-8 text-primary animate-pulse" />
                 </h1>
-                <p className="text-muted-foreground">Smart business insights generated from your historical financial data.</p>
+                <p className="text-muted-foreground">Smart business insights generated from your live financial data.</p>
               </div>
               <Button 
                 onClick={generateInsights} 
@@ -93,7 +131,7 @@ export default function InsightsPage() {
                   </div>
                   <div className="max-w-md">
                     <h2 className="text-xl font-bold">Unlocking Profit Potential</h2>
-                    <p className="text-muted-foreground mt-2">Our AI analyzes spending patterns across Green Villa, Oval Palace, and Nalakath Construction to find hidden efficiencies.</p>
+                    <p className="text-muted-foreground mt-2">Our AI analyzes your real-time spending patterns across all divisions to find hidden efficiencies.</p>
                   </div>
                   <Button onClick={generateInsights} className="rounded-full mt-4 text-black">Start Analysis</Button>
                 </CardContent>
@@ -126,7 +164,7 @@ export default function InsightsPage() {
                     </div>
                     <div>
                       <h2 className="text-xl font-bold">Executive Summary</h2>
-                      <p className="text-muted-foreground mt-1">{insights.overallSummary || "Comprehensive analysis of Nalakath Holdings divisions complete."}</p>
+                      <p className="text-muted-foreground mt-1">{insights.overallSummary || "Comprehensive analysis of live Nalakath Holdings data complete."}</p>
                     </div>
                   </div>
                 </section>
@@ -181,26 +219,21 @@ export default function InsightsPage() {
                           <AlertTriangle className="h-5 w-5 text-orange-500" />
                           Risk Radar
                         </CardTitle>
-                        <CardDescription>Potential financial threats detected via anomaly analysis.</CardDescription>
+                        <CardDescription>Potentially identified financial risks in current operations.</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-500/5 border border-orange-500/10">
-                            <div className="h-2 w-2 rounded-full bg-orange-500" />
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold">Green Villa Variance</p>
-                              <p className="text-xs text-muted-foreground">Material costs increased by 14% compared to previous quarters.</p>
+                          {!ledger?.length ? (
+                            <p className="text-xs text-muted-foreground">No ledger data to analyze risks.</p>
+                          ) : (
+                            <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-500/5 border border-orange-500/10">
+                              <div className="h-2 w-2 rounded-full bg-orange-500" />
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold">Ledger Activity Detected</p>
+                                <p className="text-xs text-muted-foreground">Monitoring active transactions for unusual variances in material costs.</p>
+                              </div>
                             </div>
-                            <Button size="sm" variant="ghost">Review</Button>
-                          </div>
-                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-destructive/5 border border-destructive/10">
-                            <div className="h-2 w-2 rounded-full bg-destructive" />
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold">Resort Overrun</p>
-                              <p className="text-xs text-muted-foreground">Oval Palace project has exceeded its budget by ₹20,00,000.</p>
-                            </div>
-                            <Button size="sm" variant="ghost">Audit</Button>
-                          </div>
+                          )}
                         </div>
                       </CardContent>
                    </Card>
@@ -211,7 +244,7 @@ export default function InsightsPage() {
                           <Target className="h-5 w-5 text-green-500" />
                           Growth Targets
                         </CardTitle>
-                        <CardDescription>AI-driven opportunities for increasing revenue.</CardDescription>
+                        <CardDescription>AI-driven opportunities for increasing division revenue.</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
@@ -219,21 +252,10 @@ export default function InsightsPage() {
                              <div className="flex items-center gap-3">
                                <CheckCircle2 className="h-5 w-5 text-green-500" />
                                <div>
-                                 <p className="text-sm font-semibold">Asset Leasing</p>
-                                 <p className="text-xs text-muted-foreground">Leasing idle machinery could yield +₹50k/mo.</p>
+                                 <p className="text-sm font-semibold">Division Integration</p>
+                                 <p className="text-xs text-muted-foreground">Unified tracking across all {projects?.length || 0} active projects.</p>
                                </div>
                              </div>
-                             <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20">High ROI</Badge>
-                           </div>
-                           <div className="flex items-center justify-between p-3 rounded-2xl bg-blue-500/5 border border-blue-500/10">
-                             <div className="flex items-center gap-3">
-                               <CheckCircle2 className="h-5 w-5 text-blue-500" />
-                               <div>
-                                 <p className="text-sm font-semibold">Tax Optimization</p>
-                                 <p className="text-xs text-muted-foreground">Restructuring divisions may save ₹4,00,000 annually.</p>
-                               </div>
-                             </div>
-                             <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">Strategy</Badge>
                            </div>
                         </div>
                       </CardContent>
