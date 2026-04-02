@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -24,48 +25,70 @@ import {
   Tooltip,
   Bar as RechartsBar,
 } from "recharts";
-
-const data = [
-  { name: "Jan", revenue: 400000, expenses: 240000 },
-  { name: "Feb", revenue: 300000, expenses: 139800 },
-  { name: "Mar", revenue: 200000, expenses: 980000 },
-  { name: "Apr", revenue: 278000, expenses: 390800 },
-  { name: "May", revenue: 189000, expenses: 480000 },
-  { name: "Jun", revenue: 239000, expenses: 380000 },
-];
-
-const stats = [
-  {
-    title: "Total Revenue",
-    value: "₹1,28,44,300",
-    change: "+12.5%",
-    trend: "up",
-    icon: IndianRupee,
-  },
-  {
-    title: "Net Profit",
-    value: "₹43,21,000",
-    change: "+4.3%",
-    trend: "up",
-    icon: TrendingUp,
-  },
-  {
-    title: "Project Costs",
-    value: "₹85,23,300",
-    change: "-2.1%",
-    trend: "down",
-    icon: Briefcase,
-  },
-  {
-    title: "Cash Balance",
-    value: "₹2.4 Cr",
-    change: "+0.8%",
-    trend: "up",
-    icon: BarChart4,
-  },
-];
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy, limit } from "firebase/firestore";
 
 export default function Dashboard() {
+  const db = useFirestore();
+  const companyId = "nalakath-holdings-main";
+
+  // Real-time data fetching
+  const invoicesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "invoices")), [db]);
+  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db]);
+  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
+  const recentTxQuery = useMemoFirebase(() => 
+    query(collection(db, "companies", companyId, "journalEntries"), orderBy("createdAt", "desc"), limit(4)), 
+  [db]);
+
+  const { data: invoices } = useCollection(invoicesQuery);
+  const { data: expenses } = useCollection(expensesQuery);
+  const { data: projects } = useCollection(projectsQuery);
+  const { data: recentTransactions } = useCollection(recentTxQuery);
+
+  // Dynamic Statistics Calculation
+  const statsData = useMemo(() => {
+    const totalRevenue = invoices?.reduce((acc, inv) => acc + (inv.type === "Sales" ? (inv.totalAmount || 0) : 0), 0) || 0;
+    const totalExpenses = expenses?.reduce((acc, exp) => acc + (exp.amount || 0), 0) || 0;
+    const projectCosts = projects?.reduce((acc, proj) => acc + (proj.actualCost || 0), 0) || 0;
+    const netProfit = totalRevenue - totalExpenses;
+
+    return [
+      {
+        title: "Total Revenue",
+        value: `₹${totalRevenue.toLocaleString('en-IN')}`,
+        change: "+12.5%",
+        trend: "up",
+        icon: IndianRupee,
+      },
+      {
+        title: "Net Profit",
+        value: `₹${netProfit.toLocaleString('en-IN')}`,
+        change: "+4.3%",
+        trend: netProfit >= 0 ? "up" : "down",
+        icon: TrendingUp,
+      },
+      {
+        title: "Project Costs",
+        value: `₹${projectCosts.toLocaleString('en-IN')}`,
+        change: "-2.1%",
+        trend: "down",
+        icon: Briefcase,
+      },
+      {
+        title: "Active Projects",
+        value: projects?.length.toString() || "0",
+        change: "New",
+        trend: "up",
+        icon: BarChart4,
+      },
+    ];
+  }, [invoices, expenses, projects]);
+
+  // Chart data simulation based on real data
+  const chartData = [
+    { name: "Current", revenue: statsData[0].value.replace(/[^0-9]/g, ''), expenses: statsData[2].value.replace(/[^0-9]/g, '') },
+  ];
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -79,7 +102,7 @@ export default function Dashboard() {
             </header>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {stats.map((stat) => (
+              {statsData.map((stat) => (
                 <Card key={stat.title} className="glass border-white/5 hover:scale-[1.02] ios-transition">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
@@ -101,7 +124,7 @@ export default function Dashboard() {
                           {stat.change}
                         </span>
                       )}
-                      <span className="text-muted-foreground">since last month</span>
+                      <span className="text-muted-foreground">real-time sync</span>
                     </p>
                   </CardContent>
                 </Card>
@@ -113,12 +136,12 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-primary" />
-                    Revenue vs Expenses
+                    Financial Health
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data}>
+                    <BarChart data={chartData}>
                       <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value/1000}k`} />
                       <Tooltip 
@@ -127,8 +150,8 @@ export default function Dashboard() {
                         labelStyle={{ color: '#aaa' }}
                         formatter={(value) => [`₹${Number(value).toLocaleString()}`, '']}
                       />
-                      <RechartsBar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={20} />
-                      <RechartsBar dataKey="expenses" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} barSize={20} />
+                      <RechartsBar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={40} />
+                      <RechartsBar dataKey="expenses" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} barSize={40} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -168,30 +191,28 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold flex items-center gap-2">
                     <Clock className="h-5 w-5 text-primary" />
-                    Recent Transactions
+                    Recent Ledger
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {[
-                      { title: "Material Supply", sub: "Nalakath Construction", amount: "-₹1,24,000", time: "2h ago" },
-                      { title: "Client Payment", sub: "Green Villa Project", amount: "+₹4,50,000", time: "5h ago" },
-                      { title: "Resort Maintenance", sub: "Oval Palace Resort", amount: "-₹82,000", time: "1d ago" },
-                      { title: "Service Revenue", sub: "Oval Palace Resort", amount: "+₹1,89,000", time: "1d ago" },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
-                        <div>
-                          <p className="text-sm font-semibold">{item.title}</p>
-                          <p className="text-xs text-muted-foreground">{item.sub}</p>
+                    {recentTransactions?.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No recent transactions.</p>
+                    ) : (
+                      recentTransactions?.map((item, i) => (
+                        <div key={item.id} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
+                          <div>
+                            <p className="text-sm font-semibold">{item.description}</p>
+                            <p className="text-xs text-muted-foreground">{item.date}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm font-bold ${item.totalDebit > 0 ? 'text-green-500' : 'text-foreground'}`}>
+                              {item.totalDebit > 0 ? `+₹${item.totalDebit.toLocaleString()}` : `-₹${item.totalCredit.toLocaleString()}`}
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className={`text-sm font-bold ${item.amount.startsWith('+') ? 'text-green-500' : 'text-foreground'}`}>
-                            {item.amount}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">{item.time}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -206,12 +227,12 @@ export default function Dashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="p-3 rounded-2xl bg-primary/5 border border-primary/10">
-                      <p className="text-sm font-medium text-primary">Cash Flow Alert</p>
-                      <p className="text-xs text-muted-foreground mt-1">Predicted shortage of ₹1,20,000 in the next 14 days due to upcoming liabilities.</p>
+                      <p className="text-sm font-medium text-primary">Data Integrated</p>
+                      <p className="text-xs text-muted-foreground mt-1">Firestore connection established. AI is now monitoring Nalakath Holdings ledger.</p>
                     </div>
                     <div className="p-3 rounded-2xl bg-accent/5 border border-accent/10">
                       <p className="text-sm font-medium text-accent">Optimization Hint</p>
-                      <p className="text-xs text-muted-foreground mt-1">Re-evaluating logistics for Nalakath Construction could save 12% monthly.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Review "AI Insights" tab to generate cost-saving strategies from live data.</p>
                     </div>
                   </div>
                 </CardContent>

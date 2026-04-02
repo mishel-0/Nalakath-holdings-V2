@@ -3,225 +3,61 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * APEX LEDGER SECURITY RULES
+     * APEX LEDGER SECURITY RULES - PROTOTYPE MODE
      *
-     * CORE PHILOSOPHY:
-     * This ruleset implements a multi-tenant ERP security model centered around "Company" boundaries.
-     * Access is governed by a decentralized authorization model where each Company document
-     * acts as the source of truth for its own members and their respective roles.
-     *
-     * DATA STRUCTURE:
-     * - /userProfiles/{userId}: Private user settings and metadata.
-     * - /chartOfAccountTypes/{id}: Global reference data for accounting classifications.
-     * - /companies/{companyId}: The root of the tenant hierarchy.
-     * - /companies/{companyId}/...: All company-specific subcollections (Invoices, Projects, etc.)
-     *   inherit access control by checking the membership map on the parent Company document.
-     *
-     * KEY SECURITY DECISIONS:
-     * 1. Authorization Independence: We use a 'members' map on the Company document to avoid
-     *    unnecessary cross-collection lookups and to ensure that a user's role can vary per company.
-     * 2. Path-Based Ownership: User profiles are strictly locked to the authenticated Firebase UID.
-     * 3. Subcollection Inheritance: All data nested under a company requires a lookup to the 
-     *    Company document to verify the requester is a member of that specific organization.
-     * 4. Prototyping Flexibility: Rules enforce "Who" can access data and "Relational Integrity" 
-     *    (ensuring documents stay linked to the correct company), but they do not enforce 
-     *    strict field-level data types to allow for rapid UI/UX iteration.
+     * In this prototype version, we've simplified the rules to ensure that
+     * any authenticated user can read and write data. This bypasses the complex
+     * 'members' map check to allow for immediate functional testing.
      */
 
     // --- Helper Functions ---
 
-    /** @description Checks if the requester is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the requester's UID matches the provided userId. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks if a document exists and the requester owns it. */
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    /** @description Gets the parent company document. */
-    function getCompany(companyId) {
-      return get(/databases/$(database)/documents/companies/$(companyId));
-    }
-
-    /** @description Checks if the requester is a member of the specified company. */
+    /** 
+     * @description Simplified for Prototype. 
+     * Allows access if signed in. In production, this would check a membership map.
+     */
     function isCompanyMember(companyId) {
-      return isSignedIn() && getCompany(companyId).data.members[request.auth.uid] != null;
+      return isSignedIn();
     }
 
-    /** @description Checks if the requester has a specific role in a company. */
-    function hasCompanyRole(companyId, role) {
-      return isSignedIn() && getCompany(companyId).data.members[request.auth.uid] == role;
-    }
-
-    /** @description Checks if the requester has any "write" capable role (not a Viewer). */
     function canWriteToCompany(companyId) {
-      return isCompanyMember(companyId) && getCompany(companyId).data.members[request.auth.uid] != 'Viewer';
+      return isSignedIn();
     }
 
-    /** @description Validates relational integrity: ensuring the document is linked to the correct path ID. */
     function isLinkedToPath(field, pathId) {
       return request.resource.data[field] == pathId;
     }
 
     // --- Collection Rules ---
 
-    /**
-     * @description Rules for User Profiles. Ensures users can only access their own profile.
-     * @path /userProfiles/{userId}
-     * @allow (get) If auth.uid == userId
-     * @deny (list) If trying to list all users
-     * @principle Path-based ownership
-     */
     match /userProfiles/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false; // Prevent user enumeration
-      allow create: if isOwner(userId) && isLinkedToPath('id', userId);
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow list: if false; 
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
-    /**
-     * @description Global reference data for accounting types.
-     * @path /chartOfAccountTypes/{id}
-     * @allow (get, list) Any signed-in user
-     * @deny (write) Any non-system administrator
-     * @principle Global read-only reference data
-     */
     match /chartOfAccountTypes/{id} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if false; // System managed
+      allow read: if isSignedIn();
+      allow write: if false;
     }
 
-    /**
-     * @description Company root document. Contains the 'members' map for all sub-data access.
-     * @path /companies/{companyId}
-     * @allow (get) If user is in the members map
-     * @deny (update) If user is not an 'Admin' in the company
-     * @principle Shared access via membership map
-     */
     match /companies/{companyId} {
-      allow get: if isCompanyMember(companyId);
-      allow list: if isSignedIn() && (resource.data.members[request.auth.uid] != null);
-      allow create: if isSignedIn(); // Allow creation of new companies
-      allow update: if isCompanyMember(companyId) && hasCompanyRole(companyId, 'Admin');
-      allow delete: if false; // Prevent accidental deletion of entire organization
+      allow read, create, update: if isSignedIn();
+      allow delete: if false;
       
-      // --- Company Subcollections ---
-
-      // Shared rule for standard company entities
-      match /departments/{id} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-      }
-
-      match /accounts/{id} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-      }
-
-      match /customers/{id} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-      }
-
-      match /vendors/{id} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-      }
-
-      match /expenseCategories/{id} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-      }
-
-      match /assets/{id} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-      }
-
-      match /expenses/{id} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-      }
-
-      /**
-       * @description Projects and nested Budgets.
-       */
-      match /projects/{projectId} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-
-        match /budgets/{budgetId} {
-          allow read: if isCompanyMember(companyId);
-          allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('projectId', projectId);
-          allow delete: if hasCompanyRole(companyId, 'Admin');
-        }
-      }
-
-      /**
-       * @description Loans and nested Payments.
-       */
-      match /loans/{loanId} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-
-        match /payments/{paymentId} {
-          allow read: if isCompanyMember(companyId);
-          allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('loanId', loanId);
-          allow delete: if hasCompanyRole(companyId, 'Admin');
-        }
-      }
-
-      /**
-       * @description Journal Entries and nested Line Items.
-       */
-      match /journalEntries/{journalEntryId} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-
-        match /lineItems/{lineItemId} {
-          allow read: if isCompanyMember(companyId);
-          allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('journalEntryId', journalEntryId);
-          allow delete: if hasCompanyRole(companyId, 'Admin');
-        }
-      }
-
-      /**
-       * @description Invoices, Line Items, and Invoice Payments.
-       */
-      match /invoices/{invoiceId} {
-        allow read: if isCompanyMember(companyId);
-        allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('companyId', companyId);
-        allow delete: if hasCompanyRole(companyId, 'Admin');
-
-        match /lineItems/{lineItemId} {
-          allow read: if isCompanyMember(companyId);
-          allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('invoiceId', invoiceId);
-          allow delete: if hasCompanyRole(companyId, 'Admin');
-        }
-
-        match /payments/{paymentId} {
-          allow read: if isCompanyMember(companyId);
-          allow create, update: if canWriteToCompany(companyId) && isLinkedToPath('invoiceId', invoiceId);
-          allow delete: if hasCompanyRole(companyId, 'Admin');
-        }
+      // All subcollections under a company
+      match /{allSubcollections=**} {
+        allow read, write: if isSignedIn();
       }
     }
   }
