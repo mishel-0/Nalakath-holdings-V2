@@ -6,13 +6,13 @@
   :root {
     --background: 0 0% 0%;
     --foreground: 45 20% 98%;
-    --card: 0 0% 3% / 0.8;
+    --card: 0 0% 5% / 0.7;
     --card-foreground: 45 20% 98%;
     --popover: 0 0% 5% / 0.95;
     --popover-foreground: 45 20% 98%;
     --primary: 45 100% 50%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 10%;
+    --secondary: 0 0% 12%;
     --secondary-foreground: 45 100% 50%;
     --muted: 0 0% 15%;
     --muted-foreground: 45 10% 65%;
@@ -20,32 +20,10 @@
     --accent-foreground: 0 0% 0%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 45 20% 20%;
-    --input: 45 20% 20%;
+    --border: 45 20% 15%;
+    --input: 45 20% 15%;
     --ring: 45 100% 50%;
-    --radius: 1.25rem;
-  }
-
-  .dark {
-    --background: 0 0% 0%;
-    --foreground: 45 20% 98%;
-    --card: 0 0% 3% / 0.8;
-    --card-foreground: 45 20% 98%;
-    --popover: 0 0% 5% / 0.95;
-    --popover-foreground: 45 20% 98%;
-    --primary: 45 100% 50%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 45 100% 50%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 45 10% 65%;
-    --accent: 48 100% 60%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 45 20% 20%;
-    --input: 45 20% 20%;
-    --ring: 45 100% 50%;
+    --radius: 1.5rem;
   }
 }
 
@@ -56,20 +34,23 @@
   body {
     @apply bg-background text-foreground font-body antialiased;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(45, 100%, 50%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(48, 100%, 60%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(45, 100%, 50%, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(48, 100%, 60%, 0.08) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
 
 @layer components {
   .glass {
-    @apply bg-card backdrop-blur-md border border-white/5 shadow-2xl;
+    @apply bg-card backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)];
   }
   .glass-dark {
-    @apply bg-black/40 backdrop-blur-xl border-white/10 shadow-2xl;
+    @apply bg-black/60 backdrop-blur-3xl border-white/10 shadow-2xl;
   }
   .ios-transition {
     @apply transition-all duration-300 ease-in-out;
+  }
+  .gold-gradient {
+    background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
   }
 }
