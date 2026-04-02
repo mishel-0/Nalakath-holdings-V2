@@ -13,7 +13,8 @@ import {
   BarChart3, 
   Settings,
   Sparkles,
-  Layers
+  Layers,
+  ListTree
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -23,7 +24,8 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
-  { name: "Payment Vouchers", href: "/vouchers", icon: ReceiptText },
+  { name: "Chart of Accounts", href: "/accounts", icon: ListTree },
+  { name: "Payment Vouchers", href: "/vouchers", icon: ReceiptText, adminOnly: true },
   { name: "Expenses", href: "/expenses", icon: Calculator },
   { name: "Assets", href: "/assets", icon: Layers, adminOnly: true },
   { name: "Loans", href: "/loans", icon: Landmark, adminOnly: true },

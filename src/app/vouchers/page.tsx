@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -8,25 +9,46 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Download, Upload, Receipt, FileText, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Upload, MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
+import { collection, query, orderBy, doc } from "firebase/firestore";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export default function VouchersPage() {
   const db = useFirestore();
+  const { user } = useUser();
+  const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const companyId = "nalakath-holdings-main";
+
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
+
+  useEffect(() => {
+    if (!isProfileLoading && profile && profile.role !== "Admin") {
+      toast({
+        variant: "destructive",
+        title: "Access Restricted",
+        description: "Payment Vouchers are restricted to Administrators.",
+      });
+      router.replace("/");
+    }
+  }, [profile, isProfileLoading, router, toast]);
 
   const vouchersQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "vouchers"), orderBy("date", "desc"));
@@ -50,6 +72,14 @@ export default function VouchersPage() {
       paid: acc.paid + (v.status === "Paid" ? (v.amount || 0) : 0)
     }), { total: 0, pending: 0, paid: 0 });
   }, [vouchers]);
+
+  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Authorizing...</div>
+      </div>
+    );
+  }
 
   const handleAddVoucher = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -8,7 +8,8 @@ import {
   HardHat, 
   BookOpen, 
   BarChart3, 
-  Sparkles 
+  Sparkles,
+  ListTree
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -17,7 +18,8 @@ import { doc } from "firebase/firestore";
 const mobileNav = [
   { name: "Home", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
-  { name: "Accounts", href: "/accounting", icon: BookOpen },
+  { name: "Accounting", href: "/accounting", icon: BookOpen },
+  { name: "COA", href: "/accounts", icon: ListTree },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI", href: "/insights", icon: Sparkles },
 ];

@@ -1,13 +1,26 @@
+
 "use client";
 
 import { useState } from "react";
-import { Plus, ReceiptText, Calculator, BookOpen, X } from "lucide-react";
+import { Plus, ReceiptText, Calculator, BookOpen, ListTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
 
 export function QuickActionFAB() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useUser();
+  const db = useFirestore();
+
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileDocRef);
+  const isAdmin = profile?.role === "Admin";
 
   return (
     <div className="fixed bottom-24 right-6 md:bottom-8 md:right-8 z-50 flex flex-col items-end gap-3">
@@ -23,13 +36,23 @@ export function QuickActionFAB() {
           delay="delay-[0ms]"
           onClick={() => setIsOpen(false)}
         />
-        <QuickActionItem 
-          href="/vouchers" 
-          label="Record Voucher" 
-          icon={ReceiptText} 
-          delay="delay-[50ms]"
-          onClick={() => setIsOpen(false)}
-        />
+        {isAdmin ? (
+          <QuickActionItem 
+            href="/vouchers" 
+            label="Record Voucher" 
+            icon={ReceiptText} 
+            delay="delay-[50ms]"
+            onClick={() => setIsOpen(false)}
+          />
+        ) : (
+          <QuickActionItem 
+            href="/accounts" 
+            label="Chart of Accounts" 
+            icon={ListTree} 
+            delay="delay-[50ms]"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
         <QuickActionItem 
           href="/expenses" 
           label="Log Expense" 
@@ -47,7 +70,7 @@ export function QuickActionFAB() {
           isOpen ? "bg-white text-black rotate-45 scale-90" : "bg-primary text-black scale-100"
         )}
       >
-        {isOpen ? <Plus className="h-8 w-8" /> : <Plus className="h-8 w-8" />}
+        <Plus className="h-8 w-8" />
       </Button>
     </div>
   );
