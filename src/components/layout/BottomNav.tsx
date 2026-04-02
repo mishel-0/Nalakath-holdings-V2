@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -10,10 +11,12 @@ import {
   Sparkles 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
 
 const mobileNav = [
   { name: "Home", href: "/", icon: LayoutDashboard },
-  { name: "Projects", href: "/projects", icon: HardHat },
+  { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
   { name: "Accounts", href: "/accounting", icon: BookOpen },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI", href: "/insights", icon: Sparkles },
@@ -21,11 +24,23 @@ const mobileNav = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useUser();
+  const db = useFirestore();
+
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileDocRef);
+  const isAdmin = profile?.role === "Admin";
+
+  const filteredNav = mobileNav.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 md:hidden pb-safe">
       <div className="flex h-16 items-center justify-around px-2">
-        {mobileNav.map((item) => {
+        {filteredNav.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link

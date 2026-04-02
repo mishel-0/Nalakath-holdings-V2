@@ -16,27 +16,41 @@ import {
   Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Projects", href: "/projects", icon: HardHat },
+  { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
   { name: "Payment Vouchers", href: "/vouchers", icon: ReceiptText },
   { name: "Expenses", href: "/expenses", icon: Calculator },
-  { name: "Assets", href: "/assets", icon: Layers },
-  { name: "Loans", href: "/loans", icon: Landmark },
+  { name: "Assets", href: "/assets", icon: Layers, adminOnly: true },
+  { name: "Loans", href: "/loans", icon: Landmark, adminOnly: true },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI Insights", href: "/insights", icon: Sparkles },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useUser();
+  const db = useFirestore();
+
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileDocRef);
+  const isAdmin = profile?.role === "Admin";
+
+  const filteredNavigation = navigation.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <aside className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-64 border-r border-white/10 glass md:block">
       <div className="flex h-full flex-col gap-4 p-4">
         <nav className="flex-1 space-y-1">
-          {navigation.map((item) => {
+          {filteredNavigation.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link

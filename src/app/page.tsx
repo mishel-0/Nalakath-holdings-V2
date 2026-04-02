@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -31,13 +32,14 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, limit } from "firebase/firestore";
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
+import { collection, query, orderBy, limit, doc } from "firebase/firestore";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
   const db = useFirestore();
+  const { user } = useUser();
   const companyId = "nalakath-holdings-main";
 
   // Real-time data fetching
@@ -48,10 +50,18 @@ export default function Dashboard() {
     query(collection(db, "companies", companyId, "journalEntries"), orderBy("createdAt", "desc"), limit(5)), 
   [db]);
 
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileDocRef);
   const { data: vouchers } = useCollection(vouchersQuery);
   const { data: expenses } = useCollection(expensesQuery);
   const { data: projects } = useCollection(projectsQuery);
   const { data: recentTransactions } = useCollection(recentTxQuery);
+
+  const isAdmin = profile?.role === "Admin";
 
   // Dynamic Statistics
   const stats = useMemo(() => {
@@ -91,10 +101,10 @@ export default function Dashboard() {
             <header className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="rounded-full bg-primary/10 text-primary border-primary/20 px-3 py-1 text-[10px] uppercase tracking-widest font-bold">
-                  Group HQ Active
+                  {isAdmin ? "Admin Console" : "Accountant Console"}
                 </Badge>
                 <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold uppercase tracking-widest ml-2">
-                  <ShieldCheck className="h-3 w-3" /> Double-Entry Verified
+                  <ShieldCheck className="h-3 w-3" /> Ledger Sync: Live
                 </div>
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">Accountant Desk</h1>
@@ -105,7 +115,11 @@ export default function Dashboard() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
               <MetricCard title="Net Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
-              <MetricCard title="Project Costs" value={stats.projectCosts} icon={Briefcase} trend="down" />
+              {isAdmin ? (
+                <MetricCard title="Project Costs" value={stats.projectCosts} icon={Briefcase} trend="down" />
+              ) : (
+                <MetricCard title="Total OPEX" value={stats.revenue - stats.profit} icon={Calculator} trend="none" />
+              )}
               <MetricCard title="Pending Vouchers" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
 
@@ -235,11 +249,13 @@ export default function Dashboard() {
                     desc={`Found ${stats.alerts} pending vouchers requiring proof verification.`}
                     severity="high"
                   />
-                  <AlertItem 
-                    title="Budget Threshold" 
-                    desc="Construction budget usage has exceeded 85% of projection."
-                    severity="medium"
-                  />
+                  {isAdmin && (
+                    <AlertItem 
+                      title="Budget Threshold" 
+                      desc="Construction budget usage has exceeded 85% of projection."
+                      severity="medium"
+                    />
+                  )}
                   <AlertItem 
                     title="Ledger Synced" 
                     desc="All division cost centers are currently synchronized with HQ."
@@ -274,7 +290,7 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold font-mono tracking-tight">
-          {typeof value === 'number' ? `₹${value.toLocaleString('en-IN')}` : value}
+          {processedValue(value)}
         </div>
         <div className="flex items-center gap-1.5 mt-2">
           {trend === "up" && <ArrowUpRight className="h-3 w-3 text-green-500" />}
@@ -289,6 +305,12 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
       </CardContent>
     </Card>
   );
+}
+
+function processedValue(val: any) {
+  const num = Number(val);
+  if (isNaN(num)) return val;
+  return `₹${num.toLocaleString('en-IN')}`;
 }
 
 function DivisionRow({ name, value, color }: any) {

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -9,27 +9,58 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Activity, HardHat } from "lucide-react";
+import { Plus, Activity, HardHat, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
+import { collection, query, orderBy, doc } from "firebase/firestore";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProjectsPage() {
   const db = useFirestore();
+  const { user } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const companyId = "nalakath-holdings-main";
+
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
+
+  useEffect(() => {
+    if (!isProfileLoading && profile && profile.role !== "Admin") {
+      toast({
+        variant: "destructive",
+        title: "Access Restricted",
+        description: "Project management is reserved for Administrators.",
+      });
+      router.replace("/");
+    }
+  }, [profile, isProfileLoading, router, toast]);
 
   const projectsQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "projects"), orderBy("createdAt", "desc"));
   }, [db, companyId]);
 
   const { data: projects, isLoading } = useCollection(projectsQuery);
+
+  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Validating Credentials...</div>
+      </div>
+    );
+  }
 
   const handleAddProject = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
