@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -25,13 +24,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
-        toast({ title: "Account Created", description: "Admin access granted." });
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-        toast({ title: "Welcome back", description: "Secure session initiated." });
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({ title: "Welcome back", description: "Secure session initiated." });
       router.push('/');
     } catch (error: any) {
       toast({
@@ -60,18 +54,16 @@ export default function LoginPage() {
         <Card className="glass border-white/10 shadow-2xl overflow-hidden">
           <CardHeader className="text-center pt-8">
             <CardTitle className="text-2xl font-headline font-bold tracking-tight">
-              {isSignUp ? "Register Admin" : "Ledger Access"}
+              Ledger Access
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              {isSignUp 
-                ? "Create a new administrator account." 
-                : "Enter credentials to access Nalakath Holdings financial records."}
+              Enter credentials to access Nalakath Holdings financial records.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-8">
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Admin Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -107,20 +99,12 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full h-12 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition group"
               >
-                {loading ? "Verifying..." : isSignUp ? "Create Account" : "Access Ledger"}
+                {loading ? "Verifying..." : "Access Ledger"}
                 {!loading && <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 ios-transition" />}
               </Button>
             </form>
 
             <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-4">
-              <Button
-                variant="link"
-                className="text-muted-foreground text-xs hover:text-primary transition-colors"
-                onClick={() => setIsSignUp(!isSignUp)}
-              >
-                {isSignUp ? "Already have an account? Sign in" : "Need an admin account? Register"}
-              </Button>
-              
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
                 <ShieldCheck className="h-3 w-3 text-primary" />
                 <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
