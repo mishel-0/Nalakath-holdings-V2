@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 
 const companies = [
   { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
-  { id: 2, name: "Apex Construction", division: "Infrastructure" },
-  { id: 3, name: "Luxe Hospitality", division: "Tourism" },
-  { id: 4, name: "Global Trading Co.", division: "Retail" },
+  { id: 2, name: "Green Villa", division: "Real Estate" },
+  { id: 3, name: "Oval Palace Resort", division: "Hospitality" },
+  { id: 4, name: "Nalakath Construction", division: "Infrastructure" },
 ];
 
 export function Navbar() {
@@ -43,7 +43,7 @@ export function Navbar() {
               <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/10">
                 <Building2 className="h-4 w-4 text-primary" />
                 <div className="flex flex-col items-start text-xs">
-                  <span className="font-semibold leading-none">{activeCompany.name}</span>
+                  <span className="font-semibold leading-none text-left">{activeCompany.name}</span>
                   <span className="text-muted-foreground hidden sm:block">{activeCompany.division}</span>
                 </div>
                 <ChevronDown className="h-3 w-3 opacity-50" />

@@ -22,7 +22,7 @@ import {
   type CostOptimizationSuggestionsOutput 
 } from "@/ai/flows/cost-optimization-suggestions";
 
-// Mock data for the AI flow input
+// Mock data updated to match new divisions
 const mockFinancialData = {
   companyName: "Nalakath Holdings",
   financialSummary: {
@@ -33,13 +33,13 @@ const mockFinancialData = {
   },
   spendingAnalysis: {
     topExpenseCategories: [
-      { category: "Steel & Construction Materials", amount: 4500000, percentageOfTotalExpenses: 52 },
-      { category: "Labor & Payroll", amount: 2200000, percentageOfTotalExpenses: 26 },
-      { category: "Logistics & Fleet", amount: 1100000, percentageOfTotalExpenses: 13 },
+      { category: "Construction Materials", amount: 4500000, percentageOfTotalExpenses: 52 },
+      { category: "Resort Payroll", amount: 2200000, percentageOfTotalExpenses: 26 },
+      { category: "Villa Landscaping", amount: 1100000, percentageOfTotalExpenses: 13 },
     ],
     projectSpendingOverview: [
-      { projectName: "Azure Tower", budget: 120000000, actualSpent: 84000000, variance: 36000000, status: "On Track" },
-      { projectName: "Grand Plaza", budget: 25000000, actualSpent: 27000000, variance: -2000000, status: "Over Budget" },
+      { projectName: "Green Villa Phase 1", budget: 120000000, actualSpent: 84000000, variance: 36000000, status: "On Track" },
+      { projectName: "Oval Palace Renovation", budget: 25000000, actualSpent: 27000000, variance: -2000000, status: "Over Budget" },
     ],
   },
 };
@@ -93,7 +93,7 @@ export default function InsightsPage() {
                   </div>
                   <div className="max-w-md">
                     <h2 className="text-xl font-bold">Unlocking Profit Potential</h2>
-                    <p className="text-muted-foreground mt-2">Our AI can analyze your spending patterns across all divisions to find hidden efficiencies and predict cash flow bottlenecks.</p>
+                    <p className="text-muted-foreground mt-2">Our AI analyzes spending patterns across Green Villa, Oval Palace, and Nalakath Construction to find hidden efficiencies.</p>
                   </div>
                   <Button onClick={generateInsights} className="rounded-full mt-4 text-black">Start Analysis</Button>
                 </CardContent>
@@ -188,16 +188,16 @@ export default function InsightsPage() {
                           <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-500/5 border border-orange-500/10">
                             <div className="h-2 w-2 rounded-full bg-orange-500" />
                             <div className="flex-1">
-                              <p className="text-sm font-semibold">Vendor Variance</p>
-                              <p className="text-xs text-muted-foreground">Azure Tower steel costs increased by 14% compared to previous quarters.</p>
+                              <p className="text-sm font-semibold">Green Villa Variance</p>
+                              <p className="text-xs text-muted-foreground">Material costs increased by 14% compared to previous quarters.</p>
                             </div>
                             <Button size="sm" variant="ghost">Review</Button>
                           </div>
                           <div className="flex items-center gap-3 p-3 rounded-2xl bg-destructive/5 border border-destructive/10">
                             <div className="h-2 w-2 rounded-full bg-destructive" />
                             <div className="flex-1">
-                              <p className="text-sm font-semibold">Project Overrun</p>
-                              <p className="text-xs text-muted-foreground">Grand Plaza hospitality project has exceeded its budget by ₹20,00,000.</p>
+                              <p className="text-sm font-semibold">Resort Overrun</p>
+                              <p className="text-xs text-muted-foreground">Oval Palace project has exceeded its budget by ₹20,00,000.</p>
                             </div>
                             <Button size="sm" variant="ghost">Audit</Button>
                           </div>

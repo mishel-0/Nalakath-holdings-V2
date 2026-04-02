@@ -7,50 +7,40 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, HardHat, Activity } from "lucide-react";
+import { Plus, Activity } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 const projects = [
   {
     id: 1,
-    name: "Azure Luxury Tower",
-    division: "Construction",
+    name: "Green Villa Estate",
+    division: "Real Estate",
     budget: 120000000,
     spent: 84000000,
     progress: 70,
     status: "On Track",
-    image: "https://picsum.photos/seed/tower1/600/400"
+    image: "https://picsum.photos/seed/villa1/600/400"
   },
   {
     id: 2,
-    name: "Grand Plaza Renovation",
+    name: "Oval Palace Spa Wing",
     division: "Hospitality",
     budget: 25000000,
     spent: 27000000,
     progress: 95,
     status: "Over Budget",
-    image: "https://picsum.photos/seed/hotel2/600/400"
+    image: "https://picsum.photos/seed/resort1/600/400"
   },
   {
     id: 3,
-    name: "Logistics Hub Expansion",
-    division: "Trading",
+    name: "Nalakath Bridge Project",
+    division: "Infrastructure",
     budget: 40000000,
     spent: 12000000,
     progress: 30,
     status: "On Track",
-    image: "https://picsum.photos/seed/warehouse1/600/400"
-  },
-  {
-    id: 4,
-    name: "Metro Office Suites",
-    division: "Real Estate",
-    budget: 80000000,
-    spent: 45000000,
-    progress: 55,
-    status: "On Track",
-    image: "https://picsum.photos/seed/office1/600/400"
+    image: "https://picsum.photos/seed/bridge1/600/400"
   }
 ];
 
@@ -82,7 +72,7 @@ export default function ProjectsPage() {
                       alt={project.name}
                       fill
                       className="object-cover group-hover:scale-105 ios-transition"
-                      data-ai-hint="construction building"
+                      data-ai-hint="luxury building"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">

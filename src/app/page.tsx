@@ -144,10 +144,9 @@ export default function Dashboard() {
                 <CardContent className="h-[350px] flex flex-col justify-center">
                   <div className="space-y-4">
                     {[
-                      { name: "Construction", value: "45%", color: "bg-primary" },
-                      { name: "Hospitality", value: "25%", color: "bg-accent" },
-                      { name: "Real Estate", value: "20%", color: "bg-yellow-600" },
-                      { name: "Trading", value: "10%", color: "bg-stone-500" },
+                      { name: "Nalakath Construction", value: "45%", color: "bg-primary" },
+                      { name: "Oval Palace Resort", value: "25%", color: "bg-accent" },
+                      { name: "Green Villa", value: "30%", color: "bg-yellow-600" },
                     ].map((div) => (
                       <div key={div.name} className="flex flex-col gap-1">
                         <div className="flex justify-between text-sm">
@@ -175,10 +174,10 @@ export default function Dashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { title: "Material Supply", sub: "Steel Works Ltd", amount: "-₹1,24,000", time: "2h ago" },
-                      { title: "Client Payment", sub: "Azure Tower Project", amount: "+₹4,50,000", time: "5h ago" },
-                      { title: "Office Rent", sub: "Division HQ", amount: "-₹82,000", time: "1d ago" },
-                      { title: "Service Revenue", sub: "Grand Plaza Hotel", amount: "+₹1,89,000", time: "1d ago" },
+                      { title: "Material Supply", sub: "Nalakath Construction", amount: "-₹1,24,000", time: "2h ago" },
+                      { title: "Client Payment", sub: "Green Villa Project", amount: "+₹4,50,000", time: "5h ago" },
+                      { title: "Resort Maintenance", sub: "Oval Palace Resort", amount: "-₹82,000", time: "1d ago" },
+                      { title: "Service Revenue", sub: "Oval Palace Resort", amount: "+₹1,89,000", time: "1d ago" },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
                         <div>
@@ -208,11 +207,11 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     <div className="p-3 rounded-2xl bg-primary/5 border border-primary/10">
                       <p className="text-sm font-medium text-primary">Cash Flow Alert</p>
-                      <p className="text-xs text-muted-foreground mt-1">Predicted shortage of ₹1,20,000 in the next 14 days due to upcoming tax liabilities.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Predicted shortage of ₹1,20,000 in the next 14 days due to upcoming liabilities.</p>
                     </div>
                     <div className="p-3 rounded-2xl bg-accent/5 border border-accent/10">
                       <p className="text-sm font-medium text-accent">Optimization Hint</p>
-                      <p className="text-xs text-muted-foreground mt-1">Switching logistics vendors for the Trading division could save up to 15% monthly.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Re-evaluating logistics for Nalakath Construction could save 12% monthly.</p>
                     </div>
                   </div>
                 </CardContent>
