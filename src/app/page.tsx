@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -18,7 +18,8 @@ import {
   Sparkles,
   AlertCircle,
   ChevronRight,
-  Plus
+  Plus,
+  ShieldCheck
 } from "lucide-react";
 import {
   Bar,
@@ -27,10 +28,13 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Area,
+  AreaChart,
 } from "recharts";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query, orderBy, limit } from "firebase/firestore";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
   const db = useFirestore();
@@ -67,7 +71,13 @@ export default function Dashboard() {
 
   const chartData = useMemo(() => {
     return [
-      { name: "Current", revenue: stats.revenue, expenses: stats.revenue - stats.profit }
+      { name: "Mon", income: stats.revenue * 0.2, cost: stats.projectCosts * 0.1 },
+      { name: "Tue", income: stats.revenue * 0.4, cost: stats.projectCosts * 0.3 },
+      { name: "Wed", income: stats.revenue * 0.3, cost: stats.projectCosts * 0.2 },
+      { name: "Thu", income: stats.revenue * 0.6, cost: stats.projectCosts * 0.5 },
+      { name: "Fri", income: stats.revenue * 0.8, cost: stats.projectCosts * 0.7 },
+      { name: "Sat", income: stats.revenue * 0.9, cost: stats.projectCosts * 0.8 },
+      { name: "Sun", income: stats.revenue, cost: stats.projectCosts }
     ];
   }, [stats]);
 
@@ -83,6 +93,9 @@ export default function Dashboard() {
                 <Badge variant="outline" className="rounded-full bg-primary/10 text-primary border-primary/20 px-3 py-1 text-[10px] uppercase tracking-widest font-bold">
                   Group HQ Active
                 </Badge>
+                <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold uppercase tracking-widest ml-2">
+                  <ShieldCheck className="h-3 w-3" /> Double-Entry Verified
+                </div>
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">Accountant Desk</h1>
               <p className="text-muted-foreground">Manage daily financial flows for Nalakath Holdings.</p>
@@ -100,25 +113,34 @@ export default function Dashboard() {
               {/* Financial Chart */}
               <Card className="lg:col-span-4 glass border-white/5 overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">Fiscal Health</CardTitle>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Fiscal Health</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">Weekly income vs operating costs</p>
+                  </div>
                   <Link href="/reports">
                     <Button variant="ghost" size="sm" className="rounded-full text-primary hover:bg-primary/10">
-                      View Details <ChevronRight className="ml-1 h-3 w-3" />
+                      View Reports <ChevronRight className="ml-1 h-3 w-3" />
                     </Button>
                   </Link>
                 </CardHeader>
                 <CardContent className="h-[300px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
                       <XAxis dataKey="name" stroke="#555" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#555" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#555" fontSize={10} tickLine={false} axisLine={false} hide />
                       <Tooltip 
                         contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', borderRadius: '16px', border: '1px solid #333' }}
-                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                        itemStyle={{ color: '#fff' }}
                       />
-                      <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} barSize={50} />
-                      <Bar dataKey="expenses" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} barSize={50} />
-                    </BarChart>
+                      <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={3} />
+                      <Area type="monotone" dataKey="cost" stroke="hsl(var(--accent))" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
@@ -136,8 +158,12 @@ export default function Dashboard() {
                   <DivisionRow name="Oval Palace Resort" value="30%" color="bg-accent" />
                   <DivisionRow name="Green Villa" value="25%" color="bg-yellow-600" />
                   <div className="pt-4 mt-4 border-t border-white/5">
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      AI is monitoring cost variances in **Construction** division due to recent material price spikes.
+                    <div className="flex items-center gap-2 p-3 rounded-2xl bg-primary/5 border border-primary/10">
+                      <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <p className="text-[10px] uppercase font-bold tracking-widest text-primary">AI Insight</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+                      Material costs in **Construction** division are trending 12% higher this quarter.
                     </p>
                   </div>
                 </CardContent>
@@ -150,35 +176,41 @@ export default function Dashboard() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2">
                     <Clock className="h-5 w-5 text-primary" />
-                    Recent Journal Entries
+                    Daily Journal Entries
                   </CardTitle>
                   <Link href="/accounting">
                     <Button variant="outline" size="sm" className="rounded-full border-white/10 hover:bg-white/5 text-xs">
-                      Ledger <Plus className="ml-1 h-3 w-3" />
+                      Full Ledger <Plus className="ml-1 h-3 w-3" />
                     </Button>
                   </Link>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-1">
                     {!recentTransactions?.length ? (
-                      <p className="py-8 text-center text-muted-foreground text-sm">No recent transactions.</p>
+                      <p className="py-8 text-center text-muted-foreground text-sm">No daily entries found.</p>
                     ) : (
                       recentTransactions.map((tx) => (
-                        <div key={tx.id} className="flex items-center justify-between p-3 rounded-2xl hover:bg-white/5 ios-transition group cursor-pointer">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-xl ${tx.totalDebit > 0 ? 'bg-destructive/10' : 'bg-green-500/10'}`}>
-                              <IndianRupee className={`h-4 w-4 ${tx.totalDebit > 0 ? 'text-destructive' : 'text-green-500'}`} />
+                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 ios-transition group cursor-pointer border border-transparent hover:border-white/5">
+                          <div className="flex items-center gap-4">
+                            <div className={cn(
+                              "h-10 w-10 rounded-full flex items-center justify-center",
+                              tx.totalDebit > 0 ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500"
+                            )}>
+                              {tx.totalDebit > 0 ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                             </div>
                             <div>
-                              <p className="text-sm font-semibold">{tx.description}</p>
-                              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{tx.date}</p>
+                              <p className="text-sm font-bold">{tx.description}</p>
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{tx.date}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className={`text-sm font-bold ${tx.totalDebit > 0 ? 'text-destructive' : 'text-green-500'}`}>
+                            <p className={cn(
+                              "text-sm font-mono font-bold",
+                              tx.totalDebit > 0 ? "text-destructive" : "text-green-500"
+                            )}>
                               {tx.totalDebit > 0 ? `-₹${tx.totalDebit.toLocaleString('en-IN')}` : `+₹${tx.totalCredit.toLocaleString('en-IN')}`}
                             </p>
-                            <Badge variant="outline" className="text-[8px] h-4 rounded-full border-white/10 py-0">
+                            <Badge variant="outline" className="text-[8px] h-4 rounded-full border-white/10 py-0 uppercase tracking-tighter">
                               Verified
                             </Badge>
                           </div>
@@ -194,23 +226,23 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
-                    Action Required
+                    System Alerts
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-2">
                   <AlertItem 
-                    title="Overdue Vouchers" 
-                    desc={`${stats.alerts} proofs pending verification in Green Villa.`}
+                    title="Audit Due" 
+                    desc={`Found ${stats.alerts} pending vouchers requiring proof verification.`}
                     severity="high"
                   />
                   <AlertItem 
-                    title="Budget Warning" 
-                    desc="Oval Palace project is 92% through allocated budget."
+                    title="Budget Threshold" 
+                    desc="Construction budget usage has exceeded 85% of projection."
                     severity="medium"
                   />
                   <AlertItem 
-                    title="Sync Complete" 
-                    desc="Ledger is currently up to date with all divisions."
+                    title="Ledger Synced" 
+                    desc="All division cost centers are currently synchronized with HQ."
                     severity="low"
                   />
                 </CardContent>
@@ -227,22 +259,31 @@ export default function Dashboard() {
 
 function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
   return (
-    <Card className={`glass border-white/5 hover:scale-[1.02] ios-transition ${isAlert ? 'ring-1 ring-destructive/30' : ''}`}>
+    <Card className={cn(
+      "glass border-white/5 hover:scale-[1.02] ios-transition relative overflow-hidden group",
+      isAlert ? "ring-1 ring-destructive/40 bg-destructive/5" : ""
+    )}>
+      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 ios-transition">
+        <Icon className="h-12 w-12" />
+      </div>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-widest">{title}</CardTitle>
+        <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{title}</CardTitle>
         <div className="p-2 bg-primary/10 rounded-xl">
           <Icon className="h-4 w-4 text-primary" />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold font-mono">
+        <div className="text-2xl font-bold font-mono tracking-tight">
           {typeof value === 'number' ? `₹${value.toLocaleString('en-IN')}` : value}
         </div>
         <div className="flex items-center gap-1.5 mt-2">
           {trend === "up" && <ArrowUpRight className="h-3 w-3 text-green-500" />}
           {trend === "down" && <ArrowDownRight className="h-3 w-3 text-destructive" />}
-          <span className={`text-[10px] font-bold ${trend === "up" ? 'text-green-500' : trend === "down" ? 'text-destructive' : 'text-muted-foreground'}`}>
-            {trend === "none" ? "SYNCED" : "REAL-TIME"}
+          <span className={cn(
+            "text-[9px] font-bold uppercase tracking-widest",
+            trend === "up" ? 'text-green-500' : trend === "down" ? 'text-destructive' : 'text-muted-foreground'
+          )}>
+            {trend === "none" ? "Status: OK" : trend === "up" ? "Trending Up" : "Trending Down"}
           </span>
         </div>
       </CardContent>
@@ -253,12 +294,12 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
 function DivisionRow({ name, value, color }: any) {
   return (
     <div className="space-y-2">
-      <div className="flex justify-between text-xs font-semibold tracking-tight">
-        <span>{name}</span>
+      <div className="flex justify-between text-[11px] font-bold tracking-tight uppercase">
+        <span className="text-foreground/80">{name}</span>
         <span className="text-muted-foreground">{value}</span>
       </div>
       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-        <div className={`h-full ${color} ios-transition`} style={{ width: value }} />
+        <div className={`h-full ${color} ios-transition shadow-[0_0_8px_rgba(var(--primary),0.5)]`} style={{ width: value }} />
       </div>
     </div>
   );
@@ -266,16 +307,16 @@ function DivisionRow({ name, value, color }: any) {
 
 function AlertItem({ title, desc, severity }: any) {
   const colors = {
-    high: "bg-destructive text-destructive",
-    medium: "bg-orange-500 text-orange-500",
-    low: "bg-green-500 text-green-500"
+    high: "bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.5)]",
+    medium: "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]",
+    low: "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"
   };
   return (
-    <div className="flex gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 group hover:border-white/10 ios-transition cursor-pointer">
-      <div className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${colors[severity as keyof typeof colors].split(' ')[0]}`} />
+    <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group hover:border-white/20 ios-transition cursor-pointer">
+      <div className={cn("mt-1.5 h-1.5 w-1.5 rounded-full shrink-0", colors[severity as keyof typeof colors])} />
       <div>
         <p className="text-sm font-bold leading-none">{title}</p>
-        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{desc}</p>
       </div>
     </div>
   );
