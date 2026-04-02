@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -12,7 +13,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useAuth, useUser, useDoc, useFirestore } from "@/firebase";
+import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +31,12 @@ export function Navbar() {
   const auth = useAuth();
   const db = useFirestore();
 
-  const { data: profile } = useDoc(user ? doc(db, "userProfiles", user.uid) : null);
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileDocRef);
 
   const handleSignOut = () => {
     signOut(auth);
