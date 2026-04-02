@@ -1,10 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
-  Briefcase, 
   BookOpen, 
   ReceiptText, 
   Calculator, 
@@ -21,7 +21,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: HardHat },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
-  { name: "Invoices", href: "/invoices", icon: ReceiptText },
+  { name: "Payment Vouchers", href: "/vouchers", icon: ReceiptText },
   { name: "Expenses", href: "/expenses", icon: Calculator },
   { name: "Assets", href: "/assets", icon: Layers },
   { name: "Loans", href: "/loans", icon: Landmark },
@@ -45,11 +45,11 @@ export function Sidebar() {
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium ios-transition",
                   isActive 
-                    ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                    ? "bg-primary text-black shadow-lg shadow-primary/20" 
                     : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                 )}
               >
-                <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "text-primary/70 group-hover:text-primary")} />
+                <item.icon className={cn("h-5 w-5", isActive ? "text-black" : "text-primary/70 group-hover:text-primary")} />
                 {item.name}
               </Link>
             );
