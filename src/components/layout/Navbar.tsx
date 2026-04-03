@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -18,6 +17,8 @@ import { signOut } from "firebase/auth";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
 
 const companies = [
   { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
@@ -48,14 +49,16 @@ export function Navbar() {
     <header className="sticky top-0 z-40 w-full glass border-b border-white/10 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-black font-bold text-lg">N</span>
-            </div>
-            <span className="hidden font-headline text-lg font-bold tracking-tight text-foreground md:inline-block uppercase">
-              Nalakath Holdings
-            </span>
-          </div>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Image 
+              src="https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110" 
+              alt="Nalakath Holdings" 
+              width={160} 
+              height={48} 
+              className="h-10 w-auto object-contain"
+              priority
+            />
+          </Link>
 
           <div className="h-6 w-px bg-white/10 hidden md:block" />
 

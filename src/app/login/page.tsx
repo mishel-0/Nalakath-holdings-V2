@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, Mail, ArrowRight, Info, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -52,9 +52,14 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
         <div className="flex justify-center mb-10">
-          <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 rotate-3 transform transition-transform hover:rotate-0 ios-transition cursor-default">
-            <span className="text-black font-bold text-4xl">N</span>
-          </div>
+          <Image 
+            src="https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110" 
+            alt="Nalakath Holdings" 
+            width={180} 
+            height={180} 
+            className="h-32 w-auto object-contain drop-shadow-[0_0_20px_rgba(255,215,0,0.3)]"
+            priority
+          />
         </div>
 
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
