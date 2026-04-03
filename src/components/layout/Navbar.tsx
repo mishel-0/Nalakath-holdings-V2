@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Building2, User, LogOut, Shield, ShieldCheck } from "lucide-react";
+import { ChevronDown, Building2, User, LogOut, Shield, ShieldCheck, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from "@/fireb
 import { signOut } from "firebase/auth";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -59,7 +60,10 @@ export function Navbar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/5 text-white">
                 <Building2 className="h-4 w-4 text-primary" />
-                <span className="text-xs font-semibold leading-none text-left hidden sm:block">Switch Division</span>
+                <div className="flex flex-col items-start hidden sm:flex">
+                   <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">{activeCompany.name}</span>
+                   <span className="text-[8px] text-muted-foreground uppercase">{activeCompany.division}</span>
+                </div>
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
@@ -80,16 +84,21 @@ export function Navbar() {
           </DropdownMenu>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2 mr-4">
-             <Badge className={cn(
-               "h-6 rounded-full px-3 text-[9px] uppercase tracking-widest border-none font-bold",
-               isAdmin ? "bg-primary text-black" : "bg-blue-400 text-black"
-             )}>
-                {isAdmin ? <Shield className="h-2 w-2 mr-1" /> : <ShieldCheck className="h-2 w-2 mr-1" />}
-                {profile?.role || "User"}
-             </Badge>
+        <div className="hidden md:flex flex-1 max-w-md mx-4">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search financials..." 
+              className="pl-10 h-10 rounded-full bg-white/5 border-white/10 focus-visible:ring-primary/50"
+            />
           </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" className="rounded-full relative hover:bg-white/5">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full border-2 border-background" />
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -101,9 +110,20 @@ export function Navbar() {
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-1">
                   <span className="text-sm font-bold">{profile?.firstName} {profile?.lastName}</span>
-                  <span className="text-[10px] text-muted-foreground">{user?.email}</span>
+                  <Badge className={cn(
+                    "w-fit h-5 rounded-full px-2 text-[8px] uppercase tracking-widest",
+                    isAdmin ? "bg-primary text-black" : "bg-blue-400 text-black"
+                  )}>
+                    {profile?.role}
+                  </Badge>
                 </div>
               </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="cursor-pointer">
+                  <Building2 className="mr-2 h-4 w-4" /> Account Settings
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />

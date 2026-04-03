@@ -18,12 +18,9 @@ import {
   Sparkles,
   AlertCircle,
   ChevronRight,
-  Calculator,
   Activity,
   History,
-  FileText,
   ShieldCheck,
-  LayoutDashboard,
   CheckCircle2
 } from "lucide-react";
 import {
@@ -131,21 +128,19 @@ export default function Dashboard() {
               </div>
               <div className="mt-2">
                 <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
-                  {isAdmin ? "Group Dashboard" : "Financial Operations"}
+                  Group Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                  {isAdmin 
-                    ? "Strategic financial management for the Group Holdings." 
-                    : "Daily financial management and real-time ledger verification."}
+                  Strategic financial management and real-time ledger verification for the Group.
                 </p>
               </div>
             </header>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard title="Group Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
-              <MetricCard title="Net Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
-              <MetricCard title="Project Costs" value={stats.projectCosts} icon={Briefcase} trend="down" />
-              <MetricCard title="Priority Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
+              <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
+              <MetricCard title="Net Operating Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
+              <MetricCard title="Capital Expenditure" value={stats.projectCosts} icon={Briefcase} trend="down" />
+              <MetricCard title="Action Required" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
@@ -153,16 +148,19 @@ export default function Dashboard() {
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
                     <CardTitle className="text-lg font-bold">
-                      Performance Trend
+                      Fiscal Health Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">Real-time analysis of income vs expenditures</p>
+                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs operating costs</p>
                   </div>
+                  <Button variant="ghost" size="sm" className="text-primary text-[10px] font-bold uppercase tracking-widest">
+                    Analytics <ChevronRight className="h-3 w-3 ml-1" />
+                  </Button>
                 </CardHeader>
                 <CardContent className="h-[300px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <defs>
-                        <linearGradient id="colorVal" x1="0" x1="0" x2="0" y2="1">
+                        <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
                           <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                         </linearGradient>
@@ -170,6 +168,7 @@ export default function Dashboard() {
                       <XAxis dataKey="name" stroke="#333" fontSize={10} axisLine={false} tickLine={false} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: 'rgba(0,0,0,0.95)', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)' }}
+                        formatter={(v) => `₹${Number(v).toLocaleString('en-IN')}`}
                       />
                       <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fill="url(#colorVal)" strokeWidth={3} />
                     </AreaChart>
@@ -181,17 +180,17 @@ export default function Dashboard() {
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Division Performance
+                    Division Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="Construction" value="42%" color="gold-gradient" />
-                  <DivisionBar name="Hospitality" value="38%" color="bg-accent" />
-                  <DivisionBar name="Real Estate" value="20%" color="bg-zinc-600" />
+                  <DivisionBar name="Construction Infra" value="42%" color="gold-gradient" />
+                  <DivisionBar name="Hospitality Hub" value="38%" color="bg-accent" />
+                  <DivisionBar name="Estate Portfolio" value="20%" color="bg-zinc-600" />
                   <div className="pt-4 border-t border-white/5">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
                     <p className="text-xs text-muted-foreground italic leading-relaxed">
-                      "Live growth target reached. Data reflects current contributions from all active business divisions."
+                      "Consolidated performance is meeting the quarterly target. High variance detected in infrastructure procurement."
                     </p>
                   </div>
                 </CardContent>
@@ -203,7 +202,7 @@ export default function Dashboard() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <History className="h-5 w-5 text-primary" />
-                    Latest Transactions
+                    Latest Ledger Activity
                   </CardTitle>
                   <Link href="/accounting">
                     <Button variant="ghost" size="sm" className="rounded-full text-[10px] font-bold uppercase tracking-widest text-primary">
@@ -255,7 +254,7 @@ export default function Dashboard() {
                 <CardContent className="space-y-4">
                   <AlertItem title="Audit Readiness" desc="Q2 compliance docs are due for upload." severity="high" />
                   <AlertItem title="Budget Threshold" desc="Site Phase 3 has reached 80% buffer." severity="medium" />
-                  <AlertItem title="System integrity" desc="Auto-reconciliation complete. No errors." severity="low" />
+                  <AlertItem title="System Integrity" desc="Auto-reconciliation complete. No errors." severity="low" />
                 </CardContent>
               </Card>
             </div>
@@ -289,7 +288,7 @@ function MetricCard({ title, value, icon: Icon, trend, color, isAlert }: any) {
             "text-[8px] font-bold tracking-widest h-5 uppercase rounded-full border-none",
             trend === "up" ? 'bg-green-500/10 text-green-500' : trend === "down" ? 'bg-destructive/10 text-destructive' : 'bg-white/5 text-muted-foreground'
           )}>
-            {trend === "up" ? "+" : trend === "down" ? "-" : ""} {trend === "none" ? "Status: OK" : "Flow"}
+            {trend === "up" ? "Gaining" : trend === "down" ? "Variance" : "Stable"} {trend === "none" ? "" : "vs last quarter"}
           </Badge>
         </div>
       </CardContent>
