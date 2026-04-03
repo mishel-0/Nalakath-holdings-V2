@@ -180,7 +180,7 @@ export default function Dashboard() {
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Division Breakdown
+                    Portfolio Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">

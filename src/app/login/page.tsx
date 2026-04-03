@@ -59,7 +59,7 @@ export default function LoginPage() {
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
           <CardHeader className="text-center pt-10 px-8">
             <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
-              Confidential ERP Access Portal
+              APEX LEDGER ACCESS PORTAL
             </p>
           </CardHeader>
           <CardContent className="p-10 pt-6">
@@ -118,7 +118,7 @@ export default function LoginPage() {
         </Card>
         
         <p className="text-center mt-8 text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-50">
-          Group Holdings © 2026
+          APEX LEDGER © 2026
         </p>
       </div>
     </div>

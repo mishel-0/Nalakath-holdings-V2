@@ -20,10 +20,10 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const companies = [
-  { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
-  { id: 2, name: "Green Villa", division: "Real Estate" },
-  { id: 3, name: "Oval Palace Resort", division: "Hospitality" },
-  { id: 4, name: "Nalakath Construction", division: "Infrastructure" },
+  { id: 1, name: "Core Holdings", division: "Group HQ" },
+  { id: 2, name: "Estate Division", division: "Real Estate" },
+  { id: 3, name: "Hospitality Hub", division: "Hospitality" },
+  { id: 4, name: "Infra Projects", division: "Infrastructure" },
 ];
 
 export function Navbar() {
