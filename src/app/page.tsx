@@ -123,7 +123,7 @@ export default function Dashboard() {
                   Group Dashboard
                 </h1>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Strategic financial management for Nalakath Holdings.
+                  Strategic financial management for the Group Portfolio.
                 </p>
               </div>
             </header>
