@@ -270,7 +270,7 @@ function MetricCard({ title, value, icon: Icon, trend, color, isAlert }: any) {
       <div className="flex flex-col gap-1">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">{title}</p>
         <div className="flex items-center justify-between">
-          <div className="text-5xl font-bold font-mono tracking-tighter text-white">
+          <div className="text-3xl font-bold font-mono tracking-tighter text-white">
             {processedValue(value)}
           </div>
           <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/40">
