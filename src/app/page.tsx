@@ -129,12 +129,12 @@ export default function Dashboard() {
               </h1>
               <p className="text-muted-foreground">
                 {isAdmin 
-                  ? "Strategic visibility and capital tracking for Nalakath Holdings." 
+                  ? "Strategic visibility and capital tracking." 
                   : "Daily financial management and real-time ledger verification."}
               </p>
             </header>
 
-            {/* Metrics Section - Reflecting live data for both roles */}
+            {/* Metrics Section */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {isAdmin ? (
                 <>
@@ -183,7 +183,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Action/Context Panel - Role Specific */}
+              {/* Action/Context Panel */}
               <Card className={cn(
                 "lg:col-span-3 glass border-white/5 rounded-[2rem] overflow-hidden",
                 isAdmin ? "border-primary/10" : "border-blue-400/10"

@@ -30,7 +30,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       toast({ 
         title: "Access Authorized", 
-        description: "Secure session initialized for Nalakath Group Ledger." 
+        description: "Secure session initialized for the group ledger." 
       });
       router.push('/');
     } catch (error: any) {
@@ -53,15 +53,16 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
         <div className="flex justify-center mb-10">
-          <Image 
-            src="https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110" 
-            alt="Nalakath Holdings" 
-            width={240} 
-            height={80} 
-            className="h-24 w-auto object-contain drop-shadow-[0_0_20px_rgba(255,215,0,0.3)]"
-            unoptimized
-            priority
-          />
+          <div className="relative h-24 w-64">
+            <Image 
+              src="https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110" 
+              alt="" 
+              fill
+              className="object-contain drop-shadow-[0_0_20px_rgba(255,215,0,0.3)]"
+              unoptimized
+              priority
+            />
+          </div>
         </div>
 
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
@@ -71,7 +72,7 @@ export default function LoginPage() {
               <ShieldCheck className="h-6 w-6 text-primary" />
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
-              Nalakath Holdings Group | Confidential Access
+              Confidential ERP Access Portal
             </CardDescription>
           </CardHeader>
           <CardContent className="p-10 pt-6">
@@ -122,7 +123,7 @@ export default function LoginPage() {
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
                 <Info className="h-5 w-5 text-primary shrink-0" />
                 <span className="text-[10px] text-muted-foreground font-semibold leading-tight">
-                  Encrypted financial data access. All sessions are audited for compliance with Nalakath Group security protocols.
+                  Encrypted financial data access. All sessions are audited for compliance with group security protocols.
                 </span>
               </div>
             </div>
@@ -130,7 +131,7 @@ export default function LoginPage() {
         </Card>
         
         <p className="text-center mt-8 text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-50">
-          Nalakath Holdings Group © 2026
+          Group Holdings © 2026
         </p>
       </div>
     </div>
