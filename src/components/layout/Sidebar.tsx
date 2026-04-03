@@ -14,7 +14,8 @@ import {
   Settings,
   Sparkles,
   Layers,
-  ListTree
+  ListTree,
+  History
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -31,6 +32,7 @@ const navigation = [
   { name: "Loans", href: "/loans", icon: Landmark, adminOnly: true },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI Insights", href: "/insights", icon: Sparkles },
+  { name: "System Logs", href: "/logs", icon: History },
 ];
 
 export function Sidebar() {
