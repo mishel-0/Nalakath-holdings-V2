@@ -112,26 +112,33 @@ export default function Dashboard() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
             
             {/* Header Section */}
-            <header className="flex flex-col gap-2">
+            <header className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className={cn(
-                  "rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg",
-                  isAdmin ? "bg-primary/10 text-primary border-primary/30" : "bg-blue-500/10 text-blue-400 border-blue-400/30"
-                )}>
-                  {isAdmin ? "Executive Strategy Console" : "Operational Accounting Desk"}
-                </Badge>
-                <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1.5 rounded-full border border-green-500/10">
-                  <Activity className="h-3 w-3 animate-pulse" /> Live Ledger Sync
+                <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                  <span className="text-black font-black text-2xl">N</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Badge variant="outline" className={cn(
+                    "rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg w-fit",
+                    isAdmin ? "bg-primary/10 text-primary border-primary/30" : "bg-blue-500/10 text-blue-400 border-blue-400/30"
+                  )}>
+                    {isAdmin ? "Executive Strategy Console" : "Operational Accounting Desk"}
+                  </Badge>
+                  <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1.5 rounded-full border border-green-500/10 w-fit">
+                    <Activity className="h-3 w-3 animate-pulse" /> Live Ledger Sync
+                  </div>
                 </div>
               </div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
-                {isAdmin ? "Group Overview" : "Financial Operations"}
-              </h1>
-              <p className="text-muted-foreground">
-                {isAdmin 
-                  ? "Strategic visibility and capital tracking." 
-                  : "Daily financial management and real-time ledger verification."}
-              </p>
+              <div className="mt-2">
+                <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
+                  {isAdmin ? "Group Overview" : "Financial Operations"}
+                </h1>
+                <p className="text-muted-foreground">
+                  {isAdmin 
+                    ? "Strategic visibility and capital tracking." 
+                    : "Daily financial management and real-time ledger verification."}
+                </p>
+              </div>
             </header>
 
             {/* Metrics Section */}
@@ -168,7 +175,7 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <defs>
-                        <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="colorVal" x1="0" x1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} stopOpacity={0.3}/>
                           <stop offset="95%" stopColor={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} stopOpacity={0}/>
                         </linearGradient>

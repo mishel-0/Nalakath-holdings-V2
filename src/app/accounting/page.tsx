@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Download, Filter, CheckCircle2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Download, Filter, CheckCircle2, MoreHorizontal, Pencil, Trash2, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -108,9 +108,14 @@ export default function AccountingPage() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">General Ledger</h1>
-                <p className="text-muted-foreground">Comprehensive record of group financial activity.</p>
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                  <span className="text-black font-black text-xl">N</span>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">General Ledger</h1>
+                  <p className="text-muted-foreground">Comprehensive record of group financial activity.</p>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5">

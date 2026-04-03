@@ -30,17 +30,21 @@ export default function LogsPage() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header>
-              <div className="flex items-center gap-3 mb-2">
-                <Badge variant="outline" className="rounded-full px-3 py-1 bg-primary/10 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-widest">
-                  System Audit
-                </Badge>
-                <div className="flex items-center gap-1 text-[9px] text-green-500 font-bold uppercase tracking-widest">
-                   <ShieldCheck className="h-3 w-3" /> Integrity Verified
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                  <span className="text-black font-black text-xl">N</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="rounded-full px-3 py-1 bg-primary/10 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-widest">
+                    System Audit
+                  </Badge>
+                  <div className="flex items-center gap-1 text-[9px] text-green-500 font-bold uppercase tracking-widest">
+                    <ShieldCheck className="h-3 w-3" /> Integrity Verified
+                  </div>
                 </div>
               </div>
               <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3">
                 Activity Logs
-                <History className="h-8 w-8 text-primary" />
               </h1>
               <p className="text-muted-foreground">Comprehensive trail of all modifications across business divisions.</p>
             </header>

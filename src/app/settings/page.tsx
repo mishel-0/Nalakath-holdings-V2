@@ -52,9 +52,14 @@ export default function SettingsPage() {
         <Sidebar />
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-4xl mx-auto">
-            <header>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Settings</h1>
-              <p className="text-muted-foreground">Manage your group profile and system preferences.</p>
+            <header className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                <span className="text-black font-black text-xl">N</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Settings</h1>
+                <p className="text-muted-foreground">Manage your group profile and system preferences.</p>
+              </div>
             </header>
 
             <div className="grid gap-6">
@@ -62,8 +67,8 @@ export default function SettingsPage() {
               <Card className="glass border-white/5 overflow-hidden rounded-[2rem]">
                 <CardHeader className="bg-white/5 pb-4">
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-3xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                      <UserCircle className="h-10 w-10 text-black" />
+                    <div className="h-16 w-16 rounded-3xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                      <span className="text-black font-black text-3xl">N</span>
                     </div>
                     <div>
                       <CardTitle>{profile?.firstName} {profile?.lastName}</CardTitle>

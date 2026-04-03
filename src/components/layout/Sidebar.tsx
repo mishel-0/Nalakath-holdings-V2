@@ -53,6 +53,12 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-64 border-r border-white/10 glass md:block">
       <div className="flex h-full flex-col gap-4 p-4">
+        <div className="px-3 py-4 mb-2 flex items-center justify-center">
+          <div className="h-16 w-16 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/30">
+            <span className="text-black font-black text-3xl">N</span>
+          </div>
+        </div>
+        
         <nav className="flex-1 space-y-1">
           {filteredNavigation.map((item) => {
             const isActive = pathname === item.href;
