@@ -1,21 +1,30 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useAuth, useFirestore } from '@/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, UserPlus, LogIn, UserCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [role, setRole] = useState<'Admin' | 'Accountant'>('Admin');
+  const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
+  
   const auth = useAuth();
+  const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -24,15 +33,47 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: "Secure Access Granted", description: "Authenticated session established." });
+      if (isRegistering) {
+        // Create Auth User
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Create User Profile in Firestore
+        const now = new Date().toISOString();
+        const profileData = {
+          id: user.uid,
+          firebaseUid: user.uid,
+          firstName: firstName || (role === 'Admin' ? 'System' : 'Group'),
+          lastName: lastName || (role === 'Admin' ? 'Admin' : 'Accountant'),
+          email: email,
+          role: role,
+          companyIds: ['nalakath-holdings-main'],
+          preferredCompanyId: 'nalakath-holdings-main',
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        await setDoc(doc(db, 'userProfiles', user.uid), profileData);
+        
+        toast({ 
+          title: "Account Created", 
+          description: `Welcome, ${profileData.firstName}. Your ${role} session is ready.` 
+        });
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast({ title: "Secure Access Granted", description: "Authenticated session established." });
+      }
       router.push('/');
     } catch (error: any) {
       console.error(error);
+      const errorMessage = error.code === 'auth/email-already-in-use' 
+        ? "This email is already registered. Please sign in." 
+        : "Authentication failed. Please check your credentials.";
+      
       toast({
         variant: "destructive",
-        title: "Authentication Failed",
-        description: "Invalid credentials. Please contact your system administrator.",
+        title: "Access Denied",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -55,23 +96,64 @@ export default function LoginPage() {
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
           <CardHeader className="text-center pt-10">
             <CardTitle className="text-3xl font-headline font-bold tracking-tight">
-              Ledger Access
+              {isRegistering ? "Create Profile" : "Ledger Access"}
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
-              Premium Financial Suite for Nalakath Holdings.
+              {isRegistering 
+                ? "Register a new administrative or accounting user." 
+                : "Premium Financial Suite for Nalakath Holdings."}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-10">
-            <form onSubmit={handleAuth} className="space-y-6">
+            <form onSubmit={handleAuth} className="space-y-4">
+              {isRegistering && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">First Name</Label>
+                      <Input
+                        placeholder="Jane"
+                        className="bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Last Name</Label>
+                      <Input
+                        placeholder="Doe"
+                        className="bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Assigned Role</Label>
+                    <Select onValueChange={(v: any) => setRole(v)} defaultValue="Admin">
+                      <SelectTrigger className="bg-white/5 border-white/10 rounded-2xl h-12">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent className="glass">
+                        <SelectItem value="Admin">Administrator (Full Access)</SelectItem>
+                        <SelectItem value="Accountant">Accountant (Operations Only)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Email Identifier</Label>
+                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email Identifier</Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-4 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="admin@nalakath.com"
-                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-14 focus-visible:ring-primary/30"
+                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -80,14 +162,14 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" title="password" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Security Key</Label>
+                <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Security Key</Label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-4 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-14 focus-visible:ring-primary/30"
+                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -100,15 +182,26 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full h-14 rounded-2xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition group mt-4 text-lg"
               >
-                {loading ? "Verifying..." : "Initialize Session"}
+                {loading ? "Processing..." : isRegistering ? "Create Account" : "Initialize Session"}
                 {!loading && <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 ios-transition" />}
               </Button>
             </form>
 
-            <div className="mt-10 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
+            <button
+              onClick={() => setIsRegistering(!isRegistering)}
+              className="w-full mt-6 text-[10px] uppercase tracking-[0.2em] font-bold text-primary hover:text-white ios-transition flex items-center justify-center gap-2"
+            >
+              {isRegistering ? (
+                <><LogIn className="h-3 w-3" /> Back to Sign In</>
+              ) : (
+                <><UserPlus className="h-3 w-3" /> Register Admin/Staff Account</>
+              )}
+            </button>
+
+            <div className="mt-8 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5">
-                <ShieldCheck className="h-4 w-4 text-primary" />
-                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
+                <ShieldCheck className="h-3 w-3 text-primary" />
+                <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
                   Encrypted Ledger Session
                 </span>
               </div>
