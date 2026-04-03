@@ -1,26 +1,62 @@
-
 "use client";
 
-import { useMemo } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { History, ShieldCheck, User, Clock, Info } from "lucide-react";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, limit } from "firebase/firestore";
+import { ShieldCheck, User, Clock, Info } from "lucide-react";
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
+import { collection, query, orderBy, limit, doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LogsPage() {
   const db = useFirestore();
+  const { user } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, "userProfiles", user.uid);
+  }, [user, db]);
+
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
+
+  useEffect(() => {
+    if (!isProfileLoading && profile && profile.role !== "Admin") {
+      toast({
+        variant: "destructive",
+        title: "Access Restricted",
+        description: "System logs and audit trails are reserved for Administrators.",
+      });
+      router.replace("/");
+    }
+  }, [profile, isProfileLoading, router, toast]);
 
   const logsQuery = useMemoFirebase(() => {
+    if (!db) return null;
     return query(collection(db, "auditLogs"), orderBy("timestamp", "desc"), limit(100));
   }, [db]);
 
   const { data: logs, isLoading } = useCollection(logsQuery);
+
+  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-16 w-16 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
+            <span className="text-black font-black text-3xl">N</span>
+          </div>
+          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Verifying Credentials...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

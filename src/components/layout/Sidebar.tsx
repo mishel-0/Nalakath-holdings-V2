@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -32,7 +31,7 @@ const navigation = [
   { name: "Loans", href: "/loans", icon: Landmark, adminOnly: true },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI Insights", href: "/insights", icon: Sparkles },
-  { name: "System Logs", href: "/logs", icon: History },
+  { name: "System Logs", href: "/logs", icon: History, adminOnly: true },
 ];
 
 export function Sidebar() {
