@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Building2, User, LogOut, Shield, ShieldCheck, Bell, Search } from "lucide-react";
+import { ChevronDown, Building2, User, LogOut, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,10 +20,10 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const companies = [
-  { id: 1, name: "Core Holdings", division: "Group HQ" },
-  { id: 2, name: "Estate Division", division: "Real Estate" },
-  { id: 3, name: "Hospitality Hub", division: "Hospitality" },
-  { id: 4, name: "Infra Projects", division: "Infrastructure" },
+  { id: 1, name: "Apex Group HQ", division: "Group Strategy" },
+  { id: 2, name: "Apex Construction", division: "Infrastructure" },
+  { id: 3, name: "Apex Hospitality", division: "Resorts & Hotels" },
+  { id: 4, name: "Apex Real Estate", division: "Property Portfolio" },
 ];
 
 export function Navbar() {
@@ -68,7 +68,7 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 glass">
-              <DropdownMenuLabel>Group Divisions</DropdownMenuLabel>
+              <DropdownMenuLabel>Apex Group Divisions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {companies.map((company) => (
                 <DropdownMenuItem
@@ -88,7 +88,7 @@ export function Navbar() {
           <div className="relative w-full">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
-              placeholder="Search financials..." 
+              placeholder="Search Apex Ledger..." 
               className="pl-10 h-10 rounded-full bg-white/5 border-white/10 focus-visible:ring-primary/50"
             />
           </div>
@@ -121,7 +121,7 @@ export function Navbar() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/settings" className="cursor-pointer">
-                  <Building2 className="mr-2 h-4 w-4" /> Account Settings
+                  <Building2 className="mr-2 h-4 w-4" /> System Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

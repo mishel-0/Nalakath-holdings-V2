@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -145,7 +144,7 @@ export default function VouchersPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Payment Vouchers</h1>
-                  <p className="text-muted-foreground">Purchasing proofs and division expenditure tracking.</p>
+                  <p className="text-muted-foreground">Apex Group purchasing proofs and division expenditure.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -183,15 +182,15 @@ export default function VouchersPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="division">Division</Label>
-                        <Select name="division" defaultValue="Nalakath Construction">
+                        <Label htmlFor="division">Apex Division</Label>
+                        <Select name="division" defaultValue="Apex Construction">
                           <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="glass">
-                            <SelectItem value="Nalakath Construction">Nalakath Construction</SelectItem>
-                            <SelectItem value="Green Villa">Green Villa</SelectItem>
-                            <SelectItem value="Oval Palace Resort">Oval Palace Resort</SelectItem>
+                            <SelectItem value="Apex Construction">Apex Construction</SelectItem>
+                            <SelectItem value="Apex Hospitality">Apex Hospitality</SelectItem>
+                            <SelectItem value="Apex Real Estate">Apex Real Estate</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -263,7 +262,7 @@ export default function VouchersPage() {
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs uppercase tracking-widest">Loading...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs uppercase tracking-widest">Syncing...</TableCell></TableRow>
                     ) : filteredVouchers.length === 0 ? (
                       <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground">No vouchers registered.</TableCell></TableRow>
                     ) : (
@@ -347,9 +346,9 @@ export default function VouchersPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="glass">
-                    <SelectItem value="Nalakath Construction">Nalakath Construction</SelectItem>
-                    <SelectItem value="Green Villa">Green Villa</SelectItem>
-                    <SelectItem value="Oval Palace Resort">Oval Palace Resort</SelectItem>
+                    <SelectItem value="Apex Construction">Apex Construction</SelectItem>
+                    <SelectItem value="Apex Hospitality">Apex Hospitality</SelectItem>
+                    <SelectItem value="Apex Real Estate">Apex Real Estate</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

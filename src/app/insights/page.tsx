@@ -14,14 +14,10 @@ import {
   AlertTriangle, 
   Target, 
   Zap,
-  ArrowRight,
   RefreshCcw,
   CheckCircle2,
   TrendingUp,
-  History,
-  ShieldAlert,
-  Search,
-  LayoutDashboard
+  ShieldAlert
 } from "lucide-react";
 import { 
   costOptimizationSuggestions, 
@@ -39,7 +35,7 @@ import {
   type DetectTransactionAnomalyInput
 } from "@/ai/flows/transaction-anomaly-detection-flow";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, limit } from "firebase/firestore";
+import { collection, query, orderBy } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 export default function InsightsPage() {
@@ -49,12 +45,10 @@ export default function InsightsPage() {
   const [activeTab, setActiveTab] = useState("strategy");
   const [loading, setLoading] = useState(false);
   
-  // States for different AI outputs
   const [strategyInsights, setStrategyInsights] = useState<CostOptimizationSuggestionsOutput | null>(null);
   const [cashFlowInsights, setCashFlowInsights] = useState<CashFlowPredictionOutput | null>(null);
   const [anomalyResults, setAnomalyResults] = useState<any[]>([]);
 
-  // Real-time data
   const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt", "desc")), [db]);
   const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
   const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries"), orderBy("date", "asc")), [db]);
@@ -102,7 +96,7 @@ export default function InsightsPage() {
       }));
 
     const input: CostOptimizationSuggestionsInput = {
-      companyName: "Nalakath Holdings",
+      companyName: "Apex Ledger",
       financialSummary: {
         netProfit: totalRevenue - totalExpenses,
         totalRevenue,
@@ -148,7 +142,6 @@ export default function InsightsPage() {
     if (!expenses || expenses.length < 2) return;
     
     const results = [];
-    // Analyze the 3 most recent expenses for anomalies
     const recent = expenses.slice(0, 3);
     const history = expenses.slice(3, 10);
 
@@ -159,7 +152,7 @@ export default function InsightsPage() {
           date: exp.expenseDate,
           amount: exp.amount,
           description: exp.description,
-          account: "General Expense",
+          account: "Apex General Ledger",
           category: exp.expenseCategory
         },
         historicalTransactions: history.map(h => ({
@@ -167,7 +160,7 @@ export default function InsightsPage() {
           date: h.expenseDate,
           amount: h.amount,
           description: h.description,
-          account: "General Expense",
+          account: "Apex General Ledger",
           category: h.expenseCategory
         }))
       };
@@ -191,10 +184,10 @@ export default function InsightsPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3">
-                    AI Financial Assistant
+                    Apex Financial AI
                     <Sparkles className="h-8 w-8 text-primary animate-pulse" />
                   </h1>
-                  <p className="text-muted-foreground">Premium automated insights and fiscal intelligence.</p>
+                  <p className="text-muted-foreground">Premium automated insights and portfolio intelligence.</p>
                 </div>
               </div>
               <Button 
@@ -214,10 +207,9 @@ export default function InsightsPage() {
                 <TabsTrigger value="audit" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Audit Monitor</TabsTrigger>
               </TabsList>
 
-              {/* Strategy Engine */}
               <TabsContent value="strategy" className="space-y-6">
                 {!strategyInsights && !loading ? (
-                  <EmptyInsight icon={Target} title="Strategy Optimizer" desc="Initialize strategy engine to identify cost savings and process efficiencies across the group." />
+                  <EmptyInsight icon={Target} title="Strategy Optimizer" desc="Initialize Apex strategy engine to identify cost savings and process efficiencies." />
                 ) : loading && activeTab === "strategy" ? (
                   <LoadingGrid />
                 ) : (
@@ -231,10 +223,9 @@ export default function InsightsPage() {
                 )}
               </TabsContent>
 
-              {/* Cash Flow Engine */}
               <TabsContent value="prediction" className="space-y-6">
                 {!cashFlowInsights && !loading ? (
-                  <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc="Forecast liquidity and identify potential shortages based on your upcoming payment vouchers." />
+                  <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc="Forecast Apex liquidity and identify potential shortages based on upcoming commitments." />
                 ) : loading && activeTab === "prediction" ? (
                   <LoadingGrid />
                 ) : (
@@ -244,7 +235,7 @@ export default function InsightsPage() {
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
                             <TrendingUp className="h-5 w-5 text-primary" />
-                            30-Day Liquidity Forecast
+                            Apex 30-Day Liquidity Forecast
                           </CardTitle>
                           <CardDescription>{cashFlowInsights.predictionSummary}</CardDescription>
                         </CardHeader>
@@ -268,10 +259,9 @@ export default function InsightsPage() {
                 )}
               </TabsContent>
 
-              {/* Audit Monitor Engine */}
               <TabsContent value="audit" className="space-y-6">
                 {!anomalyResults.length && !loading ? (
-                  <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc="Scan recent expenditures for anomalies, vague descriptions, or suspicious patterns." />
+                  <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc="Scan recent Apex expenditures for anomalies, vague descriptions, or suspicious patterns." />
                 ) : loading && activeTab === "audit" ? (
                   <LoadingGrid />
                 ) : (
@@ -355,7 +345,7 @@ function StatusCard({ title, status, color, desc }: any) {
   );
 }
 
-function EmptyInsight({ icon: Icon, title, title: _title, desc }: any) {
+function EmptyInsight({ icon: Icon, title, desc }: any) {
   return (
     <Card className="glass border-white/5 border-dashed py-20 rounded-[3rem]">
       <CardContent className="flex flex-col items-center justify-center text-center gap-4">

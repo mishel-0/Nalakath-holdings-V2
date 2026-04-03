@@ -1,5 +1,4 @@
-
-# 🚀 Vercel Deployment Guide: Nalakath Holdings Ledger
+# 🚀 Vercel Deployment Guide: Apex Ledger
 
 Follow these steps to deploy your Premium Accounting ERP to Vercel and get your live URL.
 
@@ -20,12 +19,12 @@ Run the following command in the root of your project:
 ```bash
 vercel
 ```
-*Follow the prompts to log in and set up your project (e.g., "Nalakath Ledger").*
+*Follow the prompts to log in and set up your project (e.g., "Apex Ledger").*
 
 ## Step 4: Configure Environment Variables
-In the Vercel dashboard for your new project, or via the CLI, add your **GOOGLE_GENAI_API_KEY**:
+In the Vercel dashboard for your new project, or via the CLI, add your **GOOGLE_GENAI_API_KEY** or **OPENROUTER_API_KEY**:
 ```bash
-vercel env add GOOGLE_GENAI_API_KEY
+vercel env add OPENROUTER_API_KEY
 ```
 
 ## Step 5: Run Production Deployment
@@ -37,11 +36,11 @@ vercel --prod
 ## Step 6: Verify Firebase Integration
 1. Go to your **Firebase Console**.
 2. Navigate to **Authentication > Settings > Authorized Domains**.
-3. Add your new Vercel domain (e.g., `nalakath-ledger.vercel.app`) to the list so login works.
+3. Add your new Vercel domain (e.g., `apex-ledger.vercel.app`) to the list so login works.
 
 ## Step 7: Access your Live URL
 After Step 5, Vercel will provide a link like:
-**https://nalakath-ledger.vercel.app**
+**https://apex-ledger.vercel.app**
 
 ---
-*Nalakath Holdings @2026 - Production Environment Ready*
+*Apex Group @2026 - Production Environment Ready*

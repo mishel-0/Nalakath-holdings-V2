@@ -1,6 +1,6 @@
 # APEX LEDGER
 
-Premium iOS-style Accounting & ERP system for multi-division holdings.
+Premium iOS-style Accounting & ERP system for multi-division group holdings.
 
 ## Getting Started
 

@@ -14,19 +14,15 @@ import {
   IndianRupee, 
   Briefcase, 
   TrendingUp,
-  Clock,
-  Sparkles,
   AlertCircle,
   ChevronRight,
   Activity,
   History,
-  ShieldCheck,
-  CheckCircle2
+  Sparkles
 } from "lucide-react";
 import {
   ResponsiveContainer,
   XAxis,
-  YAxis,
   Tooltip,
   Area,
   AreaChart,
@@ -95,7 +91,7 @@ export default function Dashboard() {
           <div className="h-16 w-16 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
             <span className="text-black font-black text-3xl">N</span>
           </div>
-          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Ledger Data...</p>
+          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Apex Data...</p>
         </div>
       </div>
     );
@@ -131,7 +127,7 @@ export default function Dashboard() {
                   Group Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                  Strategic financial management and real-time ledger verification.
+                  Strategic financial management for the Apex portfolio.
                 </p>
               </div>
             </header>
@@ -150,7 +146,7 @@ export default function Dashboard() {
                     <CardTitle className="text-lg font-bold">
                       Fiscal Health Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs operating costs</p>
+                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of group income vs costs</p>
                   </div>
                   <Button variant="ghost" size="sm" className="text-primary text-[10px] font-bold uppercase tracking-widest">
                     Analytics <ChevronRight className="h-3 w-3 ml-1" />
@@ -180,7 +176,7 @@ export default function Dashboard() {
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Portfolio Breakdown
+                    Apex Portfolio Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
@@ -190,7 +186,7 @@ export default function Dashboard() {
                   <div className="pt-4 border-t border-white/5">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
                     <p className="text-xs text-muted-foreground italic leading-relaxed">
-                      "Consolidated performance is meeting the quarterly target. High variance detected in infrastructure procurement."
+                      "Consolidated performance is meeting quarterly targets. Apex construction variance is within tolerance."
                     </p>
                   </div>
                 </CardContent>
@@ -248,7 +244,7 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
-                    Priority Desk
+                    Apex Priority Desk
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -258,6 +254,10 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+            
+            <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-8">
+              APEX LEDGER © 2026
+            </p>
           </div>
         </main>
       </div>
