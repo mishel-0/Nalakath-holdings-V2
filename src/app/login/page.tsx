@@ -5,13 +5,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, ArrowRight, Info, ShieldCheck } from 'lucide-react';
-import Image from 'next/image';
+import { Lock, Mail, ArrowRight, Info } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -45,6 +44,8 @@ export default function LoginPage() {
     }
   };
 
+  const logoUrl = "https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110";
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-black relative overflow-hidden">
       {/* Premium Background Accents */}
@@ -53,27 +54,20 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
         <div className="flex justify-center mb-10">
-          <div className="relative h-24 w-64">
-            <Image 
-              src="https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110" 
+          <div className="h-24 w-64 flex items-center justify-center">
+            <img 
+              src={logoUrl} 
               alt="" 
-              fill
-              className="object-contain drop-shadow-[0_0_20px_rgba(255,215,0,0.3)]"
-              unoptimized
-              priority
+              className="h-full w-auto object-contain drop-shadow-[0_0_20px_rgba(255,215,0,0.3)]"
             />
           </div>
         </div>
 
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
           <CardHeader className="text-center pt-10 px-8">
-            <CardTitle className="text-3xl font-headline font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
-              Secure Ledger
-              <ShieldCheck className="h-6 w-6 text-primary" />
-            </CardTitle>
-            <CardDescription className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
               Confidential ERP Access Portal
-            </CardDescription>
+            </p>
           </CardHeader>
           <CardContent className="p-10 pt-6">
             <form onSubmit={handleAuth} className="space-y-6">

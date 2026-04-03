@@ -12,13 +12,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import Link from "next/link";
 
 const companies = [
@@ -46,19 +44,18 @@ export function Navbar() {
     signOut(auth);
   };
 
+  const logoUrl = "https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110";
+
   return (
     <header className="sticky top-0 z-40 w-full glass border-b border-white/10 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
           <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <div className="relative h-10 w-40">
-              <Image 
-                src="https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110" 
+            <div className="h-10 w-40 flex items-center">
+              <img 
+                src={logoUrl} 
                 alt="" 
-                fill
-                className="object-contain object-left"
-                unoptimized
-                priority
+                className="h-full w-auto object-contain"
               />
             </div>
           </Link>
@@ -69,10 +66,7 @@ export function Navbar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/5 text-white">
                 <Building2 className="h-4 w-4 text-primary" />
-                <div className="flex flex-col items-start text-xs">
-                  <span className="font-semibold leading-none text-left">{activeCompany.name}</span>
-                  <span className="text-muted-foreground hidden sm:block">{activeCompany.division}</span>
-                </div>
+                <span className="text-xs font-semibold leading-none text-left hidden sm:block">Switch Division</span>
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
