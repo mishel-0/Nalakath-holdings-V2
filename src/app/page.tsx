@@ -45,7 +45,6 @@ export default function Dashboard() {
   const { user } = useUser();
   const companyId = "nalakath-holdings-main";
 
-  // Real-time data fetching - Shared across all roles for reflection
   const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers"), orderBy("createdAt", "desc"), limit(20)), [db]);
   const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db]);
   const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
@@ -65,9 +64,7 @@ export default function Dashboard() {
   const { data: recentTransactions } = useCollection(recentTxQuery);
 
   const isAdmin = profile?.role === "Admin";
-  const isAccountant = profile?.role === "Accountant";
 
-  // Metrics calculated from shared live data
   const stats = useMemo(() => {
     const totalRev = recentTransactions?.reduce((acc, tx) => acc + (tx.totalCredit || 0), 0) || 0;
     const totalExp = expenses?.reduce((acc, exp) => acc + (exp.amount || 0), 0) || 0;
@@ -111,7 +108,6 @@ export default function Dashboard() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
             
-            {/* Header Section */}
             <header className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
@@ -131,42 +127,29 @@ export default function Dashboard() {
               </div>
               <div className="mt-2">
                 <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
-                  {isAdmin ? "Group Overview" : "Financial Operations"}
+                  {isAdmin ? "Group Dashboard" : "Financial Operations"}
                 </h1>
                 <p className="text-muted-foreground">
                   {isAdmin 
-                    ? "Strategic visibility and capital tracking." 
+                    ? "Strategic financial management for the Group Holdings." 
                     : "Daily financial management and real-time ledger verification."}
                 </p>
               </div>
             </header>
 
-            {/* Metrics Section */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {isAdmin ? (
-                <>
-                  <MetricCard title="Group Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
-                  <MetricCard title="Net Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
-                  <MetricCard title="Project Costs" value={stats.projectCosts} icon={Briefcase} trend="down" />
-                  <MetricCard title="Priority Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
-                </>
-              ) : (
-                <>
-                  <MetricCard title="Live Revenue" value={stats.revenue} icon={Calculator} trend="up" color="text-blue-400" />
-                  <MetricCard title="Verified Entries" value={recentTransactions?.length || 0} icon={ShieldCheck} trend="none" color="text-blue-400" />
-                  <MetricCard title="Total Opex" value={stats.revenue - stats.profit} icon={History} trend="down" color="text-blue-400" />
-                  <MetricCard title="Pending Vouchers" value={stats.alerts.toString()} icon={FileText} trend="none" color="text-blue-400" />
-                </>
-              )}
+              <MetricCard title="Group Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
+              <MetricCard title="Net Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
+              <MetricCard title="Project Costs" value={stats.projectCosts} icon={Briefcase} trend="down" />
+              <MetricCard title="Priority Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
-              {/* Performance Visualization */}
               <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-[2rem]">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
                     <CardTitle className="text-lg font-bold">
-                      {isAdmin ? "Fiscal Momentum" : "Transaction Flow Chart"}
+                      Performance Trend
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">Real-time analysis of income vs expenditures</p>
                   </div>
@@ -176,82 +159,41 @@ export default function Dashboard() {
                     <AreaChart data={chartData}>
                       <defs>
                         <linearGradient id="colorVal" x1="0" x1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} stopOpacity={0}/>
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <XAxis dataKey="name" stroke="#333" fontSize={10} axisLine={false} tickLine={false} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: 'rgba(0,0,0,0.95)', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)' }}
                       />
-                      <Area type="monotone" dataKey="income" stroke={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
+                      <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fill="url(#colorVal)" strokeWidth={3} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              {/* Action/Context Panel */}
-              <Card className={cn(
-                "lg:col-span-3 glass border-white/5 rounded-[2rem] overflow-hidden",
-                isAdmin ? "border-primary/10" : "border-blue-400/10"
-              )}>
-                {isAdmin ? (
-                  <>
-                    <CardHeader className="bg-primary/5">
-                      <CardTitle className="text-lg font-bold flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-primary" />
-                        Division Performance
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6 pt-6">
-                      <DivisionBar name="Construction" value="42%" color="gold-gradient" />
-                      <DivisionBar name="Hospitality" value="38%" color="bg-accent" />
-                      <DivisionBar name="Real Estate" value="20%" color="bg-zinc-600" />
-                      <div className="pt-4 border-t border-white/5">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
-                        <p className="text-xs text-muted-foreground italic leading-relaxed">
-                          "Live growth target reached. Data reflects current contributions from all active business divisions."
-                        </p>
-                      </div>
-                    </CardContent>
-                  </>
-                ) : (
-                  <>
-                    <CardHeader className="bg-blue-400/5">
-                      <CardTitle className="text-lg font-bold flex items-center gap-2 text-blue-400">
-                        <ShieldCheck className="h-5 w-5" />
-                        Compliance Monitor
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 pt-6">
-                      <div className="p-4 rounded-2xl bg-blue-400/5 border border-blue-400/10">
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Audit Health</span>
-                          <span className="text-[10px] font-bold text-green-500">OPTIMAL</span>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-muted-foreground">Matched Vouchers</span>
-                            <span className="font-mono text-blue-400">100%</span>
-                          </div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-muted-foreground">Ledger Discrepancies</span>
-                            <span className="font-mono text-blue-400">0</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Link href="/accounting">
-                        <Button className="w-full rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-400/20 font-bold uppercase text-[10px] tracking-widest h-11">
-                          Verify Master Ledger
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </>
-                )}
+              <Card className="lg:col-span-3 glass border-white/5 rounded-[2rem] overflow-hidden border-primary/10">
+                <CardHeader className="bg-primary/5">
+                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Division Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  <DivisionBar name="Construction" value="42%" color="gold-gradient" />
+                  <DivisionBar name="Hospitality" value="38%" color="bg-accent" />
+                  <DivisionBar name="Real Estate" value="20%" color="bg-zinc-600" />
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
+                    <p className="text-xs text-muted-foreground italic leading-relaxed">
+                      "Live growth target reached. Data reflects current contributions from all active business divisions."
+                    </p>
+                  </div>
+                </CardContent>
               </Card>
             </div>
 
-            {/* Recent Activity Section */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Card className="glass border-white/5 lg:col-span-2 rounded-[2rem]">
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -299,7 +241,6 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Priority Alerts */}
               <Card className="glass border-white/5 rounded-[2rem]">
                 <CardHeader>
                   <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
@@ -309,7 +250,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <AlertItem title="Audit Readiness" desc="Q2 compliance docs are due for upload." severity="high" />
-                  {isAdmin && <AlertItem title="Budget Threshold" desc="Site Phase 3 has reached 80% buffer." severity="medium" />}
+                  <AlertItem title="Budget Threshold" desc="Site Phase 3 has reached 80% buffer." severity="medium" />
                   <AlertItem title="System integrity" desc="Auto-reconciliation complete. No errors." severity="low" />
                 </CardContent>
               </Card>
