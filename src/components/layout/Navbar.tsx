@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Building2, Bell, Search, User, LogOut, Shield } from "lucide-react";
+import { ChevronDown, Building2, Bell, Search, User, LogOut, Shield, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from "@/fireb
 import { signOut } from "firebase/auth";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const companies = [
   { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
@@ -37,6 +38,7 @@ export function Navbar() {
   }, [user, db]);
 
   const { data: profile } = useDoc(profileDocRef);
+  const isAdmin = profile?.role === "Admin";
 
   const handleSignOut = () => {
     signOut(auth);
@@ -51,15 +53,15 @@ export function Navbar() {
               <span className="text-black font-bold text-lg">N</span>
             </div>
             <span className="hidden font-headline text-lg font-bold tracking-tight text-foreground md:inline-block uppercase">
-              Nalakath Holdings Ledger
+              Nalakath Holdings
             </span>
           </div>
 
-          <div className="h-6 w-px bg-border/50 hidden md:block" />
+          <div className="h-6 w-px bg-white/10 hidden md:block" />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/10 text-white">
+              <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/5 text-white">
                 <Building2 className="h-4 w-4 text-primary" />
                 <div className="flex flex-col items-start text-xs">
                   <span className="font-semibold leading-none text-left">{activeCompany.name}</span>
@@ -69,7 +71,7 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 glass">
-              <DropdownMenuLabel>Switch Division</DropdownMenuLabel>
+              <DropdownMenuLabel>Group Divisions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {companies.map((company) => (
                 <DropdownMenuItem
@@ -85,49 +87,37 @@ export function Navbar() {
           </DropdownMenu>
         </div>
 
-        <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
-          <div className="hidden sm:flex relative max-w-sm flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search financials..."
-              className="pl-9 bg-white/5 border-white/10 rounded-full h-9 focus-visible:ring-primary/30"
-            />
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2 mr-4">
+             <Badge className={cn(
+               "h-6 rounded-full px-3 text-[9px] uppercase tracking-widest border-none font-bold",
+               isAdmin ? "bg-primary text-black" : "bg-blue-400 text-black"
+             )}>
+                {isAdmin ? <Shield className="h-2 w-2 mr-1" /> : <ShieldCheck className="h-2 w-2 mr-1" />}
+                {profile?.role || "User"}
+             </Badge>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative rounded-full hover:bg-white/10">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
-            </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10">
-                  <User className="h-5 w-5 text-primary" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 glass">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold">User Account</span>
-                      <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20 h-5">
-                        <Shield className="h-2 w-2 mr-1" />
-                        {profile?.role || "Staff"}
-                      </Badge>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground truncate">{user?.email}</span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/5">
+                <User className="h-5 w-5 text-primary" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 glass">
+              <DropdownMenuLabel>
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-bold">{profile?.firstName} {profile?.lastName}</span>
+                  <span className="text-[10px] text-muted-foreground">{user?.email}</span>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

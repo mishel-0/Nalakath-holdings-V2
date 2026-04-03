@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -23,7 +24,8 @@ import {
   History,
   FileText,
   ShieldCheck,
-  LayoutDashboard
+  LayoutDashboard,
+  CheckCircle2
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -65,7 +67,6 @@ export default function Dashboard() {
   const isAdmin = profile?.role === "Admin";
   const isAccountant = profile?.role === "Accountant";
 
-  // Dynamic Statistics
   const stats = useMemo(() => {
     const totalRev = recentTransactions?.reduce((acc, tx) => acc + (tx.totalCredit || 0), 0) || 0;
     const totalExp = expenses?.reduce((acc, exp) => acc + (exp.amount || 0), 0) || 0;
@@ -96,7 +97,7 @@ export default function Dashboard() {
   if (isProfileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Initializing Dashboard...</div>
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Initializing Role Data...</div>
       </div>
     );
   }
@@ -108,185 +109,180 @@ export default function Dashboard() {
         <Sidebar />
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
+            
+            {/* Header Section */}
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className={cn(
                   "rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg",
                   isAdmin ? "bg-primary/10 text-primary border-primary/30" : "bg-blue-500/10 text-blue-400 border-blue-400/30"
                 )}>
-                  {isAdmin ? "Executive Strategy Console" : "Operational Desk"}
+                  {isAdmin ? "Executive Strategy Console" : "Operational Accounting Desk"}
                 </Badge>
                 <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1.5 rounded-full border border-green-500/10">
                   <Activity className="h-3 w-3 animate-pulse" /> Live Ledger Sync
                 </div>
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
-                {isAdmin ? "Group Overview" : "Accounting Core"}
+                {isAdmin ? "Group Overview" : "Financial Operations"}
               </h1>
               <p className="text-muted-foreground">
-                {isAdmin ? "Strategic financial visibility for Nalakath Holdings." : "Daily financial operations and transaction management."}
+                {isAdmin 
+                  ? "Strategic visibility and capital tracking for Nalakath Holdings." 
+                  : "Daily financial management and real-time ledger verification."}
               </p>
             </header>
 
-            {/* Metrics Grid - Differing by Role */}
+            {/* Metrics Section - Distinct per Role */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {isAdmin ? (
                 <>
-                  <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
-                  <MetricCard title="Net Operating Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
-                  <MetricCard title="Capital Expenditure" value={stats.projectCosts} icon={Briefcase} trend="down" />
-                  <MetricCard title="Action Required" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
+                  <MetricCard title="Group Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
+                  <MetricCard title="Net Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
+                  <MetricCard title="Project Costs" value={stats.projectCosts} icon={Briefcase} trend="down" />
+                  <MetricCard title="Priority Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
                 </>
               ) : (
                 <>
-                  <MetricCard title="Today's Revenue" value={stats.revenue * 0.15} icon={Calculator} trend="up" />
-                  <MetricCard title="Verified Entries" value={recentTransactions?.length || 0} icon={ShieldCheck} trend="none" />
-                  <MetricCard title="Operational Spend" value={stats.revenue - stats.profit} icon={History} trend="down" />
-                  <MetricCard title="Active Vouchers" value={stats.alerts.toString()} icon={FileText} trend="none" />
+                  <MetricCard title="Daily Revenue" value={stats.revenue * 0.15} icon={Calculator} trend="up" color="text-blue-400" />
+                  <MetricCard title="Verified Entries" value={recentTransactions?.length || 0} icon={ShieldCheck} trend="none" color="text-blue-400" />
+                  <MetricCard title="Operational Spend" value={stats.revenue - stats.profit} icon={History} trend="down" color="text-blue-400" />
+                  <MetricCard title="Active Vouchers" value={stats.alerts.toString()} icon={FileText} trend="none" color="text-blue-400" />
                 </>
               )}
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
-              {/* Main Visualizations */}
-              <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-3xl">
+              {/* Performance Visualization */}
+              <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-[2rem]">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
                     <CardTitle className="text-lg font-bold">
-                      {isAdmin ? "Fiscal Health Trend" : "Transaction Flow"}
+                      {isAdmin ? "Fiscal Momentum" : "Transaction Flow Chart"}
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of financial momentum</p>
+                    <p className="text-xs text-muted-foreground mt-1">Real-time analysis of income vs expenditures</p>
                   </div>
-                  <Link href="/reports">
-                    <Button variant="ghost" size="sm" className="rounded-full text-primary hover:bg-primary/10 font-bold text-xs uppercase tracking-widest">
-                      Analytics <ChevronRight className="ml-1 h-3 w-3" />
-                    </Button>
-                  </Link>
                 </CardHeader>
-                <CardContent className="h-[320px] pt-4">
+                <CardContent className="h-[300px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <defs>
-                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="name" stroke="#444" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#444" fontSize={10} tickLine={false} axisLine={false} hide />
+                      <XAxis dataKey="name" stroke="#333" fontSize={10} axisLine={false} tickLine={false} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: 'rgba(0,0,0,0.95)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', backdropBlur: '12px' }}
-                        itemStyle={{ color: '#FFD700', fontSize: '12px', fontWeight: 'bold' }}
+                        contentStyle={{ backgroundColor: 'rgba(0,0,0,0.95)', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)' }}
                       />
-                      <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={4} />
-                      <Area type="monotone" dataKey="cost" stroke="hsl(var(--accent))" fill="transparent" strokeWidth={2} strokeDasharray="6 6" />
+                      <Area type="monotone" dataKey="income" stroke={isAdmin ? "hsl(var(--primary))" : "#60A5FA"} fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              {/* Right Panel - Differing by Role */}
-              <Card className="lg:col-span-3 glass border-white/5 rounded-3xl">
+              {/* Action/Context Panel - Role Specific */}
+              <Card className={cn(
+                "lg:col-span-3 glass border-white/5 rounded-[2rem] overflow-hidden",
+                isAdmin ? "border-primary/10" : "border-blue-400/10"
+              )}>
                 {isAdmin ? (
                   <>
-                    <CardHeader>
+                    <CardHeader className="bg-primary/5">
                       <CardTitle className="text-lg font-bold flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
-                        Division Breakdown
+                        Division Performance
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-7 pt-2">
-                      <DivisionRow name="Construction Infra" value="45%" color="gold-gradient" />
-                      <DivisionRow name="Oval Palace Resort" value="30%" color="bg-accent" />
-                      <DivisionRow name="Green Villa Estates" value="25%" color="bg-zinc-700" />
-                      <div className="pt-6 mt-4 border-t border-white/10">
-                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                          <p className="text-[10px] uppercase font-bold tracking-[0.25em] text-primary">Strategic Insight</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed mt-4 italic">
-                          "Operating margins in **Construction** have stabilized. Recommended focus on **Hospitality** CAPEX for Q3."
+                    <CardContent className="space-y-6 pt-6">
+                      <DivisionBar name="Construction" value="42%" color="gold-gradient" />
+                      <DivisionBar name="Hospitality" value="38%" color="bg-accent" />
+                      <DivisionBar name="Real Estate" value="20%" color="bg-zinc-600" />
+                      <div className="pt-4 border-t border-white/5">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
+                        <p className="text-xs text-muted-foreground italic leading-relaxed">
+                          "Growth target reached in Infrastructure. Recommended re-allocation of Q3 surplus to Resort upgrades."
                         </p>
                       </div>
                     </CardContent>
                   </>
                 ) : (
                   <>
-                    <CardHeader>
+                    <CardHeader className="bg-blue-400/5">
                       <CardTitle className="text-lg font-bold flex items-center gap-2 text-blue-400">
                         <ShieldCheck className="h-5 w-5" />
-                        Verification Pipeline
+                        Compliance Monitor
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 pt-2">
-                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Recent Activity</span>
-                          <span className="text-[10px] font-bold text-green-500 uppercase">98% Match</span>
+                    <CardContent className="space-y-4 pt-6">
+                      <div className="p-4 rounded-2xl bg-blue-400/5 border border-blue-400/10">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Audit Health</span>
+                          <span className="text-[10px] font-bold text-green-500">OPTIMAL</span>
                         </div>
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">Entries Processed</span>
-                            <span className="font-mono">{recentTransactions?.length || 0}</span>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Matched Vouchers</span>
+                            <span className="font-mono text-blue-400">100%</span>
                           </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">Daily Target</span>
-                            <span className="font-mono">50</span>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Ledger Discrepancies</span>
+                            <span className="font-mono text-blue-400">0</span>
                           </div>
                         </div>
                       </div>
-                      <Button className="w-full rounded-2xl h-12 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-400/20 font-bold uppercase tracking-widest text-[10px]">
-                        Review Audit Logs
-                      </Button>
+                      <Link href="/accounting">
+                        <Button className="w-full rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-400/20 font-bold uppercase text-[10px] tracking-widest h-11">
+                          Reconcile Master Ledger
+                        </Button>
+                      </Link>
                     </CardContent>
                   </>
                 )}
               </Card>
             </div>
 
+            {/* Recent Activity Section */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Journal Activity List */}
-              <Card className="glass border-white/5 lg:col-span-2 rounded-3xl">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Card className="glass border-white/5 lg:col-span-2 rounded-[2rem]">
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <History className="h-5 w-5 text-primary" />
-                    Latest Operations
+                    Latest Transactions
                   </CardTitle>
                   <Link href="/accounting">
-                    <Button variant="outline" size="sm" className="rounded-full border-white/10 hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest h-8 px-4">
-                      Explore Ledger
+                    <Button variant="ghost" size="sm" className="rounded-full text-[10px] font-bold uppercase tracking-widest text-primary">
+                      Full History
                     </Button>
                   </Link>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {!recentTransactions?.length ? (
-                      <p className="py-12 text-center text-muted-foreground text-sm font-medium">No activity recorded for this period.</p>
+                      <p className="py-10 text-center text-muted-foreground text-sm">No recent transactions recorded.</p>
                     ) : (
                       recentTransactions.map((tx) => (
-                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 ios-transition group cursor-pointer border border-transparent hover:border-white/10">
+                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 ios-transition group border border-transparent hover:border-white/10">
                           <div className="flex items-center gap-4">
                             <div className={cn(
-                              "h-12 w-12 rounded-full flex items-center justify-center shadow-inner",
-                              tx.totalDebit > 0 ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-green-500/10 text-green-500 border border-green-500/20"
+                              "h-10 w-10 rounded-full flex items-center justify-center",
+                              tx.totalDebit > 0 ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500"
                             )}>
-                              {tx.totalDebit > 0 ? <ArrowDownRight className="h-6 w-6" /> : <ArrowUpRight className="h-6 w-6" />}
+                              {tx.totalDebit > 0 ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                             </div>
                             <div>
-                              <p className="text-sm font-bold tracking-tight">{tx.description}</p>
-                              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-medium mt-1">{tx.date}</p>
+                              <p className="text-sm font-bold">{tx.description}</p>
+                              <p className="text-[10px] text-muted-foreground font-mono">{tx.date}</p>
                             </div>
                           </div>
                           <div className="text-right">
                             <p className={cn(
-                              "text-sm font-mono font-bold tracking-tight",
+                              "text-sm font-mono font-bold",
                               tx.totalDebit > 0 ? "text-destructive" : "text-green-500"
                             )}>
                               {tx.totalDebit > 0 ? `-₹${tx.totalDebit.toLocaleString('en-IN')}` : `+₹${tx.totalCredit.toLocaleString('en-IN')}`}
                             </p>
-                            <Badge variant="outline" className="text-[8px] h-4 rounded-full border-white/10 py-0 uppercase tracking-widest font-bold mt-1 opacity-60">
-                              Verified
-                            </Badge>
                           </div>
                         </div>
                       ))
@@ -295,32 +291,18 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* System Alerts */}
-              <Card className="glass border-white/5 rounded-3xl">
+              {/* Priority Alerts */}
+              <Card className="glass border-white/5 rounded-[2rem]">
                 <CardHeader>
                   <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
-                    Priority Alerts
+                    Priority Desk
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 pt-2">
-                  <AlertItem 
-                    title="Audit Readiness" 
-                    desc="Q2 compliance documentation is now due for archival."
-                    severity="high"
-                  />
-                  {isAdmin && (
-                    <AlertItem 
-                      title="Budget Threshold" 
-                      desc="Infrastructure Project #09 has exceeded 85% of its fiscal buffer."
-                      severity="medium"
-                    />
-                  )}
-                  <AlertItem 
-                    title="Ledger Integrity" 
-                    desc="System self-check complete. All cross-division entries reconciled."
-                    severity="low"
-                  />
+                <CardContent className="space-y-4">
+                  <AlertItem title="Audit Readiness" desc="Q2 compliance docs are due for upload." severity="high" />
+                  {isAdmin && <AlertItem title="Budget Threshold" desc="Site Phase 3 has reached 80% buffer." severity="medium" />}
+                  <AlertItem title="System integrity" desc="Auto-reconciliation complete. No errors." severity="low" />
                 </CardContent>
               </Card>
             </div>
@@ -333,19 +315,16 @@ export default function Dashboard() {
   );
 }
 
-function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
+function MetricCard({ title, value, icon: Icon, trend, color, isAlert }: any) {
   return (
     <Card className={cn(
-      "glass border-white/5 hover:scale-[1.03] ios-transition relative overflow-hidden group rounded-[2rem]",
-      isAlert ? "ring-2 ring-destructive/40 bg-destructive/5" : "hover:border-primary/20"
+      "glass border-white/5 ios-transition relative overflow-hidden group rounded-3xl",
+      isAlert ? "ring-2 ring-destructive/30 bg-destructive/5" : "hover:border-white/20"
     )}>
-      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-125 ios-transition group-hover:opacity-10">
-        <Icon className="h-16 w-16" />
-      </div>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.25em]">{title}</CardTitle>
-        <div className="p-2.5 bg-primary/10 rounded-2xl border border-primary/20">
-          <Icon className="h-4 w-4 text-primary" />
+        <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{title}</CardTitle>
+        <div className="p-2 bg-white/5 rounded-xl border border-white/10 group-hover:bg-primary/20 group-hover:border-primary/30 ios-transition">
+          <Icon className={cn("h-4 w-4 text-muted-foreground", color)} />
         </div>
       </CardHeader>
       <CardContent>
@@ -353,14 +332,12 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
           {processedValue(value)}
         </div>
         <div className="flex items-center gap-2 mt-3">
-          <div className={cn(
-            "flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest",
+          <Badge variant="outline" className={cn(
+            "text-[8px] font-bold tracking-widest h-5 uppercase rounded-full border-none",
             trend === "up" ? 'bg-green-500/10 text-green-500' : trend === "down" ? 'bg-destructive/10 text-destructive' : 'bg-white/5 text-muted-foreground'
           )}>
-            {trend === "up" && <ArrowUpRight className="h-2 w-2" />}
-            {trend === "down" && <ArrowDownRight className="h-2 w-2" />}
-            {trend === "none" ? "Status: Optimal" : trend === "up" ? "Surplus" : "Deficit"}
-          </div>
+            {trend === "up" ? "+" : trend === "down" ? "-" : ""} {trend === "none" ? "Status: OK" : "Flow"}
+          </Badge>
         </div>
       </CardContent>
     </Card>
@@ -373,34 +350,30 @@ function processedValue(val: any) {
   return `₹${num.toLocaleString('en-IN')}`;
 }
 
-function DivisionRow({ name, value, color }: any) {
+function DivisionBar({ name, value, color }: any) {
   return (
-    <div className="space-y-3">
-      <div className="flex justify-between text-[11px] font-bold tracking-[0.1em] uppercase">
-        <span className="text-foreground/90">{name}</span>
-        <span className="text-primary font-mono">{value}</span>
+    <div className="space-y-2">
+      <div className="flex justify-between text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+        <span>{name}</span>
+        <span className="text-white font-mono">{value}</span>
       </div>
-      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-        <div className={cn("h-full ios-transition", color)} style={{ width: value }} />
+      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+        <div className={cn("h-full", color)} style={{ width: value }} />
       </div>
     </div>
   );
 }
 
 function AlertItem({ title, desc, severity }: any) {
-  const colors = {
-    high: "bg-destructive",
-    medium: "bg-orange-500",
-    low: "bg-green-500"
-  };
+  const colors = { high: "bg-destructive", medium: "bg-orange-500", low: "bg-green-500" };
   return (
-    <div className="flex gap-4 p-5 rounded-3xl bg-white/5 border border-white/5 group hover:border-white/20 ios-transition cursor-pointer hover:bg-white/10">
-      <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0 animate-pulse shadow-[0_0_10px]", colors[severity as keyof typeof colors])} />
-      <div className="flex-1">
-        <p className="text-sm font-bold leading-none tracking-tight">{title}</p>
-        <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed font-medium">{desc}</p>
+    <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 ios-transition group cursor-pointer">
+      <div className={cn("mt-1.5 h-2 w-2 rounded-full", colors[severity as keyof typeof colors])} />
+      <div>
+        <p className="text-sm font-bold leading-none">{title}</p>
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{desc}</p>
       </div>
-      <ChevronRight className="h-4 w-4 text-muted-foreground/30 self-center group-hover:translate-x-1 ios-transition" />
+      <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto self-center group-hover:translate-x-1 ios-transition" />
     </div>
   );
 }

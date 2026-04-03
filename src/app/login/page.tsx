@@ -11,8 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, ArrowRight, ShieldCheck, UserPlus, LogIn, UserCircle } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, UserPlus, LogIn, UserCircle, Info } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -57,22 +58,28 @@ export default function LoginPage() {
         
         toast({ 
           title: "Account Created", 
-          description: `Welcome, ${profileData.firstName}. Your ${role} session is ready.` 
+          description: `Welcome, ${profileData.firstName}. Your ${role} profile is ready.` 
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        toast({ title: "Secure Access Granted", description: "Authenticated session established." });
+        toast({ title: "Access Granted", description: "Welcome back to the Nalakath Ledger." });
       }
       router.push('/');
     } catch (error: any) {
       console.error(error);
-      const errorMessage = error.code === 'auth/email-already-in-use' 
-        ? "This email is already registered. Please sign in." 
-        : "Authentication failed. Please check your credentials.";
+      let errorMessage = "Authentication failed.";
+      
+      if (error.code === 'auth/invalid-credential') {
+        errorMessage = "Invalid credentials. If this is a new account, please click 'Register' first.";
+      } else if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "This email is already registered. Please sign in instead.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password should be at least 6 characters.";
+      }
       
       toast({
         variant: "destructive",
-        title: "Access Denied",
+        title: "Authentication Error",
         description: errorMessage,
       });
     } finally {
@@ -96,12 +103,12 @@ export default function LoginPage() {
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
           <CardHeader className="text-center pt-10">
             <CardTitle className="text-3xl font-headline font-bold tracking-tight">
-              {isRegistering ? "Create Profile" : "Ledger Access"}
+              {isRegistering ? "Registration" : "Secure Login"}
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
               {isRegistering 
-                ? "Register a new administrative or accounting user." 
-                : "Premium Financial Suite for Nalakath Holdings."}
+                ? "Create a new Admin or Accountant profile." 
+                : "Enter your credentials to access the ledger."}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-10">
@@ -112,8 +119,8 @@ export default function LoginPage() {
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">First Name</Label>
                       <Input
-                        placeholder="Jane"
-                        className="bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
+                        placeholder="e.g. Jane"
+                        className="bg-white/5 border-white/10 rounded-2xl h-12"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
@@ -122,8 +129,8 @@ export default function LoginPage() {
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Last Name</Label>
                       <Input
-                        placeholder="Doe"
-                        className="bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
+                        placeholder="e.g. Doe"
+                        className="bg-white/5 border-white/10 rounded-2xl h-12"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         required
@@ -131,14 +138,14 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Assigned Role</Label>
+                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">System Role</Label>
                     <Select onValueChange={(v: any) => setRole(v)} defaultValue="Admin">
                       <SelectTrigger className="bg-white/5 border-white/10 rounded-2xl h-12">
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent className="glass">
                         <SelectItem value="Admin">Administrator (Full Access)</SelectItem>
-                        <SelectItem value="Accountant">Accountant (Operations Only)</SelectItem>
+                        <SelectItem value="Accountant">Accountant (Operational)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -146,14 +153,14 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email Identifier</Label>
+                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="admin@nalakath.com"
-                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
+                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -162,14 +169,14 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Security Key</Label>
+                <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 focus-visible:ring-primary/30"
+                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -180,38 +187,34 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-14 rounded-2xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition group mt-4 text-lg"
+                className="w-full h-14 rounded-2xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition mt-4 text-lg"
               >
-                {loading ? "Processing..." : isRegistering ? "Create Account" : "Initialize Session"}
-                {!loading && <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 ios-transition" />}
+                {loading ? "Verifying..." : isRegistering ? "Create Profile" : "Initialize Session"}
+                {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
               </Button>
             </form>
 
-            <button
-              onClick={() => setIsRegistering(!isRegistering)}
-              className="w-full mt-6 text-[10px] uppercase tracking-[0.2em] font-bold text-primary hover:text-white ios-transition flex items-center justify-center gap-2"
-            >
-              {isRegistering ? (
-                <><LogIn className="h-3 w-3" /> Back to Sign In</>
-              ) : (
-                <><UserPlus className="h-3 w-3" /> Register Admin/Staff Account</>
-              )}
-            </button>
+            <div className="flex flex-col gap-4 mt-8">
+              <button
+                onClick={() => setIsRegistering(!isRegistering)}
+                className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary hover:text-white ios-transition flex items-center justify-center gap-2"
+              >
+                {isRegistering ? (
+                  <><LogIn className="h-3 w-3" /> Back to Sign In</>
+                ) : (
+                  <><UserPlus className="h-3 w-3" /> Need to register a new account?</>
+                )}
+              </button>
 
-            <div className="mt-8 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5">
-                <ShieldCheck className="h-3 w-3 text-primary" />
-                <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
-                  Encrypted Ledger Session
+              <div className="flex items-center gap-2 justify-center p-3 rounded-2xl bg-white/5 border border-white/10">
+                <Info className="h-3 w-3 text-primary" />
+                <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-[0.1em]">
+                  View <span className="text-primary underline cursor-pointer">Credentials Guide</span> for setup.
                 </span>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        <p className="text-center mt-10 text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em] opacity-40">
-          Nalakath Holdings @2026
-        </p>
       </div>
     </div>
   );
