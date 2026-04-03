@@ -48,9 +48,9 @@ export function Navbar() {
     <header className="sticky top-0 z-40 w-full glass border-b border-white/10 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="h-8 w-8 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="text-black font-black text-lg">N</span>
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity group">
+            <div className="h-9 w-9 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 ios-transition">
+              <span className="text-black font-black text-xl">N</span>
             </div>
             <span className="text-sm font-black tracking-tighter text-white hidden lg:block uppercase">NALAKATH HOLDINGS LEDGER</span>
           </Link>
@@ -103,8 +103,10 @@ export function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/5">
-                <User className="h-5 w-5 text-primary" />
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/5 overflow-hidden">
+                <div className="h-8 w-8 rounded-full gold-gradient flex items-center justify-center">
+                  <span className="text-black font-black text-xs">N</span>
+                </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64 glass">

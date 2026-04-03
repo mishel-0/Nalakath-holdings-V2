@@ -105,16 +105,21 @@ export default function Dashboard() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
             
             <header className="flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
-                  EXECUTIVE CONSOLE
-                </Badge>
-                <div className="flex items-center gap-1.5 text-[9px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
-                  <Activity className="h-3 w-3" /> LIVE LEDGER SYNC
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                  <span className="text-black font-black text-2xl">N</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
+                    EXECUTIVE CONSOLE
+                  </Badge>
+                  <div className="flex items-center gap-1.5 text-[9px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                    <Activity className="h-3 w-3" /> LIVE LEDGER SYNC
+                  </div>
                 </div>
               </div>
               <div className="mt-2">
-                <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase">
                   Group Dashboard
                 </h1>
                 <p className="text-muted-foreground mt-1 text-sm">
@@ -259,7 +264,6 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
       "glass border-white/5 relative overflow-hidden group rounded-[2rem] p-6 pt-8 bg-[#0a0a0a]/80",
       isAlert && "ring-1 ring-destructive/30"
     )}>
-      {/* Watermark Icon */}
       <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-white rotate-12" />
       
       <div className="flex flex-col gap-1 relative z-10">
