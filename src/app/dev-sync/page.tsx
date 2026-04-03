@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -119,7 +118,7 @@ export default function DevSyncPage() {
                   <StepItem 
                     num="02" 
                     title="Commit Changes" 
-                    desc="Run 'git commit -m \"update from studio\"' in your terminal." 
+                    desc={`Run 'git commit -m "update from studio"' in your terminal.`} 
                   />
                   <StepItem 
                     num="03" 
@@ -152,7 +151,7 @@ export default function DevSyncPage() {
                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Message</span>
                         <Badge variant="outline" className="text-[9px] uppercase border-primary/30 text-primary">Success</Badge>
                       </div>
-                      <p className="text-sm font-medium italic">"{lastSync.lastCommitMessage}"</p>
+                      <p className="text-sm font-medium italic">{`"${lastSync.lastCommitMessage}"`}</p>
                       <div className="pt-2 border-t border-white/5 flex justify-between text-[9px] text-muted-foreground font-mono">
                         <span>BY: {lastSync.syncByUserId}</span>
                         <span>{new Date(lastSync.lastSyncAt).toLocaleString()}</span>
