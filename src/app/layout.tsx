@@ -5,7 +5,7 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'NALAKATH HOLDINGS LEDGER',
+  title: 'APEX LEDGER',
   description: 'Premium iOS-style Accounting & ERP for multi-division holdings.',
 };
 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -107,7 +106,12 @@ export default function AssetsPage() {
   if (isProfileLoading || (profile && profile.role !== "Admin")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Authorizing...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-16 w-16 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
+            <span className="text-black font-black text-3xl">N</span>
+          </div>
+          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Authorizing Access...</p>
+        </div>
       </div>
     );
   }
