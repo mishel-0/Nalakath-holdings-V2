@@ -62,7 +62,7 @@ export default function LoginPage() {
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        toast({ title: "Access Granted", description: "Welcome back to the Nalakath Ledger." });
+        toast({ title: "Secure Access Granted", description: "Authenticated session established." });
       }
       router.push('/');
     } catch (error: any) {
@@ -209,7 +209,7 @@ export default function LoginPage() {
               <div className="flex items-center gap-2 justify-center p-3 rounded-2xl bg-white/5 border border-white/10">
                 <Info className="h-3 w-3 text-primary" />
                 <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-[0.1em]">
-                  View <span className="text-primary underline cursor-pointer">Credentials Guide</span> for setup.
+                  Refer to <span className="text-primary underline cursor-pointer">CREDENTIALS.md</span> for initial setup.
                 </span>
               </div>
             </div>
