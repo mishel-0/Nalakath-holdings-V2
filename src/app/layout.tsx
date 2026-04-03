@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
@@ -5,7 +6,7 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'NALAKATH HOLDINGS LEDGER',
+  title: 'NALAKATH HOLDINGS',
   description: 'Premium iOS-style Accounting & ERP for multi-division holdings.',
 };
 

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -18,8 +19,7 @@ import {
   ChevronRight,
   Activity,
   History,
-  Sparkles,
-  Target
+  Sparkles
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -106,8 +106,8 @@ export default function Dashboard() {
             
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-black font-black text-2xl">N</span>
+                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                  <span className="text-black font-black text-xl">N</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
@@ -130,9 +130,9 @@ export default function Dashboard() {
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
-              <MetricCard title="Net Operating Profit" value={stats.profit} icon={TrendingUp} trend="up" />
-              <MetricCard title="Capital Expenditure" value={stats.projectCosts} icon={Briefcase} trend="down" />
-              <MetricCard title="Action Required" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
+              <MetricCard title="Operating Profit" value={stats.profit} icon={TrendingUp} trend="up" />
+              <MetricCard title="Capital Expenses" value={stats.projectCosts} icon={Briefcase} trend="down" />
+              <MetricCard title="Priority Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
@@ -241,7 +241,7 @@ export default function Dashboard() {
                 <CardContent className="space-y-4">
                   <AlertItem title="Audit Readiness" desc="Q2 compliance docs are due for upload." severity="high" />
                   <AlertItem title="Budget Threshold" desc="Phase 3 has reached 80% buffer." severity="medium" />
-                  <AlertItem title="System Integrity" desc="Auto-reconciliation complete. No errors." severity="low" />
+                  <AlertItem title="System Integrity" desc="Auto-reconciliation complete." severity="low" />
                 </CardContent>
               </Card>
             </div>
@@ -261,7 +261,7 @@ export default function Dashboard() {
 function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
   return (
     <Card className={cn(
-      "glass border-white/5 relative overflow-hidden group rounded-[2rem] p-6 pt-8 bg-[#0a0a0a]/80",
+      "glass border-white/5 relative overflow-hidden group rounded-[2xl] p-6 pt-8 bg-[#0a0a0a]/80",
       isAlert && "ring-1 ring-destructive/30"
     )}>
       <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-white rotate-12" />
@@ -287,7 +287,7 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
           )}>
             {trend === "up" ? "GAINING" : trend === "down" ? "VARIANCE" : "STABLE"} 
           </Badge>
-          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-40">VS LAST QUARTER</span>
+          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-40">VS PREV</span>
         </div>
       </div>
     </Card>

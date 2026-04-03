@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -52,7 +53,7 @@ export function Navbar() {
             <div className="h-9 w-9 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 ios-transition">
               <span className="text-black font-black text-xl">N</span>
             </div>
-            <span className="text-sm font-black tracking-tighter text-white hidden lg:block uppercase">NALAKATH HOLDINGS LEDGER</span>
+            <span className="text-sm font-black tracking-tighter text-white hidden lg:block uppercase">NALAKATH HOLDINGS</span>
           </Link>
 
           <div className="h-6 w-px bg-white/10 hidden md:block" />
@@ -124,7 +125,7 @@ export function Navbar() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/settings" className="cursor-pointer">
-                  <Building2 className="mr-2 h-4 w-4" /> System Settings
+                  <User className="mr-2 h-4 w-4" /> System Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

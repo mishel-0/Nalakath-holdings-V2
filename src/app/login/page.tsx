@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -50,15 +51,15 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
         <div className="flex justify-center mb-10">
-          <div className="h-24 w-24 rounded-full gold-gradient flex items-center justify-center shadow-[0_0_40px_rgba(255,215,0,0.3)]">
+          <div className="h-20 w-20 rounded-full gold-gradient flex items-center justify-center shadow-[0_0_40px_rgba(255,215,0,0.3)]">
             <span className="text-black font-black text-4xl">N</span>
           </div>
         </div>
 
-        <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
+        <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2rem]">
           <CardHeader className="text-center pt-10 px-8">
-            <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
-              NALAKATH HOLDINGS ACCESS
+            <p className="text-muted-foreground text-[10px] font-bold tracking-[0.3em] uppercase">
+              NALAKATH HOLDINGS
             </p>
           </CardHeader>
           <CardContent className="p-10 pt-6">
@@ -71,7 +72,7 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     placeholder="name@nalakath.com"
-                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 text-foreground focus-visible:ring-primary/50"
+                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-foreground focus-visible:ring-primary/50"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -87,7 +88,7 @@ export default function LoginPage() {
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 text-foreground focus-visible:ring-primary/50"
+                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-foreground focus-visible:ring-primary/50"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -98,7 +99,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-14 rounded-2xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition mt-4 text-lg shadow-lg shadow-primary/20"
+                className="w-full h-14 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition mt-4 text-lg shadow-lg shadow-primary/20"
               >
                 {loading ? "Authorizing..." : "Initialize Session"}
                 {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
@@ -106,10 +107,10 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-10 border-t border-white/5 pt-6">
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
                 <Info className="h-5 w-5 text-primary shrink-0" />
                 <span className="text-[10px] text-muted-foreground font-semibold leading-tight">
-                  Encrypted environment. All sessions audited for compliance with group protocols.
+                  Encrypted environment. All sessions audited for compliance.
                 </span>
               </div>
             </div>
