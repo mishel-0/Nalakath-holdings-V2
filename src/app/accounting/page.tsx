@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -8,20 +9,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Download, Filter, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Download, Filter, CheckCircle2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { collection, query, orderBy, doc } from "firebase/firestore";
+import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function AccountingPage() {
   const db = useFirestore();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<any>(null);
   const [search, setSearch] = useState("");
   const companyId = "nalakath-holdings-main";
 
@@ -61,14 +64,40 @@ export default function AccountingPage() {
       status: "Verified",
       totalDebit: type === "Debit" ? amount : 0,
       totalCredit: type === "Credit" ? amount : 0,
-      postedByUserId: "admin",
+      postedByUserId: "user",
       createdAt: now,
       updatedAt: now,
     };
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "journalEntries"), newEntry);
     setIsAddOpen(false);
-    toast({ title: "Entry Posted", description: "Journal entry has been recorded in the general ledger." });
+    toast({ title: "Entry Posted", description: "Journal entry recorded successfully." });
+  };
+
+  const handleUpdateEntry = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingEntry) return;
+
+    const formData = new FormData(e.currentTarget);
+    const amount = Number(formData.get("amount"));
+    const type = formData.get("type");
+
+    const updatedData = {
+      date: formData.get("date") as string,
+      description: formData.get("description") as string,
+      totalDebit: type === "Debit" ? amount : 0,
+      totalCredit: type === "Credit" ? amount : 0,
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateDocumentNonBlocking(doc(db, "companies", companyId, "journalEntries", editingEntry.id), updatedData);
+    setEditingEntry(null);
+    toast({ title: "Entry Updated", description: "Ledger entry updated successfully." });
+  };
+
+  const handleDeleteEntry = (id: string) => {
+    deleteDocumentNonBlocking(doc(db, "companies", companyId, "journalEntries", id));
+    toast({ variant: "destructive", title: "Entry Deleted", description: "Ledger entry removed." });
   };
 
   return (
@@ -85,7 +114,7 @@ export default function AccountingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5">
-                  <Download className="h-4 w-4" /> Export Ledger
+                  <Download className="h-4 w-4" /> Export
                 </Button>
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
@@ -100,18 +129,18 @@ export default function AccountingPage() {
                     <form onSubmit={handleAddEntry} className="space-y-4 py-4">
                       <div className="grid gap-2">
                         <Label htmlFor="description">Transaction Details</Label>
-                        <Input id="description" name="description" placeholder="e.g. Office Rent Payment" required className="bg-white/5 rounded-xl border-white/10" />
+                        <Input id="description" name="description" required className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                           <Label htmlFor="amount">Amount (₹)</Label>
-                          <Input id="amount" name="amount" type="number" required className="bg-white/5 rounded-xl border-white/10" />
+                          <Input id="amount" name="amount" type="number" required className="bg-white/5 border-white/10 rounded-xl" />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="type">Transaction Type</Label>
+                          <Label htmlFor="type">Type</Label>
                           <Select name="type" defaultValue="Debit">
-                            <SelectTrigger className="bg-white/5 rounded-xl border-white/10">
-                              <SelectValue placeholder="Select type" />
+                            <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
+                              <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="glass">
                               <SelectItem value="Debit">Debit (+)</SelectItem>
@@ -121,11 +150,11 @@ export default function AccountingPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="date">Posting Date</Label>
-                        <Input id="date" name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="bg-white/5 rounded-xl border-white/10" />
+                        <Label htmlFor="date">Date</Label>
+                        <Input id="date" name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <DialogFooter>
-                        <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Post to Ledger</Button>
+                        <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Post Entry</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -133,7 +162,6 @@ export default function AccountingPage() {
               </div>
             </header>
 
-            {/* Account Summary Cards */}
             <div className="grid gap-4 sm:grid-cols-3">
               <SummaryCard title="Total Debits" value={totals.debit} color="text-foreground" />
               <SummaryCard title="Total Credits" value={totals.credit} color="text-primary" />
@@ -142,19 +170,14 @@ export default function AccountingPage() {
 
             <Card className="glass border-white/5 overflow-hidden">
               <CardHeader className="border-b border-white/5 bg-white/5 px-6 py-4">
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="Search transactions..." 
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="pl-9 h-10 rounded-full border-white/10 bg-white/5 focus-visible:ring-primary/30" 
-                    />
-                  </div>
-                  <Button variant="ghost" size="sm" className="rounded-full gap-2 text-xs">
-                    <Filter className="h-3 w-3" /> Filters
-                  </Button>
+                <div className="relative w-full md:w-96">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search ledger..." 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 h-10 rounded-full border-white/10 bg-white/5" 
+                  />
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -165,14 +188,14 @@ export default function AccountingPage() {
                       <TableHead className="uppercase tracking-widest text-[10px] font-bold">Description</TableHead>
                       <TableHead className="text-right uppercase tracking-widest text-[10px] font-bold">Debit (₹)</TableHead>
                       <TableHead className="text-right uppercase tracking-widest text-[10px] font-bold">Credit (₹)</TableHead>
-                      <TableHead className="text-center uppercase tracking-widest text-[10px] font-bold">Status</TableHead>
+                      <TableHead className="w-16"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono tracking-widest">SYNCING LEDGER...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono tracking-widest">SYNCING...</TableCell></TableRow>
                     ) : filteredEntries.length === 0 ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground">No ledger entries found.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground">No entries found.</TableCell></TableRow>
                     ) : (
                       filteredEntries.map((tx) => (
                         <TableRow key={tx.id} className="border-white/5 hover:bg-white/5 ios-transition group">
@@ -189,10 +212,22 @@ export default function AccountingPage() {
                           <TableCell className="text-right font-mono font-medium text-green-500">
                             {tx.totalCredit > 0 ? `₹${tx.totalCredit.toLocaleString('en-IN')}` : "-"}
                           </TableCell>
-                          <TableCell className="text-center">
-                            <Badge className="rounded-full text-[9px] bg-primary/10 text-primary border-primary/20 px-2 py-0 h-5" variant="outline">
-                              {tx.status}
-                            </Badge>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="glass">
+                                <DropdownMenuItem onClick={() => setEditingEntry(tx)} className="text-xs cursor-pointer">
+                                  <Pencil className="h-3 w-3 mr-2" /> Edit Entry
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteEntry(tx.id)} className="text-xs text-destructive cursor-pointer">
+                                  <Trash2 className="h-3 w-3 mr-2" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       ))
@@ -204,6 +239,48 @@ export default function AccountingPage() {
           </div>
         </main>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingEntry} onOpenChange={(open) => !open && setEditingEntry(null)}>
+        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Journal Entry</DialogTitle>
+          </DialogHeader>
+          {editingEntry && (
+            <form onSubmit={handleUpdateEntry} className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Input id="edit-description" name="description" defaultValue={editingEntry.description} required className="bg-white/5 border-white/10 rounded-xl" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-amount">Amount (₹)</Label>
+                  <Input id="edit-amount" name="amount" type="number" defaultValue={editingEntry.totalDebit || editingEntry.totalCredit} required className="bg-white/5 border-white/10 rounded-xl" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-type">Type</Label>
+                  <Select name="type" defaultValue={editingEntry.totalDebit > 0 ? "Debit" : "Credit"}>
+                    <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="glass">
+                      <SelectItem value="Debit">Debit (+)</SelectItem>
+                      <SelectItem value="Credit">Credit (-)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-date">Date</Label>
+                <Input id="edit-date" name="date" type="date" defaultValue={editingEntry.date} required className="bg-white/5 border-white/10 rounded-xl" />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Update Entry</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       <BottomNav />
     </div>
   );

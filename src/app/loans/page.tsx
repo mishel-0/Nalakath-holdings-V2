@@ -8,15 +8,16 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Landmark, TrendingUp, Calendar } from "lucide-react";
+import { Plus, Landmark, TrendingUp, Calendar, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function LoansPage() {
   const db = useFirestore();
@@ -24,6 +25,7 @@ export default function LoansPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingLoan, setEditingLoan] = useState<any>(null);
   const companyId = "nalakath-holdings-main";
 
   const profileDocRef = useMemoFirebase(() => {
@@ -50,14 +52,6 @@ export default function LoansPage() {
 
   const { data: loans, isLoading } = useCollection(loansQuery);
 
-  if (isProfileLoading || (profile && profile.role !== "Admin")) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Checking Permissions...</div>
-      </div>
-    );
-  }
-
   const handleAddLoan = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -80,7 +74,40 @@ export default function LoansPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "loans"), newLoan);
     setIsAddOpen(false);
+    toast({ title: "Loan Recorded", description: `Added liability for ${newLoan.lenderName}.` });
   };
+
+  const handleUpdateLoan = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingLoan) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updatedData = {
+      lenderName: formData.get("lender") as string,
+      loanType: formData.get("type") as string,
+      principalAmount: Number(formData.get("amount")),
+      interestRate: Number(formData.get("rate")) / 100,
+      outstandingBalance: Number(formData.get("balance")),
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateDocumentNonBlocking(doc(db, "companies", companyId, "loans", editingLoan.id), updatedData);
+    setEditingLoan(null);
+    toast({ title: "Loan Updated", description: "Liability details modified." });
+  };
+
+  const handleDeleteLoan = (id: string) => {
+    deleteDocumentNonBlocking(doc(db, "companies", companyId, "loans", id));
+    toast({ variant: "destructive", title: "Loan Deleted", description: "Liability removed from records." });
+  };
+
+  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Checking Permissions...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -107,11 +134,11 @@ export default function LoansPage() {
                   <form onSubmit={handleAddLoan} className="space-y-4 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="lender">Lender Name</Label>
-                      <Input id="lender" name="lender" placeholder="HDFC Bank, SBI, etc." required />
+                      <Input id="lender" name="lender" required />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="type">Loan Type</Label>
-                      <Input id="type" name="type" placeholder="Commercial Loan, Line of Credit" required />
+                      <Input id="type" name="type" required />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
@@ -150,8 +177,25 @@ export default function LoansPage() {
                 </Card>
               ) : (
                 loans?.map((loan) => (
-                  <Card key={loan.id} className="glass border-white/5 overflow-hidden">
-                    <CardHeader className="flex flex-row items-center justify-between">
+                  <Card key={loan.id} className="glass border-white/5 overflow-hidden relative">
+                    <div className="absolute top-4 right-4 z-10">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/10">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="glass">
+                          <DropdownMenuItem onClick={() => setEditingLoan(loan)} className="text-xs cursor-pointer">
+                            <Pencil className="h-3 w-3 mr-2" /> Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteLoan(loan.id)} className="text-xs text-destructive cursor-pointer">
+                            <Trash2 className="h-3 w-3 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <CardHeader className="flex flex-row items-center justify-between pr-12">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-xl">
                           <Landmark className="h-5 w-5 text-primary" />
@@ -161,7 +205,7 @@ export default function LoansPage() {
                           <p className="text-xs text-muted-foreground">{loan.loanType}</p>
                         </div>
                       </div>
-                      <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20">{loan.interestRate * 100}% APR</Badge>
+                      <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20">{(loan.interestRate * 100).toFixed(1)}% APR</Badge>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
@@ -170,16 +214,16 @@ export default function LoansPage() {
                           <p className="text-2xl font-bold font-mono">₹{loan.outstandingBalance?.toLocaleString('en-IN')}</p>
                         </div>
                         <div className="space-y-1 text-right">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Principal Amount</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Principal</p>
                           <p className="text-lg font-semibold text-muted-foreground">₹{loan.principalAmount?.toLocaleString('en-IN')}</p>
                         </div>
                       </div>
                       <div className="flex justify-between text-sm">
                         <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Calendar className="h-4 w-4" /> Maturity: {loan.maturityDate}
+                          <Calendar className="h-4 w-4" /> {loan.maturityDate}
                         </div>
                         <div className="flex items-center gap-1.5 text-green-500 font-medium">
-                          <TrendingUp className="h-4 w-4" /> Next Payment: ₹{(loan.principalAmount / 60).toFixed(0)}
+                          <TrendingUp className="h-4 w-4" /> Flow Optimal
                         </div>
                       </div>
                     </CardContent>
@@ -190,6 +234,43 @@ export default function LoansPage() {
           </div>
         </main>
       </div>
+
+      <Dialog open={!!editingLoan} onOpenChange={(open) => !open && setEditingLoan(null)}>
+        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Loan Details</DialogTitle>
+          </DialogHeader>
+          {editingLoan && (
+            <form onSubmit={handleUpdateLoan} className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-l-lender">Lender Name</Label>
+                <Input id="edit-l-lender" name="lender" defaultValue={editingLoan.lenderName} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-l-type">Loan Type</Label>
+                <Input id="edit-l-type" name="type" defaultValue={editingLoan.loanType} required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-l-amount">Principal (₹)</Label>
+                  <Input id="edit-l-amount" name="amount" type="number" defaultValue={editingLoan.principalAmount} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-l-rate">Interest Rate (%)</Label>
+                  <Input id="edit-l-rate" name="rate" type="number" step="0.01" defaultValue={editingLoan.interestRate * 100} required />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-l-balance">Outstanding Balance (₹)</Label>
+                <Input id="edit-l-balance" name="balance" type="number" defaultValue={editingLoan.outstandingBalance} required />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full text-black">Update Loan</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       <BottomNav />
     </div>
   );

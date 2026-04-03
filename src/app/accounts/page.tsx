@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -8,16 +9,17 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ListTree, PieChart, Wallet, CreditCard, Banknote, Landmark } from "lucide-react";
+import { Plus, Search, ListTree, PieChart, Wallet, CreditCard, Banknote, Landmark, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { collection, query, orderBy, doc } from "firebase/firestore";
+import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const accountTypeStyles: Record<string, { color: string, icon: any }> = {
   Asset: { color: "text-blue-400 border-blue-400/20 bg-blue-400/10", icon: Wallet },
@@ -31,6 +33,7 @@ export default function ChartOfAccountsPage() {
   const db = useFirestore();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
   const [search, setSearch] = useState("");
   const companyId = "nalakath-holdings-main";
 
@@ -70,6 +73,29 @@ export default function ChartOfAccountsPage() {
     toast({ title: "Account Created", description: `Added ${newAccount.name} to COA.` });
   };
 
+  const handleUpdateAccount = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingAccount) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updatedData = {
+      name: formData.get("name") as string,
+      accountNumber: formData.get("accountNumber") as string,
+      description: formData.get("description") as string,
+      chartOfAccountTypeId: formData.get("type") as string,
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateDocumentNonBlocking(doc(db, "companies", companyId, "accounts", editingAccount.id), updatedData);
+    setEditingAccount(null);
+    toast({ title: "Account Updated", description: "Account record modified." });
+  };
+
+  const handleDeleteAccount = (id: string) => {
+    deleteDocumentNonBlocking(doc(db, "companies", companyId, "accounts", id));
+    toast({ variant: "destructive", title: "Account Deleted", description: "Record removed from COA." });
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -99,7 +125,7 @@ export default function ChartOfAccountsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="accountNumber">Account #</Label>
-                        <Input id="accountNumber" name="accountNumber" placeholder="1010" required className="bg-white/5 border-white/10 rounded-xl h-11" />
+                        <Input id="accountNumber" name="accountNumber" required className="bg-white/5 border-white/10 rounded-xl h-11" />
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="type">Account Type</Label>
@@ -119,11 +145,11 @@ export default function ChartOfAccountsPage() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="name">Account Name</Label>
-                      <Input id="name" name="name" placeholder="Cash on Hand" required className="bg-white/5 border-white/10 rounded-xl h-11" />
+                      <Input id="name" name="name" required className="bg-white/5 border-white/10 rounded-xl h-11" />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="description">Description</Label>
-                      <Input id="description" name="description" placeholder="Short description of account use" className="bg-white/5 border-white/10 rounded-xl h-11" />
+                      <Input id="description" name="description" className="bg-white/5 border-white/10 rounded-xl h-11" />
                     </div>
                     <DialogFooter>
                       <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl mt-2">Create Account</Button>
@@ -138,10 +164,10 @@ export default function ChartOfAccountsPage() {
                 <div className="relative w-full md:w-96">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input 
-                    placeholder="Search accounts by name or code..." 
+                    placeholder="Search accounts..." 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 h-10 rounded-full border-white/10 bg-white/5 focus-visible:ring-primary/30" 
+                    className="pl-9 h-10 rounded-full border-white/10 bg-white/5" 
                   />
                 </div>
               </CardHeader>
@@ -153,13 +179,14 @@ export default function ChartOfAccountsPage() {
                       <TableHead className="uppercase tracking-[0.2em] text-[10px] font-bold">Account Name</TableHead>
                       <TableHead className="uppercase tracking-[0.2em] text-[10px] font-bold">Type</TableHead>
                       <TableHead className="text-right uppercase tracking-[0.2em] text-[10px] font-bold px-6">Balance (₹)</TableHead>
+                      <TableHead className="w-16"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs tracking-widest uppercase">Syncing Master Data...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs tracking-widest uppercase">Syncing...</TableCell></TableRow>
                     ) : filteredAccounts.length === 0 ? (
-                      <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-medium">No accounts registered in Chart of Accounts.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-medium">No accounts found.</TableCell></TableRow>
                     ) : (
                       filteredAccounts.map((account) => {
                         const style = accountTypeStyles[account.chartOfAccountTypeId as keyof typeof accountTypeStyles] || { color: "text-muted-foreground", icon: ListTree };
@@ -170,7 +197,7 @@ export default function ChartOfAccountsPage() {
                             <TableCell>
                               <div className="flex flex-col">
                                 <span className="font-semibold text-sm">{account.name}</span>
-                                <span className="text-[10px] text-muted-foreground truncate max-w-[200px]">{account.description || "No description provided"}</span>
+                                <span className="text-[10px] text-muted-foreground truncate max-w-[200px]">{account.description}</span>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -181,6 +208,23 @@ export default function ChartOfAccountsPage() {
                             </TableCell>
                             <TableCell className="text-right font-mono font-bold text-sm px-6">
                               ₹{account.balance?.toLocaleString('en-IN')}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="glass">
+                                  <DropdownMenuItem onClick={() => setEditingAccount(account)} className="text-xs cursor-pointer">
+                                    <Pencil className="h-3 w-3 mr-2" /> Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDeleteAccount(account.id)} className="text-xs text-destructive cursor-pointer">
+                                    <Trash2 className="h-3 w-3 mr-2" /> Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </TableCell>
                           </TableRow>
                         );
@@ -193,6 +237,50 @@ export default function ChartOfAccountsPage() {
           </div>
         </main>
       </div>
+
+      <Dialog open={!!editingAccount} onOpenChange={(open) => !open && setEditingAccount(null)}>
+        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit COA Account</DialogTitle>
+          </DialogHeader>
+          {editingAccount && (
+            <form onSubmit={handleUpdateAccount} className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-accountNumber">Account #</Label>
+                  <Input id="edit-accountNumber" name="accountNumber" defaultValue={editingAccount.accountNumber} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-type">Account Type</Label>
+                  <Select name="type" defaultValue={editingAccount.chartOfAccountTypeId}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="glass">
+                      <SelectItem value="Asset">Asset</SelectItem>
+                      <SelectItem value="Liability">Liability</SelectItem>
+                      <SelectItem value="Equity">Equity</SelectItem>
+                      <SelectItem value="Income">Income</SelectItem>
+                      <SelectItem value="Expense">Expense</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-name">Account Name</Label>
+                <Input id="edit-name" name="name" defaultValue={editingAccount.name} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Input id="edit-description" name="description" defaultValue={editingAccount.description} />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl mt-2">Update Account</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       <BottomNav />
     </div>
   );

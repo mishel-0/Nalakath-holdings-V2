@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -9,17 +9,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Receipt } from "lucide-react";
+import { Plus, Search, Receipt, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { collection, query, orderBy, doc } from "firebase/firestore";
+import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function ExpensesPage() {
   const db = useFirestore();
+  const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
   const companyId = "nalakath-holdings-main";
 
   const expensesQuery = useMemoFirebase(() => {
@@ -47,6 +51,30 @@ export default function ExpensesPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "expenses"), newExpense);
     setIsAddOpen(false);
+    toast({ title: "Expense Saved", description: "Expense record created." });
+  };
+
+  const handleUpdateExpense = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingExpense) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updatedData = {
+      expenseDate: formData.get("date") as string,
+      description: formData.get("description") as string,
+      amount: Number(formData.get("amount")),
+      expenseCategory: formData.get("category") as string,
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateDocumentNonBlocking(doc(db, "companies", companyId, "expenses", editingExpense.id), updatedData);
+    setEditingExpense(null);
+    toast({ title: "Expense Updated", description: "Expense record modified." });
+  };
+
+  const handleDeleteExpense = (id: string) => {
+    deleteDocumentNonBlocking(doc(db, "companies", companyId, "expenses", id));
+    toast({ variant: "destructive", title: "Expense Deleted", description: "Record removed." });
   };
 
   return (
@@ -74,11 +102,11 @@ export default function ExpensesPage() {
                   <form onSubmit={handleAddExpense} className="space-y-4 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="description">Description</Label>
-                      <Input id="description" name="description" placeholder="Office Rent, Supplies, etc." required />
+                      <Input id="description" name="description" required />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="category">Category</Label>
-                      <Input id="category" name="category" placeholder="Utilities, Travel, Payroll" required />
+                      <Input id="category" name="category" required />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="amount">Amount (₹)</Label>
@@ -100,7 +128,7 @@ export default function ExpensesPage() {
               <CardHeader className="border-b border-white/5 bg-white/5">
                 <div className="relative w-full md:w-96">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Filter by description..." className="pl-9 h-10 rounded-full border-white/10 bg-white/5" />
+                  <Input placeholder="Filter expenses..." className="pl-9 h-10 rounded-full border-white/10 bg-white/5" />
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -111,13 +139,14 @@ export default function ExpensesPage() {
                       <TableHead>Description</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead className="text-right">Amount (₹)</TableHead>
+                      <TableHead className="w-16"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
                     ) : expenses?.length === 0 ? (
-                      <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">No expenses recorded.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No expenses recorded.</TableCell></TableRow>
                     ) : (
                       expenses?.map((exp) => (
                         <TableRow key={exp.id} className="border-white/5 hover:bg-white/5">
@@ -132,6 +161,23 @@ export default function ExpensesPage() {
                           <TableCell className="text-right font-mono font-bold text-destructive">
                             ₹{exp.amount?.toLocaleString('en-IN')}
                           </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="glass">
+                                <DropdownMenuItem onClick={() => setEditingExpense(exp)} className="text-xs cursor-pointer">
+                                  <Pencil className="h-3 w-3 mr-2" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteExpense(exp.id)} className="text-xs text-destructive cursor-pointer">
+                                  <Trash2 className="h-3 w-3 mr-2" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -142,6 +188,37 @@ export default function ExpensesPage() {
           </div>
         </main>
       </div>
+
+      <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
+        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Expense</DialogTitle>
+          </DialogHeader>
+          {editingExpense && (
+            <form onSubmit={handleUpdateExpense} className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-exp-description">Description</Label>
+                <Input id="edit-exp-description" name="description" defaultValue={editingExpense.description} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-exp-category">Category</Label>
+                <Input id="edit-exp-category" name="category" defaultValue={editingExpense.expenseCategory} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-exp-amount">Amount (₹)</Label>
+                <Input id="edit-exp-amount" name="amount" type="number" step="0.01" defaultValue={editingExpense.amount} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-exp-date">Expense Date</Label>
+                <Input id="edit-exp-date" name="date" type="date" defaultValue={editingExpense.expenseDate} required />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full text-black">Update Expense</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       <BottomNav />
     </div>
   );

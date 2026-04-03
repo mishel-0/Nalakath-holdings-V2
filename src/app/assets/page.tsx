@@ -8,15 +8,16 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Layers, MapPin, Calendar } from "lucide-react";
+import { Plus, Layers, MapPin, Calendar, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function AssetsPage() {
   const db = useFirestore();
@@ -24,6 +25,7 @@ export default function AssetsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<any>(null);
   const companyId = "nalakath-holdings-main";
 
   const profileDocRef = useMemoFirebase(() => {
@@ -50,14 +52,6 @@ export default function AssetsPage() {
 
   const { data: assets, isLoading } = useCollection(assetsQuery);
 
-  if (isProfileLoading || (profile && profile.role !== "Admin")) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Authorizing...</div>
-      </div>
-    );
-  }
-
   const handleAddAsset = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -83,7 +77,40 @@ export default function AssetsPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "assets"), newAsset);
     setIsAddOpen(false);
+    toast({ title: "Asset Registered", description: `Added ${newAsset.name} to asset ledger.` });
   };
+
+  const handleUpdateAsset = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingAsset) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updatedData = {
+      name: formData.get("name") as string,
+      assetType: formData.get("type") as string,
+      purchasePrice: Number(formData.get("price")),
+      location: formData.get("location") as string,
+      currentBookValue: Number(formData.get("bookValue")),
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateDocumentNonBlocking(doc(db, "companies", companyId, "assets", editingAsset.id), updatedData);
+    setEditingAsset(null);
+    toast({ title: "Asset Updated", description: "Asset records modified successfully." });
+  };
+
+  const handleDeleteAsset = (id: string) => {
+    deleteDocumentNonBlocking(doc(db, "companies", companyId, "assets", id));
+    toast({ variant: "destructive", title: "Asset Removed", description: "Asset deleted from group inventory." });
+  };
+
+  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Authorizing...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -110,11 +137,11 @@ export default function AssetsPage() {
                   <form onSubmit={handleAddAsset} className="space-y-4 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="name">Asset Name</Label>
-                      <Input id="name" name="name" placeholder="Construction Crane, Office Building, etc." required />
+                      <Input id="name" name="name" required />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="type">Asset Type</Label>
-                      <Input id="type" name="type" placeholder="Machinery, Real Estate, Vehicle" required />
+                      <Input id="type" name="type" placeholder="Machinery, Real Estate, etc." required />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="price">Purchase Price (₹)</Label>
@@ -122,7 +149,7 @@ export default function AssetsPage() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="location">Location</Label>
-                      <Input id="location" name="location" placeholder="Site Alpha, HQ, etc." required />
+                      <Input id="location" name="location" required />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="purchaseDate">Purchase Date</Label>
@@ -141,11 +168,28 @@ export default function AssetsPage() {
                 <p className="text-muted-foreground">Loading assets...</p>
               ) : assets?.length === 0 ? (
                 <Card className="glass border-white/5 col-span-full py-12 text-center">
-                  <p className="text-muted-foreground">No assets found. Start by adding one.</p>
+                  <p className="text-muted-foreground">No assets found.</p>
                 </Card>
               ) : (
                 assets?.map((asset) => (
-                  <Card key={asset.id} className="glass border-white/5 hover:scale-[1.02] ios-transition">
+                  <Card key={asset.id} className="glass border-white/5 hover:scale-[1.02] ios-transition relative">
+                    <div className="absolute top-4 right-4 z-10">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/10">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="glass">
+                          <DropdownMenuItem onClick={() => setEditingAsset(asset)} className="text-xs cursor-pointer">
+                            <Pencil className="h-3 w-3 mr-2" /> Edit Asset
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteAsset(asset.id)} className="text-xs text-destructive cursor-pointer">
+                            <Trash2 className="h-3 w-3 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div className="p-3 bg-primary/10 rounded-2xl">
@@ -176,6 +220,43 @@ export default function AssetsPage() {
           </div>
         </main>
       </div>
+
+      <Dialog open={!!editingAsset} onOpenChange={(open) => !open && setEditingAsset(null)}>
+        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Asset</DialogTitle>
+          </DialogHeader>
+          {editingAsset && (
+            <form onSubmit={handleUpdateAsset} className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-a-name">Asset Name</Label>
+                <Input id="edit-a-name" name="name" defaultValue={editingAsset.name} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-a-type">Asset Type</Label>
+                <Input id="edit-a-type" name="type" defaultValue={editingAsset.assetType} required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-a-price">Purchase Price (₹)</Label>
+                  <Input id="edit-a-price" name="price" type="number" defaultValue={editingAsset.purchasePrice} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-a-book">Current Book Value (₹)</Label>
+                  <Input id="edit-a-book" name="bookValue" type="number" defaultValue={editingAsset.currentBookValue} required />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-a-location">Location</Label>
+                <Input id="edit-a-location" name="location" defaultValue={editingAsset.location} required />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full text-black">Update Asset</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       <BottomNav />
     </div>
   );

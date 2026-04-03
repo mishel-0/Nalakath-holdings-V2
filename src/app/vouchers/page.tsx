@@ -9,14 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Upload, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Upload, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -28,6 +28,7 @@ export default function VouchersPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingVoucher, setEditingVoucher] = useState<any>(null);
   const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const companyId = "nalakath-holdings-main";
@@ -73,14 +74,6 @@ export default function VouchersPage() {
     }), { total: 0, pending: 0, paid: 0 });
   }, [vouchers]);
 
-  if (isProfileLoading || (profile && profile.role !== "Admin")) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Authorizing...</div>
-      </div>
-    );
-  }
-
   const handleAddVoucher = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -103,6 +96,40 @@ export default function VouchersPage() {
     setIsAddOpen(false);
     toast({ title: "Voucher Created", description: `Recorded for ${newVoucher.vendorName}` });
   };
+
+  const handleUpdateVoucher = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingVoucher) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updatedData = {
+      voucherNumber: formData.get("voucherNumber") as string,
+      division: formData.get("division") as string,
+      vendorName: formData.get("vendorName") as string,
+      date: formData.get("date") as string,
+      amount: Number(formData.get("amount")),
+      paymentMethod: formData.get("paymentMethod") as string,
+      status: formData.get("status") as string,
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateDocumentNonBlocking(doc(db, "companies", companyId, "vouchers", editingVoucher.id), updatedData);
+    setEditingVoucher(null);
+    toast({ title: "Voucher Updated", description: "Payment voucher modified successfully." });
+  };
+
+  const handleDeleteVoucher = (id: string) => {
+    deleteDocumentNonBlocking(doc(db, "companies", companyId, "vouchers", id));
+    toast({ variant: "destructive", title: "Voucher Deleted", description: "Record removed." });
+  };
+
+  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Authorizing...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -135,7 +162,7 @@ export default function VouchersPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                           <Label htmlFor="voucherNumber">Voucher ID</Label>
-                          <Input id="voucherNumber" name="voucherNumber" placeholder="PV-1001" required className="bg-white/5 border-white/10 rounded-xl" />
+                          <Input id="voucherNumber" name="voucherNumber" required className="bg-white/5 border-white/10 rounded-xl" />
                         </div>
                         <div className="grid gap-2">
                           <Label htmlFor="status">Initial Status</Label>
@@ -151,7 +178,7 @@ export default function VouchersPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="division">Division / Cost Center</Label>
+                        <Label htmlFor="division">Division</Label>
                         <Select name="division" defaultValue="Nalakath Construction">
                           <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
                             <SelectValue />
@@ -164,8 +191,8 @@ export default function VouchersPage() {
                         </Select>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="vendorName">Vendor / Supplier</Label>
-                        <Input id="vendorName" name="vendorName" placeholder="Acme Ltd." required className="bg-white/5 border-white/10 rounded-xl" />
+                        <Label htmlFor="vendorName">Vendor</Label>
+                        <Input id="vendorName" name="vendorName" required className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
@@ -173,7 +200,7 @@ export default function VouchersPage() {
                           <Input id="amount" name="amount" type="number" step="0.01" required className="bg-white/5 border-white/10 rounded-xl" />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="paymentMethod">Payment Method</Label>
+                          <Label htmlFor="paymentMethod">Method</Label>
                           <Select name="paymentMethod" defaultValue="Bank Transfer">
                             <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
                               <SelectValue />
@@ -187,7 +214,7 @@ export default function VouchersPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="date">Transaction Date</Label>
+                        <Label htmlFor="date">Date</Label>
                         <Input id="date" name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <DialogFooter>
@@ -213,7 +240,7 @@ export default function VouchersPage() {
                     placeholder="Search vouchers..." 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 h-10 rounded-full border-white/10 bg-white/5 focus-visible:ring-primary/30" 
+                    className="pl-9 h-10 rounded-full border-white/10 bg-white/5" 
                   />
                 </div>
               </CardHeader>
@@ -231,7 +258,7 @@ export default function VouchersPage() {
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs uppercase tracking-widest">Loading records...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs uppercase tracking-widest">Loading...</TableCell></TableRow>
                     ) : filteredVouchers.length === 0 ? (
                       <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground">No vouchers registered.</TableCell></TableRow>
                     ) : (
@@ -263,9 +290,12 @@ export default function VouchersPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="glass">
-                                <DropdownMenuItem className="text-xs">Mark as Paid</DropdownMenuItem>
-                                <DropdownMenuItem className="text-xs">View Proof</DropdownMenuItem>
-                                <DropdownMenuItem className="text-xs text-destructive">Archive</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEditingVoucher(v)} className="text-xs cursor-pointer">
+                                  <Pencil className="h-3 w-3 mr-2" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteVoucher(v.id)} className="text-xs text-destructive cursor-pointer">
+                                  <Trash2 className="h-3 w-3 mr-2" /> Delete
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -279,6 +309,79 @@ export default function VouchersPage() {
           </div>
         </main>
       </div>
+
+      <Dialog open={!!editingVoucher} onOpenChange={(open) => !open && setEditingVoucher(null)}>
+        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Payment Voucher</DialogTitle>
+          </DialogHeader>
+          {editingVoucher && (
+            <form onSubmit={handleUpdateVoucher} className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-v-number">Voucher ID</Label>
+                  <Input id="edit-v-number" name="voucherNumber" defaultValue={editingVoucher.voucherNumber} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-v-status">Status</Label>
+                  <Select name="status" defaultValue={editingVoucher.status}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="glass">
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-v-division">Division</Label>
+                <Select name="division" defaultValue={editingVoucher.division}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="glass">
+                    <SelectItem value="Nalakath Construction">Nalakath Construction</SelectItem>
+                    <SelectItem value="Green Villa">Green Villa</SelectItem>
+                    <SelectItem value="Oval Palace Resort">Oval Palace Resort</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-v-vendor">Vendor</Label>
+                <Input id="edit-v-vendor" name="vendorName" defaultValue={editingVoucher.vendorName} required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-v-amount">Amount (₹)</Label>
+                  <Input id="edit-v-amount" name="amount" type="number" step="0.01" defaultValue={editingVoucher.amount} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-v-method">Method</Label>
+                  <Select name="paymentMethod" defaultValue={editingVoucher.paymentMethod}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="glass">
+                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                      <SelectItem value="Cheque">Cheque</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-v-date">Date</Label>
+                <Input id="edit-v-date" name="date" type="date" defaultValue={editingVoucher.date} required />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Update Voucher</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       <BottomNav />
     </div>
   );
