@@ -18,7 +18,8 @@ import {
   ChevronRight,
   Activity,
   History,
-  Sparkles
+  Sparkles,
+  Target
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -105,9 +106,6 @@ export default function Dashboard() {
             
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-black font-black text-xl">N</span>
-                </div>
                 <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
                   EXECUTIVE CONSOLE
                 </Badge>
@@ -116,11 +114,11 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="mt-2">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">
+                <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
                   Group Dashboard
                 </h1>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Strategic financial management for the Group Portfolio.
+                  Strategic financial management for Nalakath Holdings.
                 </p>
               </div>
             </header>
@@ -133,7 +131,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
-              <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-[2.5rem]">
+              <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-[2rem] bg-[#0a0a0a]/80">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
                     <CardTitle className="text-xl font-bold">
@@ -141,9 +139,9 @@ export default function Dashboard() {
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs operating costs</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-primary text-[10px] font-bold uppercase tracking-widest">
-                    ANALYTICS <ChevronRight className="h-3 w-3 ml-1" />
-                  </Button>
+                  <div className="flex items-center gap-1 text-primary font-bold text-[10px] uppercase tracking-widest cursor-pointer hover:opacity-70 transition-opacity">
+                    ANALYTICS <ChevronRight className="h-3 w-3" />
+                  </div>
                 </CardHeader>
                 <CardContent className="h-[300px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
@@ -165,30 +163,24 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-3 glass border-white/5 rounded-[2.5rem] overflow-hidden border-primary/10">
+              <Card className="lg:col-span-3 glass border-white/5 rounded-[2rem] overflow-hidden bg-[#0a0a0a]/80">
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Portfolio Breakdown
+                    Division Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="NALAKATH HOLDINGS" value="10%" color="bg-zinc-400" />
-                  <DivisionBar name="GREEN VILLA" value="30%" color="bg-accent" />
-                  <DivisionBar name="OVAL PALACE RESORT" value="25%" color="bg-zinc-600" />
-                  <DivisionBar name="NALAKATH CONSTRUCTION" value="35%" color="gold-gradient" />
-                  <div className="pt-6 border-t border-white/5 mt-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
-                    <p className="text-xs text-muted-foreground italic leading-relaxed">
-                      "Consolidated performance is meeting quarterly targets. Construction variance is within tolerance."
-                    </p>
-                  </div>
+                  <DivisionBar name="CONSTRUCTION INFRA" value="35%" color="gold-gradient" />
+                  <DivisionBar name="HOSPITALITY" value="25%" color="bg-zinc-600" />
+                  <DivisionBar name="REAL ESTATE" value="30%" color="bg-accent" />
+                  <DivisionBar name="GROUP HQ" value="10%" color="bg-zinc-400" />
                 </CardContent>
               </Card>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="glass border-white/5 lg:col-span-2 rounded-[2.5rem]">
+              <Card className="glass border-white/5 lg:col-span-2 rounded-[2rem] bg-[#0a0a0a]/80">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-xl font-bold flex items-center gap-2 text-white">
                     <History className="h-5 w-5 text-primary" />
@@ -234,7 +226,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="glass border-white/5 rounded-[2.5rem]">
+              <Card className="glass border-white/5 rounded-[2rem] bg-[#0a0a0a]/80">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
@@ -261,30 +253,37 @@ export default function Dashboard() {
   );
 }
 
-function MetricCard({ title, value, icon: Icon, trend, color, isAlert }: any) {
+function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
   return (
     <Card className={cn(
-      "glass border-white/5 ios-transition relative overflow-hidden group rounded-[2.5rem] p-6 pt-8",
-      isAlert ? "ring-1 ring-destructive/30 bg-destructive/5" : "hover:border-white/20"
+      "glass border-white/5 relative overflow-hidden group rounded-[2rem] p-6 pt-8 bg-[#0a0a0a]/80",
+      isAlert && "ring-1 ring-destructive/30"
     )}>
-      <div className="flex flex-col gap-1">
+      {/* Watermark Icon */}
+      <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-white rotate-12" />
+      
+      <div className="flex flex-col gap-1 relative z-10">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">{title}</p>
+        
         <div className="flex items-center justify-between">
           <div className="text-3xl font-bold font-mono tracking-tighter text-white">
             {processedValue(value)}
           </div>
-          <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/40">
-            <Icon className="h-6 w-6 text-black" />
+          <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+            <Icon className="h-5 w-5 text-black" />
           </div>
         </div>
+        
         <div className="flex items-center gap-2 mt-8">
           <Badge className={cn(
-            "text-[9px] font-black tracking-widest h-6 uppercase rounded-full border-none px-3",
-            trend === "up" ? 'bg-green-500/20 text-green-500' : trend === "down" ? 'bg-destructive/20 text-destructive' : 'bg-white/10 text-muted-foreground'
+            "text-[9px] font-black tracking-widest h-5 uppercase rounded-full border-none px-3",
+            trend === "up" ? 'bg-green-500/20 text-green-500' : 
+            trend === "down" ? 'bg-destructive/20 text-destructive' : 
+            'bg-white/10 text-muted-foreground'
           )}>
             {trend === "up" ? "GAINING" : trend === "down" ? "VARIANCE" : "STABLE"} 
           </Badge>
-          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-60">VS LAST QUARTER</span>
+          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-40">VS LAST QUARTER</span>
         </div>
       </div>
     </Card>
@@ -293,7 +292,7 @@ function MetricCard({ title, value, icon: Icon, trend, color, isAlert }: any) {
 
 function processedValue(val: any) {
   const num = Number(val);
-  if (isNaN(num)) return val;
+  if (isNaN(num)) return `₹${val}`;
   return `₹${num.toLocaleString('en-IN')}`;
 }
 
