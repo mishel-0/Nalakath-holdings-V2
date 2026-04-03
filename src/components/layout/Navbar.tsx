@@ -49,12 +49,9 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="h-8 w-8 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="text-black font-black text-sm">N</span>
+            <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+              <span className="text-black font-black text-xl">N</span>
             </div>
-            <span className="text-sm font-black tracking-tighter text-white hidden sm:block">
-              NALAKATH HOLDINGS LEDGER
-            </span>
           </Link>
 
           <div className="h-6 w-px bg-white/10 hidden md:block" />

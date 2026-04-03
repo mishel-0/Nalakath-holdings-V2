@@ -55,8 +55,6 @@ export default function Dashboard() {
   const { data: projects } = useCollection(projectsQuery);
   const { data: recentTransactions } = useCollection(recentTxQuery);
 
-  const isAdmin = profile?.role === "Admin";
-
   const stats = useMemo(() => {
     const totalRev = recentTransactions?.reduce((acc, tx) => acc + (tx.totalCredit || 0), 0) || 0;
     const totalExp = expenses?.reduce((acc, exp) => acc + (exp.amount || 0), 0) || 0;
@@ -107,6 +105,9 @@ export default function Dashboard() {
             
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+                  <span className="text-black font-black text-xl">N</span>
+                </div>
                 <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
                   EXECUTIVE CONSOLE
                 </Badge>
@@ -119,7 +120,7 @@ export default function Dashboard() {
                   Group Dashboard
                 </h1>
                 <p className="text-muted-foreground mt-2 text-lg">
-                  Strategic financial management for Nalakath Holdings.
+                  Strategic financial management for the Group Portfolio.
                 </p>
               </div>
             </header>
@@ -168,17 +169,18 @@ export default function Dashboard() {
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Division Breakdown
+                    Portfolio Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="CONSTRUCTION INFRA" value="42%" color="gold-gradient" />
-                  <DivisionBar name="HOSPITALITY" value="38%" color="bg-accent" />
-                  <DivisionBar name="REAL ESTATE" value="20%" color="bg-zinc-600" />
+                  <DivisionBar name="NALAKATH HOLDINGS" value="10%" color="bg-zinc-400" />
+                  <DivisionBar name="GREEN VILLA" value="30%" color="bg-accent" />
+                  <DivisionBar name="OVAL PALACE RESORT" value="25%" color="bg-zinc-600" />
+                  <DivisionBar name="NALAKATH CONSTRUCTION" value="35%" color="gold-gradient" />
                   <div className="pt-6 border-t border-white/5 mt-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
                     <p className="text-xs text-muted-foreground italic leading-relaxed">
-                      "Consolidated performance is meeting quarterly targets. Infrastructure variance is within tolerance."
+                      "Consolidated performance is meeting quarterly targets. Construction variance is within tolerance."
                     </p>
                   </div>
                 </CardContent>
@@ -271,8 +273,8 @@ function MetricCard({ title, value, icon: Icon, trend, color, isAlert }: any) {
           <div className="text-5xl font-bold font-mono tracking-tighter text-white">
             {processedValue(value)}
           </div>
-          <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/40">
-            <Icon className="h-5 w-5 text-black" />
+          <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/40">
+            <Icon className="h-6 w-6 text-black" />
           </div>
         </div>
         <div className="flex items-center gap-2 mt-8">
