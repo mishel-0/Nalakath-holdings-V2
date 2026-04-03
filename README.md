@@ -15,13 +15,10 @@ This is a Next.js 15 application using:
 npm run dev
 ```
 
-## Deployment
+## Setup & Deployment Guides
 
-### Vercel (Recommended)
-Refer to [VERCEL_GUIDE.md](./VERCEL_GUIDE.md) for step-by-step instructions.
-
-### Firebase App Hosting
-The project is already configured with `apphosting.yaml` for Google Cloud deployments.
+1. **GitHub Upload**: Follow [GITHUB_GUIDE.md](./GITHUB_GUIDE.md) to store your code.
+2. **Vercel Publishing**: Follow [VERCEL_GUIDE.md](./VERCEL_GUIDE.md) to go live.
 
 ---
 © 2026 Nalakath Holdings. All rights reserved.
