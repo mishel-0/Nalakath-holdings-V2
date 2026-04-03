@@ -131,7 +131,7 @@ export default function Dashboard() {
                   Group Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                  Strategic financial management and real-time ledger verification for the Group.
+                  Strategic financial management and real-time ledger verification.
                 </p>
               </div>
             </header>
