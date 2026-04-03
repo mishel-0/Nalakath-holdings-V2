@@ -1,30 +1,47 @@
-# Publishing to Vercel
 
-Follow these steps to deploy your Premium Accounting ERP to Vercel.
+# 🚀 Vercel Deployment Guide: Nalakath Holdings Ledger
 
-## 1. Prepare your Code
-Ensure you have your code in a Git repository (GitHub, GitLab, or Bitbucket).
+Follow these steps to deploy your Premium Accounting ERP to Vercel and get your live URL.
 
-## 2. Connect to Vercel
-1. Go to [vercel.com](https://vercel.com) and sign in.
-2. Click **"Add New"** > **"Project"**.
-3. Import your repository.
+## Step 1: Install Vercel CLI
+If you haven't already, install the Vercel CLI globally on your local machine:
+```bash
+npm install -g vercel
+```
 
-## 3. Configure Environment Variables
-In the Vercel "Configure Project" screen, add the following Environment Variables:
+## Step 2: Build the Project
+Ensure the project builds locally without errors:
+```bash
+npm run build
+```
 
-| Key | Value | Description |
-| :--- | :--- | :--- |
-| `GOOGLE_GENAI_API_KEY` | `YOUR_API_KEY` | Required for AI Insights (Genkit). |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | `...` | Optional (if moving away from hardcoded config). |
+## Step 3: Initialize Vercel Project
+Run the following command in the root of your project:
+```bash
+vercel
+```
+*Follow the prompts to log in and set up your project (e.g., "Nalakath Ledger").*
 
-## 4. Deploy
-Click **Deploy**. Vercel will automatically detect the Next.js framework, build your application, and provide a live URL.
+## Step 4: Configure Environment Variables
+In the Vercel dashboard for your new project, or via the CLI, add your **GOOGLE_GENAI_API_KEY**:
+```bash
+vercel env add GOOGLE_GENAI_API_KEY
+```
 
-## 5. Firebase Configuration
-Your `src/firebase/config.ts` currently contains the public configuration for your Firebase project. This is safe to commit and will work out of the box on Vercel. 
+## Step 5: Run Production Deployment
+To deploy to production and get your final `.vercel.app` URL, run:
+```bash
+vercel --prod
+```
 
-**Note:** Ensure your Firebase Authentication "Authorized Domains" in the Firebase Console include your new Vercel domain (e.g., `your-project.vercel.app`) so that logins work correctly.
+## Step 6: Verify Firebase Integration
+1. Go to your **Firebase Console**.
+2. Navigate to **Authentication > Settings > Authorized Domains**.
+3. Add your new Vercel domain (e.g., `nalakath-ledger.vercel.app`) to the list so login works.
+
+## Step 7: Access your Live URL
+After Step 5, Vercel will provide a link like:
+**https://nalakath-ledger.vercel.app**
 
 ---
-*Nalakath Holdings @2026*
+*Nalakath Holdings @2026 - Production Environment Ready*

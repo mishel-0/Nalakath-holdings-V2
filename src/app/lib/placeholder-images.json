@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "construction-division",
+      "description": "Construction site with crane and modern building",
+      "imageUrl": "https://picsum.photos/seed/construction1/1200/800",
+      "imageHint": "construction building"
+    },
+    {
+      "id": "hospitality-division",
+      "description": "Luxury hotel lobby",
+      "imageUrl": "https://picsum.photos/seed/hospitality1/1200/800",
+      "imageHint": "luxury hotel"
+    },
+    {
+      "id": "trading-division",
+      "description": "Logistics warehouse and cargo containers",
+      "imageUrl": "https://picsum.photos/seed/trading1/1200/800",
+      "imageHint": "logistics warehouse"
+    },
+    {
+      "id": "real-estate-division",
+      "description": "Modern residential apartment complex",
+      "imageUrl": "https://picsum.photos/seed/realestate1/1200/800",
+      "imageHint": "modern apartment"
+    }
+  ]
+}
