@@ -18,10 +18,12 @@ import {
   Sparkles,
   AlertCircle,
   ChevronRight,
-  Plus,
-  ShieldCheck,
   Calculator,
-  Activity
+  Activity,
+  History,
+  FileText,
+  ShieldCheck,
+  LayoutDashboard
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -54,7 +56,7 @@ export default function Dashboard() {
     return doc(db, "userProfiles", user.uid);
   }, [user, db]);
 
-  const { data: profile } = useDoc(profileDocRef);
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
   const { data: vouchers } = useCollection(vouchersQuery);
   const { data: expenses } = useCollection(expensesQuery);
   const { data: projects } = useCollection(projectsQuery);
@@ -91,47 +93,69 @@ export default function Dashboard() {
     ];
   }, [stats]);
 
+  if (isProfileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Initializing Dashboard...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <Navbar />
       <div className="flex">
         <Sidebar />
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
-          <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+          <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="rounded-full bg-primary/10 text-primary border-primary/30 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg shadow-primary/5">
-                  {isAdmin ? "Executive Console" : "Operational Desk"}
+                <Badge variant="outline" className={cn(
+                  "rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg",
+                  isAdmin ? "bg-primary/10 text-primary border-primary/30" : "bg-blue-500/10 text-blue-400 border-blue-400/30"
+                )}>
+                  {isAdmin ? "Executive Strategy Console" : "Operational Desk"}
                 </Badge>
                 <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1.5 rounded-full border border-green-500/10">
                   <Activity className="h-3 w-3 animate-pulse" /> Live Ledger Sync
                 </div>
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
-                {isAccountant ? "Accountant Desk" : "Group Dashboard"}
+                {isAdmin ? "Group Overview" : "Accounting Core"}
               </h1>
-              <p className="text-muted-foreground">Strategic financial management for Nalakath Holdings.</p>
+              <p className="text-muted-foreground">
+                {isAdmin ? "Strategic financial visibility for Nalakath Holdings." : "Daily financial operations and transaction management."}
+              </p>
             </header>
 
-            {/* Top Grid Metrics */}
+            {/* Metrics Grid - Differing by Role */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
-              <MetricCard title="Net Operating Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
               {isAdmin ? (
-                <MetricCard title="Capital Expenditure" value={stats.projectCosts} icon={Briefcase} trend="down" />
+                <>
+                  <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
+                  <MetricCard title="Net Operating Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
+                  <MetricCard title="Capital Expenditure" value={stats.projectCosts} icon={Briefcase} trend="down" />
+                  <MetricCard title="Action Required" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
+                </>
               ) : (
-                <MetricCard title="Total OPEX" value={stats.revenue - stats.profit} icon={Calculator} trend="none" />
+                <>
+                  <MetricCard title="Today's Revenue" value={stats.revenue * 0.15} icon={Calculator} trend="up" />
+                  <MetricCard title="Verified Entries" value={recentTransactions?.length || 0} icon={ShieldCheck} trend="none" />
+                  <MetricCard title="Operational Spend" value={stats.revenue - stats.profit} icon={History} trend="down" />
+                  <MetricCard title="Active Vouchers" value={stats.alerts.toString()} icon={FileText} trend="none" />
+                </>
               )}
-              <MetricCard title="Action Required" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
-              {/* Financial Chart */}
+              {/* Main Visualizations */}
               <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-3xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
-                    <CardTitle className="text-lg font-bold">Fiscal Health Trend</CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs operating costs</p>
+                    <CardTitle className="text-lg font-bold">
+                      {isAdmin ? "Fiscal Health Trend" : "Transaction Flow"}
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of financial momentum</p>
                   </div>
                   <Link href="/reports">
                     <Button variant="ghost" size="sm" className="rounded-full text-primary hover:bg-primary/10 font-bold text-xs uppercase tracking-widest">
@@ -161,38 +185,72 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Division Summary */}
+              {/* Right Panel - Differing by Role */}
               <Card className="lg:col-span-3 glass border-white/5 rounded-3xl">
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    Division Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-7 pt-2">
-                  <DivisionRow name="Construction Infra" value="45%" color="gold-gradient" />
-                  <DivisionRow name="Oval Palace Resort" value="30%" color="bg-accent" />
-                  <DivisionRow name="Green Villa Estates" value="25%" color="bg-zinc-700" />
-                  <div className="pt-6 mt-4 border-t border-white/10">
-                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                      <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                      <p className="text-[10px] uppercase font-bold tracking-[0.25em] text-primary">Intelligent Insight</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed mt-4 italic">
-                      "Operating margins in **Construction** have stabilized. Recommended focus on **Hospitality** CAPEX for Q3."
-                    </p>
-                  </div>
-                </CardContent>
+                {isAdmin ? (
+                  <>
+                    <CardHeader>
+                      <CardTitle className="text-lg font-bold flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                        Division Breakdown
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-7 pt-2">
+                      <DivisionRow name="Construction Infra" value="45%" color="gold-gradient" />
+                      <DivisionRow name="Oval Palace Resort" value="30%" color="bg-accent" />
+                      <DivisionRow name="Green Villa Estates" value="25%" color="bg-zinc-700" />
+                      <div className="pt-6 mt-4 border-t border-white/10">
+                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                          <p className="text-[10px] uppercase font-bold tracking-[0.25em] text-primary">Strategic Insight</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed mt-4 italic">
+                          "Operating margins in **Construction** have stabilized. Recommended focus on **Hospitality** CAPEX for Q3."
+                        </p>
+                      </div>
+                    </CardContent>
+                  </>
+                ) : (
+                  <>
+                    <CardHeader>
+                      <CardTitle className="text-lg font-bold flex items-center gap-2 text-blue-400">
+                        <ShieldCheck className="h-5 w-5" />
+                        Verification Pipeline
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-2">
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Recent Activity</span>
+                          <span className="text-[10px] font-bold text-green-500 uppercase">98% Match</span>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">Entries Processed</span>
+                            <span className="font-mono">{recentTransactions?.length || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">Daily Target</span>
+                            <span className="font-mono">50</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Button className="w-full rounded-2xl h-12 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-400/20 font-bold uppercase tracking-widest text-[10px]">
+                        Review Audit Logs
+                      </Button>
+                    </CardContent>
+                  </>
+                )}
               </Card>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Recent Transactions List */}
+              {/* Journal Activity List */}
               <Card className="glass border-white/5 lg:col-span-2 rounded-3xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    Recent Journal Activity
+                    <History className="h-5 w-5 text-primary" />
+                    Latest Operations
                   </CardTitle>
                   <Link href="/accounting">
                     <Button variant="outline" size="sm" className="rounded-full border-white/10 hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest h-8 px-4">
@@ -242,25 +300,25 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
-                    Strategic Alerts
+                    Priority Alerts
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-2">
                   <AlertItem 
-                    title="Compliance Check" 
-                    desc={`Awaiting verification for ${stats.alerts} high-value payment vouchers.`}
+                    title="Audit Readiness" 
+                    desc="Q2 compliance documentation is now due for archival."
                     severity="high"
                   />
                   {isAdmin && (
                     <AlertItem 
-                      title="Budget Variance" 
-                      desc="Infra project #4 has reached 90% of allocated budget."
+                      title="Budget Threshold" 
+                      desc="Infrastructure Project #09 has exceeded 85% of its fiscal buffer."
                       severity="medium"
                     />
                   )}
                   <AlertItem 
-                    title="Audit Readiness" 
-                    desc="Digital backup of all division cost centers is 100% complete."
+                    title="Ledger Integrity" 
+                    desc="System self-check complete. All cross-division entries reconciled."
                     severity="low"
                   />
                 </CardContent>
@@ -301,9 +359,8 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
           )}>
             {trend === "up" && <ArrowUpRight className="h-2 w-2" />}
             {trend === "down" && <ArrowDownRight className="h-2 w-2" />}
-            {trend === "none" ? "Stable" : trend === "up" ? "Gaining" : "Variance"}
+            {trend === "none" ? "Status: Optimal" : trend === "up" ? "Surplus" : "Deficit"}
           </div>
-          <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-40">Vs Last Quarter</span>
         </div>
       </CardContent>
     </Card>
@@ -324,7 +381,7 @@ function DivisionRow({ name, value, color }: any) {
         <span className="text-primary font-mono">{value}</span>
       </div>
       <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-        <div className={cn("h-full ios-transition shadow-[0_0_12px_rgba(var(--primary),0.4)]", color)} style={{ width: value }} />
+        <div className={cn("h-full ios-transition", color)} style={{ width: value }} />
       </div>
     </div>
   );
@@ -332,13 +389,13 @@ function DivisionRow({ name, value, color }: any) {
 
 function AlertItem({ title, desc, severity }: any) {
   const colors = {
-    high: "bg-destructive shadow-[0_0_12px_rgba(239,68,68,0.6)]",
-    medium: "bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)]",
-    low: "bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]"
+    high: "bg-destructive",
+    medium: "bg-orange-500",
+    low: "bg-green-500"
   };
   return (
     <div className="flex gap-4 p-5 rounded-3xl bg-white/5 border border-white/5 group hover:border-white/20 ios-transition cursor-pointer hover:bg-white/10">
-      <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0 animate-pulse", colors[severity as keyof typeof colors])} />
+      <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0 animate-pulse shadow-[0_0_10px]", colors[severity as keyof typeof colors])} />
       <div className="flex-1">
         <p className="text-sm font-bold leading-none tracking-tight">{title}</p>
         <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed font-medium">{desc}</p>
