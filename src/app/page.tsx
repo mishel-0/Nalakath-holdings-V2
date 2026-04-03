@@ -180,9 +180,9 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="Construction Infra" value="42%" color="gold-gradient" />
-                  <DivisionBar name="Hospitality Hub" value="38%" color="bg-accent" />
-                  <DivisionBar name="Estate Portfolio" value="20%" color="bg-zinc-600" />
+                  <DivisionBar name="Infrastructure" value="42%" color="gold-gradient" />
+                  <DivisionBar name="Hospitality" value="38%" color="bg-accent" />
+                  <DivisionBar name="Real Estate" value="20%" color="bg-zinc-600" />
                   <div className="pt-4 border-t border-white/5">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
                     <p className="text-xs text-muted-foreground italic leading-relaxed">

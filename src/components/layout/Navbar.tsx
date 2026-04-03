@@ -20,10 +20,10 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const companies = [
-  { id: 1, name: "Nalakath HQ", division: "Group Strategy" },
-  { id: 2, name: "Nalakath Construction", division: "Infrastructure" },
-  { id: 3, name: "Nalakath Hospitality", division: "Resorts & Hotels" },
-  { id: 4, name: "Nalakath Real Estate", division: "Property Portfolio" },
+  { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
+  { id: 2, name: "Green Villa", division: "Real Estate" },
+  { id: 3, name: "Oval Palace Resort", division: "Hospitality" },
+  { id: 4, name: "Nalakath Construction", division: "Infrastructure" },
 ];
 
 export function Navbar() {
@@ -68,16 +68,16 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 glass">
-              <DropdownMenuLabel>Group Divisions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-widest font-bold opacity-50">Switch Division</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/5" />
               {companies.map((company) => (
                 <DropdownMenuItem
                   key={company.id}
                   onClick={() => setActiveCompany(company)}
-                  className="flex flex-col items-start gap-1 py-2 cursor-pointer"
+                  className="flex flex-col items-start gap-1 py-3 cursor-pointer hover:bg-white/5"
                 >
-                  <span className="font-medium">{company.name}</span>
-                  <span className="text-xs text-muted-foreground">{company.division}</span>
+                  <span className="font-bold text-sm">{company.name}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-tight">{company.division}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
