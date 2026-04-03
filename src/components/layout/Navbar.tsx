@@ -20,10 +20,10 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const companies = [
-  { id: 1, name: "Apex Group HQ", division: "Group Strategy" },
-  { id: 2, name: "Apex Construction", division: "Infrastructure" },
-  { id: 3, name: "Apex Hospitality", division: "Resorts & Hotels" },
-  { id: 4, name: "Apex Real Estate", division: "Property Portfolio" },
+  { id: 1, name: "Nalakath HQ", division: "Group Strategy" },
+  { id: 2, name: "Nalakath Construction", division: "Infrastructure" },
+  { id: 3, name: "Nalakath Hospitality", division: "Resorts & Hotels" },
+  { id: 4, name: "Nalakath Real Estate", division: "Property Portfolio" },
 ];
 
 export function Navbar() {
@@ -68,7 +68,7 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 glass">
-              <DropdownMenuLabel>Apex Group Divisions</DropdownMenuLabel>
+              <DropdownMenuLabel>Group Divisions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {companies.map((company) => (
                 <DropdownMenuItem
@@ -88,7 +88,7 @@ export function Navbar() {
           <div className="relative w-full">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
-              placeholder="Search Apex Ledger..." 
+              placeholder="Search Ledger..." 
               className="pl-10 h-10 rounded-full bg-white/5 border-white/10 focus-visible:ring-primary/50"
             />
           </div>

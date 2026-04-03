@@ -91,7 +91,7 @@ export default function Dashboard() {
           <div className="h-16 w-16 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
             <span className="text-black font-black text-3xl">N</span>
           </div>
-          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Apex Data...</p>
+          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Portfolio...</p>
         </div>
       </div>
     );
@@ -115,7 +115,7 @@ export default function Dashboard() {
                     "rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg w-fit",
                     isAdmin ? "bg-primary/10 text-primary border-primary/30" : "bg-blue-500/10 text-blue-400 border-blue-400/30"
                   )}>
-                    {isAdmin ? "Executive Strategy Console" : "Operational Accounting Desk"}
+                    {isAdmin ? "Executive Console" : "Operational Desk"}
                   </Badge>
                   <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1.5 rounded-full border border-green-500/10 w-fit">
                     <Activity className="h-3 w-3 animate-pulse" /> Live Ledger Sync
@@ -127,14 +127,14 @@ export default function Dashboard() {
                   Group Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                  Strategic financial management for the Apex portfolio.
+                  Strategic management for the Nalakath portfolio.
                 </p>
               </div>
             </header>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
-              <MetricCard title="Net Operating Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
+              <MetricCard title="Net Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
               <MetricCard title="Capital Expenditure" value={stats.projectCosts} icon={Briefcase} trend="down" />
               <MetricCard title="Action Required" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
@@ -146,7 +146,7 @@ export default function Dashboard() {
                     <CardTitle className="text-lg font-bold">
                       Fiscal Health Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of group income vs costs</p>
+                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs costs</p>
                   </div>
                   <Button variant="ghost" size="sm" className="text-primary text-[10px] font-bold uppercase tracking-widest">
                     Analytics <ChevronRight className="h-3 w-3 ml-1" />
@@ -176,7 +176,7 @@ export default function Dashboard() {
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Apex Portfolio Breakdown
+                    Portfolio Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
@@ -186,7 +186,7 @@ export default function Dashboard() {
                   <div className="pt-4 border-t border-white/5">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
                     <p className="text-xs text-muted-foreground italic leading-relaxed">
-                      "Consolidated performance is meeting quarterly targets. Apex construction variance is within tolerance."
+                      "Consolidated performance is meeting quarterly targets. Infrastructure variance is within tolerance."
                     </p>
                   </div>
                 </CardContent>
@@ -244,19 +244,19 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
-                    Apex Priority Desk
+                    Priority Desk
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <AlertItem title="Audit Readiness" desc="Q2 compliance docs are due for upload." severity="high" />
-                  <AlertItem title="Budget Threshold" desc="Site Phase 3 has reached 80% buffer." severity="medium" />
+                  <AlertItem title="Budget Threshold" desc="Phase 3 has reached 80% buffer." severity="medium" />
                   <AlertItem title="System Integrity" desc="Auto-reconciliation complete. No errors." severity="low" />
                 </CardContent>
               </Card>
             </div>
             
             <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-8">
-              APEX LEDGER © 2026
+              NALAKATH HOLDINGS © 2026
             </p>
           </div>
         </main>

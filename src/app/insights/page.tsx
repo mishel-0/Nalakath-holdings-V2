@@ -96,7 +96,7 @@ export default function InsightsPage() {
       }));
 
     const input: CostOptimizationSuggestionsInput = {
-      companyName: "Apex Ledger",
+      companyName: "Nalakath Holdings",
       financialSummary: {
         netProfit: totalRevenue - totalExpenses,
         totalRevenue,
@@ -152,7 +152,7 @@ export default function InsightsPage() {
           date: exp.expenseDate,
           amount: exp.amount,
           description: exp.description,
-          account: "Apex General Ledger",
+          account: "General Ledger",
           category: exp.expenseCategory
         },
         historicalTransactions: history.map(h => ({
@@ -160,7 +160,7 @@ export default function InsightsPage() {
           date: h.expenseDate,
           amount: h.amount,
           description: h.description,
-          account: "Apex General Ledger",
+          account: "General Ledger",
           category: h.expenseCategory
         }))
       };
@@ -184,10 +184,10 @@ export default function InsightsPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3">
-                    Apex Financial AI
+                    Financial AI
                     <Sparkles className="h-8 w-8 text-primary animate-pulse" />
                   </h1>
-                  <p className="text-muted-foreground">Premium automated insights and portfolio intelligence.</p>
+                  <p className="text-muted-foreground">Automated insights and portfolio intelligence.</p>
                 </div>
               </div>
               <Button 
@@ -209,7 +209,7 @@ export default function InsightsPage() {
 
               <TabsContent value="strategy" className="space-y-6">
                 {!strategyInsights && !loading ? (
-                  <EmptyInsight icon={Target} title="Strategy Optimizer" desc="Initialize Apex strategy engine to identify cost savings and process efficiencies." />
+                  <EmptyInsight icon={Target} title="Strategy Optimizer" desc="Initialize strategy engine to identify cost savings and process efficiencies." />
                 ) : loading && activeTab === "strategy" ? (
                   <LoadingGrid />
                 ) : (
@@ -225,7 +225,7 @@ export default function InsightsPage() {
 
               <TabsContent value="prediction" className="space-y-6">
                 {!cashFlowInsights && !loading ? (
-                  <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc="Forecast Apex liquidity and identify potential shortages based on upcoming commitments." />
+                  <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc="Forecast liquidity and identify potential shortages based on upcoming commitments." />
                 ) : loading && activeTab === "prediction" ? (
                   <LoadingGrid />
                 ) : (
@@ -235,7 +235,7 @@ export default function InsightsPage() {
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
                             <TrendingUp className="h-5 w-5 text-primary" />
-                            Apex 30-Day Liquidity Forecast
+                            30-Day Liquidity Forecast
                           </CardTitle>
                           <CardDescription>{cashFlowInsights.predictionSummary}</CardDescription>
                         </CardHeader>
@@ -261,7 +261,7 @@ export default function InsightsPage() {
 
               <TabsContent value="audit" className="space-y-6">
                 {!anomalyResults.length && !loading ? (
-                  <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc="Scan recent Apex expenditures for anomalies, vague descriptions, or suspicious patterns." />
+                  <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc="Scan recent expenditures for anomalies, vague descriptions, or suspicious patterns." />
                 ) : loading && activeTab === "audit" ? (
                   <LoadingGrid />
                 ) : (

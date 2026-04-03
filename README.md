@@ -1,4 +1,4 @@
-# APEX LEDGER
+# NALAKATH HOLDINGS LEDGER
 
 Premium iOS-style Accounting & ERP system for multi-division group holdings.
 
@@ -21,4 +21,4 @@ npm run dev
 2. **Vercel Publishing**: Follow [VERCEL_GUIDE.md](./VERCEL_GUIDE.md) to go live.
 
 ---
-© 2026 APEX LEDGER. All rights reserved.
+© 2026 NALAKATH HOLDINGS. All rights reserved.

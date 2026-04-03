@@ -144,7 +144,7 @@ export default function VouchersPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Payment Vouchers</h1>
-                  <p className="text-muted-foreground">Apex Group purchasing proofs and division expenditure.</p>
+                  <p className="text-muted-foreground">Proof of purchase and expenditure across divisions.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -182,15 +182,15 @@ export default function VouchersPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="division">Apex Division</Label>
-                        <Select name="division" defaultValue="Apex Construction">
+                        <Label htmlFor="division">Division</Label>
+                        <Select name="division" defaultValue="Construction">
                           <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="glass">
-                            <SelectItem value="Apex Construction">Apex Construction</SelectItem>
-                            <SelectItem value="Apex Hospitality">Apex Hospitality</SelectItem>
-                            <SelectItem value="Apex Real Estate">Apex Real Estate</SelectItem>
+                            <SelectItem value="Construction">Construction</SelectItem>
+                            <SelectItem value="Hospitality">Hospitality</SelectItem>
+                            <SelectItem value="Real Estate">Real Estate</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -346,9 +346,9 @@ export default function VouchersPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="glass">
-                    <SelectItem value="Apex Construction">Apex Construction</SelectItem>
-                    <SelectItem value="Apex Hospitality">Apex Hospitality</SelectItem>
-                    <SelectItem value="Apex Real Estate">Apex Real Estate</SelectItem>
+                    <SelectItem value="Construction">Construction</SelectItem>
+                    <SelectItem value="Hospitality">Hospitality</SelectItem>
+                    <SelectItem value="Real Estate">Real Estate</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

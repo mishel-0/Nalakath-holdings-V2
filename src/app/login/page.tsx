@@ -28,7 +28,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       toast({ 
         title: "Access Authorized", 
-        description: "Secure session initialized for Apex Ledger." 
+        description: "Secure session initialized for Nalakath Holdings." 
       });
       router.push('/');
     } catch (error: any) {
@@ -58,7 +58,7 @@ export default function LoginPage() {
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
           <CardHeader className="text-center pt-10 px-8">
             <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
-              APEX LEDGER ACCESS PORTAL
+              NALAKATH HOLDINGS ACCESS
             </p>
           </CardHeader>
           <CardContent className="p-10 pt-6">
@@ -70,7 +70,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="name@apex-ledger.com"
+                    placeholder="name@nalakath.com"
                     className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 text-foreground focus-visible:ring-primary/50"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -109,7 +109,7 @@ export default function LoginPage() {
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
                 <Info className="h-5 w-5 text-primary shrink-0" />
                 <span className="text-[10px] text-muted-foreground font-semibold leading-tight">
-                  Encrypted financial environment. All sessions are audited for compliance with group security protocols.
+                  Encrypted environment. All sessions audited for compliance with group protocols.
                 </span>
               </div>
             </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
         </Card>
         
         <p className="text-center mt-8 text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-50">
-          APEX LEDGER © 2026
+          NALAKATH HOLDINGS © 2026
         </p>
       </div>
     </div>
