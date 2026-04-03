@@ -62,19 +62,11 @@ export function Navbar() {
     <header className="sticky top-0 z-40 w-full glass border-b border-white/5 backdrop-blur-3xl">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity group">
-            <div className="h-9 w-9 rounded-2xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 ios-transition">
-              <span className="text-black font-black text-xl">N</span>
-            </div>
-          </Link>
-
-          <div className="h-6 w-px bg-foreground/10 hidden md:block" />
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-foreground/5 rounded-full">
                 <Building2 className="h-4 w-4 text-primary" />
-                <div className="flex flex-col items-start hidden sm:flex">
+                <div className="flex flex-col items-start">
                    <span className="text-[10px] font-bold uppercase tracking-tighter">{activeCompany.name}</span>
                    <span className="text-[8px] text-muted-foreground uppercase">{activeCompany.division}</span>
                 </div>
