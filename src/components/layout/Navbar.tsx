@@ -1,8 +1,7 @@
-
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, Building2, User, LogOut, Bell, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, Building2, User, LogOut, Bell, Search, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -29,9 +28,19 @@ const companies = [
 
 export function Navbar() {
   const [activeCompany, setActiveCompany] = useState(companies[0]);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const { user } = useUser();
   const auth = useAuth();
   const db = useFirestore();
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -45,37 +54,41 @@ export function Navbar() {
     signOut(auth);
   };
 
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full glass border-b border-white/10 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full glass border-b border-white/5 backdrop-blur-3xl">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity group">
-            <div className="h-9 w-9 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 ios-transition">
+            <div className="h-9 w-9 rounded-2xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 ios-transition">
               <span className="text-black font-black text-xl">N</span>
             </div>
           </Link>
 
-          <div className="h-6 w-px bg-white/10 hidden md:block" />
+          <div className="h-6 w-px bg-foreground/10 hidden md:block" />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-white/5 text-white">
+              <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-foreground/5 rounded-full">
                 <Building2 className="h-4 w-4 text-primary" />
                 <div className="flex flex-col items-start hidden sm:flex">
-                   <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">{activeCompany.name}</span>
+                   <span className="text-[10px] font-bold uppercase tracking-tighter">{activeCompany.name}</span>
                    <span className="text-[8px] text-muted-foreground uppercase">{activeCompany.division}</span>
                 </div>
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 glass">
+            <DropdownMenuContent align="start" className="w-56 glass rounded-3xl">
               <DropdownMenuLabel className="text-[10px] uppercase tracking-widest font-bold opacity-50">Switch Division</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/5" />
+              <DropdownMenuSeparator className="bg-foreground/5" />
               {companies.map((company) => (
                 <DropdownMenuItem
                   key={company.id}
                   onClick={() => setActiveCompany(company)}
-                  className="flex flex-col items-start gap-1 py-3 cursor-pointer hover:bg-white/5"
+                  className="flex flex-col items-start gap-1 py-3 cursor-pointer hover:bg-foreground/5 rounded-xl"
                 >
                   <span className="font-bold text-sm">{company.name}</span>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-tight">{company.division}</span>
@@ -90,26 +103,35 @@ export function Navbar() {
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search financials..." 
-              className="pl-10 h-10 rounded-full bg-white/10 border-white/10 focus-visible:ring-primary/50"
+              className="pl-10 h-10 rounded-full bg-foreground/5 border-foreground/5 focus-visible:ring-primary/50"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full relative hover:bg-white/5">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full hover:bg-foreground/5"
+            onClick={toggleTheme}
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5 text-primary" /> : <Moon className="h-5 w-5 text-primary" />}
+          </Button>
+
+          <Button variant="ghost" size="icon" className="rounded-full relative hover:bg-foreground/5">
             <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full border-2 border-background" />
+            <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-destructive rounded-full border-2 border-background" />
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/5 overflow-hidden">
-                <div className="h-8 w-8 rounded-full gold-gradient flex items-center justify-center">
-                  <span className="text-black font-black text-xs">N</span>
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-foreground/5 overflow-hidden">
+                <div className="h-8 w-8 rounded-full bg-foreground/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-muted-foreground" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 glass">
+            <DropdownMenuContent align="end" className="w-64 glass rounded-3xl">
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-1">
                   <span className="text-sm font-bold">{profile?.firstName} {profile?.lastName}</span>
@@ -121,14 +143,14 @@ export function Navbar() {
                   </Badge>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-foreground/5" />
               <DropdownMenuItem asChild>
-                <Link href="/settings" className="cursor-pointer">
+                <Link href="/settings" className="cursor-pointer rounded-xl">
                   <User className="mr-2 h-4 w-4" /> System Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
+              <DropdownMenuSeparator className="bg-foreground/5" />
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer rounded-xl">
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </DropdownMenuItem>

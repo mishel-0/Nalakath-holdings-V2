@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from "react";
@@ -85,9 +84,9 @@ export default function Dashboard() {
 
   if (isProfileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
+          <div className="h-16 w-16 rounded-3xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
             <span className="text-black font-black text-3xl">N</span>
           </div>
           <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Portfolio...</p>
@@ -105,17 +104,12 @@ export default function Dashboard() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
             
             <header className="flex flex-col gap-2">
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-black font-black text-xl">N</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
-                    EXECUTIVE CONSOLE
-                  </Badge>
-                  <div className="flex items-center gap-1.5 text-[9px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
-                    <Activity className="h-3 w-3" /> LIVE LEDGER SYNC
-                  </div>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
+                  EXECUTIVE CONSOLE
+                </Badge>
+                <div className="flex items-center gap-1.5 text-[9px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                  <Activity className="h-3 w-3" /> LIVE LEDGER SYNC
                 </div>
               </div>
               <div className="mt-2">
@@ -136,7 +130,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
-              <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-[2rem] bg-[#0a0a0a]/80">
+              <Card className="lg:col-span-4 control-center-card overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
                     <CardTitle className="text-xl font-bold">
@@ -157,9 +151,9 @@ export default function Dashboard() {
                           <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="name" stroke="#333" fontSize={10} axisLine={false} tickLine={false} />
+                      <XAxis dataKey="name" stroke="currentColor" fontSize={10} axisLine={false} tickLine={false} opacity={0.3} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: 'rgba(0,0,0,0.95)', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)' }}
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
                         formatter={(v) => `₹${Number(v).toLocaleString('en-IN')}`}
                       />
                       <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fill="url(#colorVal)" strokeWidth={3} />
@@ -168,7 +162,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-3 glass border-white/5 rounded-[2rem] overflow-hidden bg-[#0a0a0a]/80">
+              <Card className="lg:col-span-3 control-center-card overflow-hidden">
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
@@ -184,10 +178,10 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="glass border-white/5 lg:col-span-2 rounded-[2rem] bg-[#0a0a0a]/80">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pb-12">
+              <Card className="lg:col-span-2 control-center-card">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl font-bold flex items-center gap-2 text-white">
+                  <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <History className="h-5 w-5 text-primary" />
                     Latest Ledger Activity
                   </CardTitle>
@@ -203,10 +197,10 @@ export default function Dashboard() {
                       <p className="py-10 text-center text-muted-foreground text-sm">No recent transactions recorded.</p>
                     ) : (
                       recentTransactions.map((tx) => (
-                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 ios-transition group border border-transparent hover:border-white/10">
+                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1.5rem] hover:bg-foreground/5 ios-transition group">
                           <div className="flex items-center gap-4">
                             <div className={cn(
-                              "h-10 w-10 rounded-full flex items-center justify-center",
+                              "h-10 w-10 rounded-2xl flex items-center justify-center",
                               tx.totalDebit > 0 ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500"
                             )}>
                               {tx.totalDebit > 0 ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
@@ -231,7 +225,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="glass border-white/5 rounded-[2rem] bg-[#0a0a0a]/80">
+              <Card className="control-center-card">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
@@ -261,19 +255,19 @@ export default function Dashboard() {
 function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
   return (
     <Card className={cn(
-      "glass border-white/5 relative overflow-hidden group rounded-[2xl] p-6 pt-8 bg-[#0a0a0a]/80",
-      isAlert && "ring-1 ring-destructive/30"
+      "control-center-card relative overflow-hidden group border-white/5",
+      isAlert && "ring-2 ring-destructive/20"
     )}>
-      <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-white rotate-12" />
+      <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-foreground rotate-12" />
       
       <div className="flex flex-col gap-1 relative z-10">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">{title}</p>
         
         <div className="flex items-center justify-between">
-          <div className="text-3xl font-bold font-mono tracking-tighter text-white">
+          <div className="text-3xl font-bold font-mono tracking-tighter">
             {processedValue(value)}
           </div>
-          <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+          <div className="h-10 w-10 rounded-2xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
             <Icon className="h-5 w-5 text-black" />
           </div>
         </div>
@@ -281,9 +275,9 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
         <div className="flex items-center gap-2 mt-8">
           <Badge className={cn(
             "text-[9px] font-black tracking-widest h-5 uppercase rounded-full border-none px-3",
-            trend === "up" ? 'bg-green-500/20 text-green-500' : 
-            trend === "down" ? 'bg-destructive/20 text-destructive' : 
-            'bg-white/10 text-muted-foreground'
+            trend === "up" ? 'bg-green-500/10 text-green-500' : 
+            trend === "down" ? 'bg-destructive/10 text-destructive' : 
+            'bg-foreground/5 text-muted-foreground'
           )}>
             {trend === "up" ? "GAINING" : trend === "down" ? "VARIANCE" : "STABLE"} 
           </Badge>
@@ -305,9 +299,9 @@ function DivisionBar({ name, value, color }: any) {
     <div className="space-y-3">
       <div className="flex justify-between text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground">
         <span>{name}</span>
-        <span className="text-white font-mono">{value}</span>
+        <span className="font-mono">{value}</span>
       </div>
-      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
         <div className={cn("h-full", color)} style={{ width: value }} />
       </div>
     </div>
@@ -317,10 +311,10 @@ function DivisionBar({ name, value, color }: any) {
 function AlertItem({ title, desc, severity }: any) {
   const colors = { high: "bg-destructive", medium: "bg-orange-500", low: "bg-green-500" };
   return (
-    <div className="flex gap-4 p-5 rounded-[2rem] bg-white/5 border border-white/10 hover:border-white/20 ios-transition group cursor-pointer">
-      <div className={cn("mt-1.5 h-2 w-2 rounded-full", colors[severity as keyof typeof colors])} />
+    <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer">
+      <div className={cn("mt-1.5 h-2.5 w-2.5 rounded-full", colors[severity as keyof typeof colors])} />
       <div>
-        <p className="text-sm font-bold leading-none text-white">{title}</p>
+        <p className="text-sm font-bold leading-none">{title}</p>
         <p className="text-xs text-muted-foreground mt-3 leading-relaxed">{desc}</p>
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto self-center group-hover:translate-x-1 ios-transition" />
