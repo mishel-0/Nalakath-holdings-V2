@@ -116,10 +116,10 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="mt-2">
-                <h1 className="text-5xl font-bold tracking-tight text-foreground font-headline">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">
                   Group Dashboard
                 </h1>
-                <p className="text-muted-foreground mt-2 text-lg">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Strategic financial management for the Group Portfolio.
                 </p>
               </div>
