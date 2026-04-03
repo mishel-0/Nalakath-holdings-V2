@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -14,7 +15,8 @@ import {
   Sparkles,
   Layers,
   ListTree,
-  History
+  History,
+  RefreshCcw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -31,6 +33,7 @@ const navigation = [
   { name: "Loans", href: "/loans", icon: Landmark, adminOnly: true },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI Insights", href: "/insights", icon: Sparkles },
+  { name: "Dev Sync", href: "/dev-sync", icon: RefreshCcw, adminOnly: true },
   { name: "System Logs", href: "/logs", icon: History, adminOnly: true },
 ];
 

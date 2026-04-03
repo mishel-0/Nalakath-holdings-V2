@@ -14,6 +14,19 @@
       },
       "required": ["id", "firstName", "lastName", "email", "role"]
     },
+    "SyncStatus": {
+      "title": "SyncStatus",
+      "type": "object",
+      "description": "Tracks development synchronization state.",
+      "properties": {
+        "id": { "type": "string" },
+        "lastSyncAt": { "type": "string", "format": "date-time" },
+        "lastCommitMessage": { "type": "string" },
+        "deploymentStatus": { "type": "string" },
+        "syncByUserId": { "type": "string" }
+      },
+      "required": ["lastSyncAt", "deploymentStatus"]
+    },
     "AuditLog": {
       "title": "AuditLog",
       "type": "object",
@@ -40,17 +53,6 @@
         "totalDebit": { "type": "number" },
         "totalCredit": { "type": "number" }
       }
-    },
-    "Expense": {
-      "title": "Expense",
-      "type": "object",
-      "description": "Company spending records.",
-      "properties": {
-        "id": { "type": "string" },
-        "amount": { "type": "number" },
-        "description": { "type": "string" },
-        "expenseCategory": { "type": "string" }
-      }
     }
   },
   "auth": {
@@ -60,6 +62,10 @@
     "/auditLogs/{logId}": {
       "schema": { "$ref": "#/backend/entities/AuditLog" },
       "description": "Stores all system activity logs."
+    },
+    "/syncStatus/{statusId}": {
+      "schema": { "$ref": "#/backend/entities/SyncStatus" },
+      "description": "Global sync metadata."
     },
     "/companies/{companyId}/journalEntries/{entryId}": {
       "schema": { "$ref": "#/backend/entities/JournalEntry" },

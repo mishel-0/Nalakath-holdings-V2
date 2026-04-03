@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -86,8 +87,8 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-3xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
-            <span className="text-black font-black text-3xl">N</span>
+          <div className="h-16 w-16 rounded-3xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
+            {/* Minimalist Sync Loader */}
           </div>
           <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Portfolio...</p>
         </div>
@@ -267,8 +268,8 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
           <div className="text-3xl font-bold font-mono tracking-tighter">
             {processedValue(value)}
           </div>
-          <div className="h-10 w-10 rounded-2xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-            <Icon className="h-5 w-5 text-black" />
+          <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20">
+            <Icon className="h-5 w-5 text-primary" />
           </div>
         </div>
         
