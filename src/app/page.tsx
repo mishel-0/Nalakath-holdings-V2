@@ -105,51 +105,43 @@ export default function Dashboard() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
             
-            <header className="flex flex-col gap-4">
+            <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-black font-black text-2xl">N</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Badge variant="outline" className={cn(
-                    "rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg w-fit",
-                    isAdmin ? "bg-primary/10 text-primary border-primary/30" : "bg-blue-500/10 text-blue-400 border-blue-400/30"
-                  )}>
-                    {isAdmin ? "Executive Console" : "Operational Desk"}
-                  </Badge>
-                  <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1.5 rounded-full border border-green-500/10 w-fit">
-                    <Activity className="h-3 w-3 animate-pulse" /> Live Ledger Sync
-                  </div>
+                <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
+                  EXECUTIVE CONSOLE
+                </Badge>
+                <div className="flex items-center gap-1.5 text-[9px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                  <Activity className="h-3 w-3" /> LIVE LEDGER SYNC
                 </div>
               </div>
               <div className="mt-2">
-                <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
+                <h1 className="text-5xl font-bold tracking-tight text-foreground font-headline">
                   Group Dashboard
                 </h1>
-                <p className="text-muted-foreground">
-                  Strategic management for the Nalakath portfolio.
+                <p className="text-muted-foreground mt-2 text-lg">
+                  Strategic financial management for Nalakath Holdings.
                 </p>
               </div>
             </header>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
-              <MetricCard title="Net Profit" value={stats.profit} icon={TrendingUp} trend={stats.profit >= 0 ? "up" : "down"} />
+              <MetricCard title="Net Operating Profit" value={stats.profit} icon={TrendingUp} trend="up" />
               <MetricCard title="Capital Expenditure" value={stats.projectCosts} icon={Briefcase} trend="down" />
               <MetricCard title="Action Required" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
-              <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-[2rem]">
+              <Card className="lg:col-span-4 glass border-white/5 overflow-hidden rounded-[2.5rem]">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
-                    <CardTitle className="text-lg font-bold">
+                    <CardTitle className="text-xl font-bold">
                       Fiscal Health Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs costs</p>
+                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs operating costs</p>
                   </div>
                   <Button variant="ghost" size="sm" className="text-primary text-[10px] font-bold uppercase tracking-widest">
-                    Analytics <ChevronRight className="h-3 w-3 ml-1" />
+                    ANALYTICS <ChevronRight className="h-3 w-3 ml-1" />
                   </Button>
                 </CardHeader>
                 <CardContent className="h-[300px] pt-4">
@@ -172,18 +164,18 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-3 glass border-white/5 rounded-[2rem] overflow-hidden border-primary/10">
+              <Card className="lg:col-span-3 glass border-white/5 rounded-[2.5rem] overflow-hidden border-primary/10">
                 <CardHeader className="bg-primary/5">
-                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Portfolio Breakdown
+                    Division Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="Infrastructure" value="42%" color="gold-gradient" />
-                  <DivisionBar name="Hospitality" value="38%" color="bg-accent" />
-                  <DivisionBar name="Real Estate" value="20%" color="bg-zinc-600" />
-                  <div className="pt-4 border-t border-white/5">
+                  <DivisionBar name="CONSTRUCTION INFRA" value="42%" color="gold-gradient" />
+                  <DivisionBar name="HOSPITALITY" value="38%" color="bg-accent" />
+                  <DivisionBar name="REAL ESTATE" value="20%" color="bg-zinc-600" />
+                  <div className="pt-6 border-t border-white/5 mt-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
                     <p className="text-xs text-muted-foreground italic leading-relaxed">
                       "Consolidated performance is meeting quarterly targets. Infrastructure variance is within tolerance."
@@ -194,9 +186,9 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="glass border-white/5 lg:col-span-2 rounded-[2rem]">
+              <Card className="glass border-white/5 lg:col-span-2 rounded-[2.5rem]">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <CardTitle className="text-xl font-bold flex items-center gap-2 text-white">
                     <History className="h-5 w-5 text-primary" />
                     Latest Ledger Activity
                   </CardTitle>
@@ -240,9 +232,9 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="glass border-white/5 rounded-[2rem]">
+              <Card className="glass border-white/5 rounded-[2.5rem]">
                 <CardHeader>
-                  <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
+                  <CardTitle className="text-xl font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
                     Priority Desk
                   </CardTitle>
@@ -255,7 +247,7 @@ export default function Dashboard() {
               </Card>
             </div>
             
-            <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-8">
+            <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-12">
               NALAKATH HOLDINGS © 2026
             </p>
           </div>
@@ -270,28 +262,29 @@ export default function Dashboard() {
 function MetricCard({ title, value, icon: Icon, trend, color, isAlert }: any) {
   return (
     <Card className={cn(
-      "glass border-white/5 ios-transition relative overflow-hidden group rounded-3xl",
-      isAlert ? "ring-2 ring-destructive/30 bg-destructive/5" : "hover:border-white/20"
+      "glass border-white/5 ios-transition relative overflow-hidden group rounded-[2.5rem] p-6 pt-8",
+      isAlert ? "ring-1 ring-destructive/30 bg-destructive/5" : "hover:border-white/20"
     )}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{title}</CardTitle>
-        <div className="p-2 bg-white/5 rounded-xl border border-white/10 group-hover:bg-primary/20 group-hover:border-primary/30 ios-transition">
-          <Icon className={cn("h-4 w-4 text-muted-foreground", color)} />
+      <div className="flex flex-col gap-1">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">{title}</p>
+        <div className="flex items-center justify-between">
+          <div className="text-5xl font-bold font-mono tracking-tighter text-white">
+            {processedValue(value)}
+          </div>
+          <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/40">
+            <Icon className="h-5 w-5 text-black" />
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold font-mono tracking-tighter">
-          {processedValue(value)}
-        </div>
-        <div className="flex items-center gap-2 mt-3">
-          <Badge variant="outline" className={cn(
-            "text-[8px] font-bold tracking-widest h-5 uppercase rounded-full border-none",
-            trend === "up" ? 'bg-green-500/10 text-green-500' : trend === "down" ? 'bg-destructive/10 text-destructive' : 'bg-white/5 text-muted-foreground'
+        <div className="flex items-center gap-2 mt-8">
+          <Badge className={cn(
+            "text-[9px] font-black tracking-widest h-6 uppercase rounded-full border-none px-3",
+            trend === "up" ? 'bg-green-500/20 text-green-500' : trend === "down" ? 'bg-destructive/20 text-destructive' : 'bg-white/10 text-muted-foreground'
           )}>
-            {trend === "up" ? "Gaining" : trend === "down" ? "Variance" : "Stable"} {trend === "none" ? "" : "vs last quarter"}
+            {trend === "up" ? "GAINING" : trend === "down" ? "VARIANCE" : "STABLE"} 
           </Badge>
+          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-60">VS LAST QUARTER</span>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }
@@ -304,12 +297,12 @@ function processedValue(val: any) {
 
 function DivisionBar({ name, value, color }: any) {
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+    <div className="space-y-3">
+      <div className="flex justify-between text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground">
         <span>{name}</span>
         <span className="text-white font-mono">{value}</span>
       </div>
-      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
         <div className={cn("h-full", color)} style={{ width: value }} />
       </div>
     </div>
@@ -319,11 +312,11 @@ function DivisionBar({ name, value, color }: any) {
 function AlertItem({ title, desc, severity }: any) {
   const colors = { high: "bg-destructive", medium: "bg-orange-500", low: "bg-green-500" };
   return (
-    <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 ios-transition group cursor-pointer">
+    <div className="flex gap-4 p-5 rounded-[2rem] bg-white/5 border border-white/10 hover:border-white/20 ios-transition group cursor-pointer">
       <div className={cn("mt-1.5 h-2 w-2 rounded-full", colors[severity as keyof typeof colors])} />
       <div>
-        <p className="text-sm font-bold leading-none">{title}</p>
-        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{desc}</p>
+        <p className="text-sm font-bold leading-none text-white">{title}</p>
+        <p className="text-xs text-muted-foreground mt-3 leading-relaxed">{desc}</p>
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto self-center group-hover:translate-x-1 ios-transition" />
     </div>

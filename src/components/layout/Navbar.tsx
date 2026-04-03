@@ -48,10 +48,13 @@ export function Navbar() {
     <header className="sticky top-0 z-40 w-full glass border-b border-white/10 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
-          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="text-black font-black text-xl">N</span>
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="h-8 w-8 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+              <span className="text-black font-black text-sm">N</span>
             </div>
+            <span className="text-sm font-black tracking-tighter text-white hidden sm:block">
+              NALAKATH HOLDINGS LEDGER
+            </span>
           </Link>
 
           <div className="h-6 w-px bg-white/10 hidden md:block" />
@@ -88,8 +91,8 @@ export function Navbar() {
           <div className="relative w-full">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
-              placeholder="Search Ledger..." 
-              className="pl-10 h-10 rounded-full bg-white/5 border-white/10 focus-visible:ring-primary/50"
+              placeholder="Search financials..." 
+              className="pl-10 h-10 rounded-full bg-white/10 border-white/10 focus-visible:ring-primary/50"
             />
           </div>
         </div>
