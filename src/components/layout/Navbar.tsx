@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Building2, Bell, Search, User, LogOut, Shield, ShieldCheck } from "lucide-react";
+import { ChevronDown, Building2, User, LogOut, Shield, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -44,19 +44,13 @@ export function Navbar() {
     signOut(auth);
   };
 
-  const logoUrl = "https://firebasestorage.googleapis.com/v0/b/studio-5249571912-a64ac.appspot.com/o/logo.png?alt=media&token=86609904-4861-419b-8e10-c057635c9110";
-
   return (
     <header className="sticky top-0 z-40 w-full glass border-b border-white/10 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-4 lg:gap-8">
           <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <div className="h-10 w-40 flex items-center">
-              <img 
-                src={logoUrl} 
-                alt="" 
-                className="h-full w-auto object-contain"
-              />
+            <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
+              <span className="text-black font-black text-xl">N</span>
             </div>
           </Link>
 
