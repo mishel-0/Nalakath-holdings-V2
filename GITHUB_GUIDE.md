@@ -1,11 +1,11 @@
 # Uploading to GitHub
 
-Follow these steps to upload your Apex Ledger to GitHub.
+Follow these steps to upload your Nalakath Holdings Ledger to GitHub.
 
 ## 1. Create a GitHub Repository
 1. Log in to [GitHub](https://github.com).
 2. Click the **"+"** icon in the top right and select **"New repository"**.
-3. Name it (e.g., `apex-ledger`), keep it **Private** for maximum confidentiality, and click **"Create repository"**.
+3. Name it (e.g., `nalakath-ledger`), keep it **Private** for maximum confidentiality, and click **"Create repository"**.
 4. **Important:** Do NOT initialize with a README, .gitignore, or license (we already have them).
 
 ## 2. Initialize and Push from your Terminal
@@ -19,7 +19,7 @@ git init
 git add .
 
 # Create initial commit
-git commit -m "Initial commit: Apex Ledger Premium ERP"
+git commit -m "Initial commit: Nalakath Holdings Premium ERP"
 
 # Set the branch to main
 git branch -M main
@@ -35,4 +35,4 @@ git push -u origin main
 Your `src/firebase/config.ts` contains your public Firebase config, which is safe to upload. However, never share your AI API keys (if you have them in a `.env` file). The provided `.gitignore` file will prevent `.env` from being uploaded.
 
 ---
-*Apex Group @2026*
+*Nalakath Group @2026*
