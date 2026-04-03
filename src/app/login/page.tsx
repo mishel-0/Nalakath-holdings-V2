@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, ArrowRight, Info } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Info, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -28,24 +28,16 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({ 
-        title: "Secure Access Granted", 
-        description: "Authenticated session established for Nalakath Holdings Ledger." 
+        title: "Access Authorized", 
+        description: "Secure session initialized for Nalakath Group Ledger." 
       });
       router.push('/');
     } catch (error: any) {
       console.error(error);
-      let errorMessage = "Authentication failed.";
-      
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        errorMessage = "Invalid credentials. Access denied.";
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "Access temporarily blocked due to many failed attempts. Please try again later.";
-      }
-      
       toast({
         variant: "destructive",
-        title: "Authentication Error",
-        description: errorMessage,
+        title: "Authentication Denied",
+        description: "Invalid credentials or unauthorized access attempt.",
       });
     } finally {
       setLoading(false);
@@ -66,24 +58,25 @@ export default function LoginPage() {
         </div>
 
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]">
-          <CardHeader className="text-center pt-10">
-            <CardTitle className="text-3xl font-headline font-bold tracking-tight text-foreground">
-              Secure Access
+          <CardHeader className="text-center pt-10 px-8">
+            <CardTitle className="text-3xl font-headline font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
+              Secure Ledger
+              <ShieldCheck className="h-6 w-6 text-primary" />
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
-              Authorized personnel only. Please enter your credentials.
+              Nalakath Holdings Group | Confidential Access
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-10">
+          <CardContent className="p-10 pt-6">
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">System Identity</Label>
+                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">System Identity</Label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="name@nalakath.com"
+                    placeholder="identity@nalakath.com"
                     className="pl-12 bg-white/5 border-white/10 rounded-2xl h-12 text-foreground focus-visible:ring-primary/50"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -93,7 +86,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Access Key</Label>
+                <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Access Key</Label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -118,11 +111,11 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="flex flex-col gap-4 mt-10 border-t border-white/5 pt-6">
-              <div className="flex items-center gap-2 justify-center p-3 rounded-2xl bg-white/5 border border-white/10">
-                <Info className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.1em] leading-tight">
-                  Encrypted Ledger Access. All sessions are logged for audit compliance.
+            <div className="mt-10 border-t border-white/5 pt-6">
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+                <Info className="h-5 w-5 text-primary shrink-0" />
+                <span className="text-[10px] text-muted-foreground font-semibold leading-tight">
+                  Encrypted financial data access. All sessions are audited for compliance with Nalakath Group security protocols.
                 </span>
               </div>
             </div>

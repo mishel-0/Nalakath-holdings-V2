@@ -45,7 +45,7 @@ export default function Dashboard() {
   const { user } = useUser();
   const companyId = "nalakath-holdings-main";
 
-  // Real-time data fetching
+  // Real-time data fetching - Shared across all roles for reflection
   const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers"), orderBy("createdAt", "desc"), limit(20)), [db]);
   const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db]);
   const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
@@ -67,6 +67,7 @@ export default function Dashboard() {
   const isAdmin = profile?.role === "Admin";
   const isAccountant = profile?.role === "Accountant";
 
+  // Metrics calculated from shared live data
   const stats = useMemo(() => {
     const totalRev = recentTransactions?.reduce((acc, tx) => acc + (tx.totalCredit || 0), 0) || 0;
     const totalExp = expenses?.reduce((acc, exp) => acc + (exp.amount || 0), 0) || 0;
@@ -97,7 +98,7 @@ export default function Dashboard() {
   if (isProfileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Initializing Role Data...</div>
+        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Syncing Role Data...</div>
       </div>
     );
   }
@@ -133,7 +134,7 @@ export default function Dashboard() {
               </p>
             </header>
 
-            {/* Metrics Section - Distinct per Role */}
+            {/* Metrics Section - Reflecting live data for both roles */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {isAdmin ? (
                 <>
@@ -144,10 +145,10 @@ export default function Dashboard() {
                 </>
               ) : (
                 <>
-                  <MetricCard title="Daily Revenue" value={stats.revenue * 0.15} icon={Calculator} trend="up" color="text-blue-400" />
+                  <MetricCard title="Live Revenue" value={stats.revenue} icon={Calculator} trend="up" color="text-blue-400" />
                   <MetricCard title="Verified Entries" value={recentTransactions?.length || 0} icon={ShieldCheck} trend="none" color="text-blue-400" />
-                  <MetricCard title="Operational Spend" value={stats.revenue - stats.profit} icon={History} trend="down" color="text-blue-400" />
-                  <MetricCard title="Active Vouchers" value={stats.alerts.toString()} icon={FileText} trend="none" color="text-blue-400" />
+                  <MetricCard title="Total Opex" value={stats.revenue - stats.profit} icon={History} trend="down" color="text-blue-400" />
+                  <MetricCard title="Pending Vouchers" value={stats.alerts.toString()} icon={FileText} trend="none" color="text-blue-400" />
                 </>
               )}
             </div>
@@ -202,7 +203,7 @@ export default function Dashboard() {
                       <div className="pt-4 border-t border-white/5">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">System AI Insight</p>
                         <p className="text-xs text-muted-foreground italic leading-relaxed">
-                          "Growth target reached in Infrastructure. Recommended re-allocation of Q3 surplus to Resort upgrades."
+                          "Live growth target reached. Data reflects current contributions from all active business divisions."
                         </p>
                       </div>
                     </CardContent>
@@ -234,7 +235,7 @@ export default function Dashboard() {
                       </div>
                       <Link href="/accounting">
                         <Button className="w-full rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-400/20 font-bold uppercase text-[10px] tracking-widest h-11">
-                          Reconcile Master Ledger
+                          Verify Master Ledger
                         </Button>
                       </Link>
                     </CardContent>
