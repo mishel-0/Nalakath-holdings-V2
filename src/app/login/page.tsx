@@ -73,41 +73,41 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-black relative overflow-hidden">
-      {/* Premium Background Accents */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px]" />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black relative overflow-hidden font-sans">
+      {/* Premium Gold Background Accents */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[160px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[160px]" />
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
-        <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2rem]">
-          <CardHeader className="text-center pt-10 px-8 border-none">
-            <p className="text-primary text-[10px] font-black tracking-[0.4em] uppercase">
+        <Card className="bg-zinc-950/60 backdrop-blur-3xl border-white/10 shadow-2xl overflow-hidden rounded-[3rem]">
+          <CardHeader className="text-center pt-12 px-8 border-none">
+            <p className="text-primary text-[11px] font-black tracking-[0.5em] uppercase">
               NALAKATH HOLDINGS
             </p>
-            <h2 className="text-2xl font-bold tracking-tight text-white mt-2">
+            <h2 className="text-3xl font-bold tracking-tight text-white mt-4">
               {isRegistering ? "System Registration" : "Executive Access"}
             </h2>
           </CardHeader>
-          <CardContent className="p-10 pt-6">
-            <form onSubmit={handleAuth} className="space-y-4">
+          <CardContent className="p-10 pt-8">
+            <form onSubmit={handleAuth} className="space-y-5">
               {isRegistering && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">First Name</Label>
+                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 ml-1">First Name</Label>
                       <Input
                         placeholder="Hafees"
-                        className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
+                        className="bg-white/5 border-white/10 rounded-2xl h-12 text-white placeholder:text-muted-foreground/40 focus-visible:ring-primary/50"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Last Name</Label>
+                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 ml-1">Last Name</Label>
                       <Input
                         placeholder="Admin"
-                        className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
+                        className="bg-white/5 border-white/10 rounded-2xl h-12 text-white placeholder:text-muted-foreground/40 focus-visible:ring-primary/50"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         required
@@ -115,12 +115,12 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">System Role</Label>
+                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 ml-1">System Role</Label>
                     <Select onValueChange={setRole} defaultValue={role}>
-                      <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12 text-white">
+                      <SelectTrigger className="bg-white/5 border-white/10 rounded-2xl h-12 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="glass border-white/10">
+                      <SelectContent className="bg-zinc-900 border-white/10">
                         <SelectItem value="Admin">Admin</SelectItem>
                         <SelectItem value="Accountant">Accountant</SelectItem>
                         <SelectItem value="Developer">Developer</SelectItem>
@@ -131,14 +131,14 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Identity Profile</Label>
+                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 ml-1">Identity Profile</Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-3.5 h-4 w-4 text-primary" />
+                  <Mail className="absolute left-4 top-4 h-4 w-4 text-primary" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="name@nalakath.com"
-                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
+                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-14 text-white placeholder:text-muted-foreground/40 focus-visible:ring-primary/50"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -147,14 +147,14 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Secure Key</Label>
+                <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 ml-1">Secure Key</Label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-3.5 h-4 w-4 text-primary" />
+                  <Lock className="absolute left-4 top-4 h-4 w-4 text-primary" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
+                    className="pl-12 bg-white/5 border-white/10 rounded-2xl h-14 text-white placeholder:text-muted-foreground/40 focus-visible:ring-primary/50"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -165,36 +165,36 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-14 rounded-xl gold-gradient text-black font-black hover:opacity-90 ios-transition mt-4 text-lg shadow-lg shadow-primary/20"
+                className="w-full h-16 rounded-2xl gold-gradient text-black font-black hover:opacity-90 transition-all duration-300 mt-6 text-lg shadow-xl shadow-primary/20"
               >
                 {loading ? "Authorizing..." : isRegistering ? "Initialize Account" : "Initialize Session"}
                 {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
               </Button>
 
-              <div className="text-center pt-2">
+              <div className="text-center pt-4">
                 <button
                   type="button"
                   onClick={() => setIsRegistering(!isRegistering)}
-                  className="text-[10px] uppercase tracking-widest font-bold text-primary hover:underline ios-transition"
+                  className="text-[11px] uppercase tracking-widest font-bold text-primary hover:text-primary/70 transition-colors"
                 >
                   {isRegistering ? "Back to Login" : "Register New Credentials"}
                 </button>
               </div>
             </form>
 
-            <div className="mt-8 border-t border-white/5 pt-6">
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="mt-10 border-t border-white/5 pt-8">
+              <div className="flex items-center gap-4 p-5 rounded-3xl bg-white/5 border border-white/10">
                 <Info className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-[10px] text-muted-foreground font-semibold leading-tight">
-                  Encrypted environment. All sessions and registrations are audited for compliance.
+                <span className="text-[10px] text-muted-foreground/60 font-semibold leading-relaxed tracking-wide">
+                  SECURE ENVIRONMENT. ALL SESSIONS AND REGISTRATIONS ARE AUDITED FOR FISCAL COMPLIANCE.
                 </span>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <p className="text-center mt-8 text-[10px] uppercase tracking-[0.4em] font-black text-muted-foreground opacity-30">
-          NALAKATH HOLDINGS © 2026
+        <p className="text-center mt-12 text-[10px] uppercase tracking-[0.5em] font-black text-white/20">
+          NALAKATH HOLDINGS • EST. 2026
         </p>
       </div>
     </div>
