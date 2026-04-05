@@ -16,7 +16,8 @@ import {
   Layers,
   ListTree,
   History,
-  RefreshCcw
+  RefreshCcw,
+  Terminal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -34,6 +35,7 @@ const navigation = [
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI Insights", href: "/insights", icon: Sparkles },
   { name: "Dev Sync", href: "/dev-sync", icon: RefreshCcw, adminOnly: true },
+  { name: "Dev Console", href: "/developer", icon: Terminal, devOnly: true },
   { name: "System Logs", href: "/logs", icon: History, adminOnly: true },
 ];
 
@@ -49,8 +51,13 @@ export function Sidebar() {
 
   const { data: profile } = useDoc(profileDocRef);
   const isAdmin = profile?.role === "Admin";
+  const isDev = profile?.role === "Developer";
 
-  const filteredNavigation = navigation.filter(item => !item.adminOnly || isAdmin);
+  const filteredNavigation = navigation.filter(item => {
+    if (item.adminOnly && !isAdmin && !isDev) return false;
+    if (item.devOnly && !isDev) return false;
+    return true;
+  });
 
   return (
     <aside className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-64 border-r border-white/10 glass md:block">

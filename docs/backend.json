@@ -10,22 +10,9 @@
         "firstName": { "type": "string" },
         "lastName": { "type": "string" },
         "email": { "type": "string" },
-        "role": { "type": "string" }
+        "role": { "type": "string", "enum": ["Admin", "Accountant", "Developer"] }
       },
       "required": ["id", "firstName", "lastName", "email", "role"]
-    },
-    "SyncStatus": {
-      "title": "SyncStatus",
-      "type": "object",
-      "description": "Tracks development synchronization state.",
-      "properties": {
-        "id": { "type": "string" },
-        "lastSyncAt": { "type": "string", "format": "date-time" },
-        "lastCommitMessage": { "type": "string" },
-        "deploymentStatus": { "type": "string" },
-        "syncByUserId": { "type": "string" }
-      },
-      "required": ["lastSyncAt", "deploymentStatus"]
     },
     "AuditLog": {
       "title": "AuditLog",
@@ -42,16 +29,31 @@
       },
       "required": ["id", "userId", "action", "entity", "timestamp"]
     },
-    "JournalEntry": {
-      "title": "JournalEntry",
+    "SystemError": {
+      "title": "SystemError",
       "type": "object",
-      "description": "Financial transaction records.",
+      "description": "Tracks all system-level exceptions and errors.",
       "properties": {
         "id": { "type": "string" },
-        "date": { "type": "string" },
-        "description": { "type": "string" },
-        "totalDebit": { "type": "number" },
-        "totalCredit": { "type": "number" }
+        "message": { "type": "string" },
+        "source": { "type": "string" },
+        "severity": { "type": "string", "enum": ["warning", "critical"] },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["message", "source", "severity", "timestamp"]
+    },
+    "DataHealthMetric": {
+      "title": "DataHealthMetric",
+      "type": "object",
+      "description": "Periodic snapshot of data quality metrics.",
+      "properties": {
+        "id": { "type": "string" },
+        "score": { "type": "number" },
+        "invalidCount": { "type": "number" },
+        "missingFieldsCount": { "type": "number" },
+        "duplicateCount": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
       }
     }
   },
@@ -59,17 +61,21 @@
     "providers": ["password"]
   },
   "firestore": {
+    "/userProfiles/{userId}": {
+      "schema": { "$ref": "#/backend/entities/UserProfile" },
+      "description": "Global user profiles."
+    },
     "/auditLogs/{logId}": {
       "schema": { "$ref": "#/backend/entities/AuditLog" },
       "description": "Stores all system activity logs."
     },
-    "/syncStatus/{statusId}": {
-      "schema": { "$ref": "#/backend/entities/SyncStatus" },
-      "description": "Global sync metadata."
+    "/systemErrors/{errorId}": {
+      "schema": { "$ref": "#/backend/entities/SystemError" },
+      "description": "Central repository for error logs."
     },
-    "/companies/{companyId}/journalEntries/{entryId}": {
-      "schema": { "$ref": "#/backend/entities/JournalEntry" },
-      "description": "Company journal entries."
+    "/dataHealthMetrics/{metricId}": {
+      "schema": { "$ref": "#/backend/entities/DataHealthMetric" },
+      "description": "Data quality snapshots."
     }
   }
 }
