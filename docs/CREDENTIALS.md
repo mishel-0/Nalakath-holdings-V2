@@ -14,5 +14,11 @@ Use these credentials when registering your initial accounts to ensure proper ro
 - **Password:** `HafeesPassword2026!`
 - **Capabilities:** Operational access to Accounting (Ledger), Expenses, Reports, AI Insights, and Chart of Accounts.
 
+## 3. Developer Account
+- **Role:** Developer
+- **Email:** `dev@nalakath.com`
+- **Password:** `DevPassword2026!`
+- **Capabilities:** Kernel-level access, Data Engine monitoring, Live Activity Feed, System Error Logs, and Cloud Data Control.
+
 ---
-*Note: Registration is currently enabled for initial setup. All access is audited via the System Logs.*
+*Note: Registration is currently enabled for initial setup. All access is audited via the System Logs and Kernel Audit Trail.*
