@@ -86,9 +86,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-3xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
-            {/* Minimalist Sync Loader */}
-          </div>
+          <div className="h-16 w-16 rounded-3xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse" />
           <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Portfolio...</p>
         </div>
       </div>
