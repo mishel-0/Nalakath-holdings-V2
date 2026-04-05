@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, ArrowRight, Info, User as UserIcon } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Info } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function LoginPage() {
@@ -34,11 +33,9 @@ export default function LoginPage() {
 
     try {
       if (isRegistering) {
-        // Create the user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Initialize the user profile in Firestore with the selected role
         await setDoc(doc(db, 'userProfiles', user.uid), {
           id: user.uid,
           firstName,
@@ -52,7 +49,6 @@ export default function LoginPage() {
           description: `Secure profile created for ${firstName} (${role}).` 
         });
       } else {
-        // Standard Sign In
         await signInWithEmailAndPassword(auth, email, password);
         toast({ 
           title: "Access Authorized", 
@@ -78,15 +74,19 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-black relative overflow-hidden">
+      {/* Premium Background Accents */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px]" />
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
         <Card className="glass border-white/10 shadow-2xl overflow-hidden rounded-[2rem]">
           <CardHeader className="text-center pt-10 px-8 border-none">
-            <p className="text-muted-foreground text-[10px] font-bold tracking-[0.3em] uppercase">
+            <p className="text-primary text-[10px] font-black tracking-[0.4em] uppercase">
               NALAKATH HOLDINGS
             </p>
+            <h2 className="text-2xl font-bold tracking-tight text-white mt-2">
+              {isRegistering ? "System Registration" : "Executive Access"}
+            </h2>
           </CardHeader>
           <CardContent className="p-10 pt-6">
             <form onSubmit={handleAuth} className="space-y-4">
@@ -97,7 +97,7 @@ export default function LoginPage() {
                       <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">First Name</Label>
                       <Input
                         placeholder="Hafees"
-                        className="bg-white/5 border-white/10 rounded-xl h-12 text-foreground focus-visible:ring-primary/50"
+                        className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
@@ -106,8 +106,8 @@ export default function LoginPage() {
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Last Name</Label>
                       <Input
-                        placeholder="Group"
-                        className="bg-white/5 border-white/10 rounded-xl h-12 text-foreground focus-visible:ring-primary/50"
+                        placeholder="Admin"
+                        className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         required
@@ -117,10 +117,10 @@ export default function LoginPage() {
                   <div className="space-y-2">
                     <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">System Role</Label>
                     <Select onValueChange={setRole} defaultValue={role}>
-                      <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12 text-foreground">
+                      <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="glass">
+                      <SelectContent className="glass border-white/10">
                         <SelectItem value="Admin">Admin</SelectItem>
                         <SelectItem value="Accountant">Accountant</SelectItem>
                         <SelectItem value="Developer">Developer</SelectItem>
@@ -133,12 +133,12 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Identity Profile</Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-4 top-3.5 h-4 w-4 text-primary" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="name@nalakath.com"
-                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-foreground focus-visible:ring-primary/50"
+                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -149,12 +149,12 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <Label htmlFor="password" title="password" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Secure Key</Label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-4 top-3.5 h-4 w-4 text-primary" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-foreground focus-visible:ring-primary/50"
+                    className="pl-12 bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-muted-foreground focus-visible:ring-primary/50"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -165,7 +165,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-14 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 ios-transition mt-4 text-lg shadow-lg shadow-primary/20"
+                className="w-full h-14 rounded-xl gold-gradient text-black font-black hover:opacity-90 ios-transition mt-4 text-lg shadow-lg shadow-primary/20"
               >
                 {loading ? "Authorizing..." : isRegistering ? "Initialize Account" : "Initialize Session"}
                 {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
@@ -193,7 +193,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
         
-        <p className="text-center mt-8 text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-50">
+        <p className="text-center mt-8 text-[10px] uppercase tracking-[0.4em] font-black text-muted-foreground opacity-30">
           NALAKATH HOLDINGS © 2026
         </p>
       </div>
