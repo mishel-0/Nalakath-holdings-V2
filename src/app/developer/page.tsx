@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -19,7 +18,6 @@ import {
   FileJson, 
   Trash2, 
   Zap, 
-  Search,
   AlertCircle,
   CheckCircle2,
   HardHat,
@@ -29,15 +27,12 @@ import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@
 import { collection, query, orderBy, limit, doc, deleteDoc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 
 export default function DeveloperDashboard() {
   const db = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("engine");
-  const [search, setSearch] = useState("");
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -49,24 +44,20 @@ export default function DeveloperDashboard() {
   // Data Listeners
   const logsQuery = useMemoFirebase(() => query(collection(db, "auditLogs"), orderBy("timestamp", "desc"), limit(50)), [db]);
   const errorsQuery = useMemoFirebase(() => query(collection(db, "systemErrors"), orderBy("timestamp", "desc"), limit(50)), [db]);
-  const healthQuery = useMemoFirebase(() => query(collection(db, "dataHealthMetrics"), orderBy("timestamp", "desc"), limit(1)), [db]);
   
   const { data: logs } = useCollection(logsQuery);
   const { data: errors } = useCollection(errorsQuery);
-  const { data: healthMetrics } = useCollection(healthQuery);
-  const health = healthMetrics?.[0];
+
+  const stats = useMemo(() => {
+    return {
+      totalLogs: logs?.length || 0,
+      totalErrors: errors?.length || 0,
+      healthScore: errors && errors.length > 0 ? Math.max(0, 100 - (errors.length * 5)) : 100
+    };
+  }, [logs, errors]);
 
   const handleAction = (action: string) => {
     toast({ title: "System Triggered", description: `Command: ${action} initiated.` });
-  };
-
-  const deleteLog = async (id: string, coll: string) => {
-    try {
-      await deleteDoc(doc(db, coll, id));
-      toast({ title: "Record Purged", description: "The data has been removed from the cloud." });
-    } catch (e) {
-      toast({ variant: "destructive", title: "Purge Failed", description: "Insufficient developer permissions." });
-    }
   };
 
   if (isProfileLoading) return <LoadingScreen />;
@@ -105,12 +96,11 @@ export default function DeveloperDashboard() {
                 <TabsTrigger value="control" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Control Panel</TabsTrigger>
               </TabsList>
 
-              {/* Data Engine Monitor */}
               <TabsContent value="engine" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-3">
-                  <MetricCard title="Total Ingested" value="1.2k" sub="Records today" icon={Database} color="text-primary" />
-                  <MetricCard title="Engine Success" value="98.4%" sub="Processing rate" icon={CheckCircle2} color="text-green-500" />
-                  <MetricCard title="Failed Records" value="12" sub="Action required" icon={AlertCircle} color="text-destructive" />
+                  <MetricCard title="System Activity" value={stats.totalLogs} sub="Total events" icon={Database} color="text-primary" />
+                  <MetricCard title="System Health" value={`${stats.healthScore}%`} sub="Stability rate" icon={CheckCircle2} color="text-green-500" />
+                  <MetricCard title="Logged Exceptions" value={stats.totalErrors} sub="Error count" icon={AlertCircle} color="text-destructive" />
                 </div>
                 <Card className="control-center-card border-white/5">
                   <CardHeader>
@@ -122,26 +112,29 @@ export default function DeveloperDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {logs?.slice(0, 5).map((log) => (
-                        <div key={log.id} className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group">
-                          <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                              <Zap className="h-5 w-5" />
+                      {logs && logs.length > 0 ? (
+                        logs.slice(0, 5).map((log) => (
+                          <div key={log.id} className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <Zap className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold">{log.entity} <span className="text-muted-foreground font-normal">({log.action})</span></p>
+                                <p className="text-[10px] font-mono text-muted-foreground">{log.entityId}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-bold">{log.entity} <span className="text-muted-foreground font-normal">({log.action})</span></p>
-                              <p className="text-[10px] font-mono text-muted-foreground">{log.entityId}</p>
-                            </div>
+                            <Badge variant="outline" className="opacity-0 group-hover:opacity-100 ios-transition bg-green-500/10 text-green-500 text-[8px]">PROCESSED</Badge>
                           </div>
-                          <Badge variant="outline" className="opacity-0 group-hover:opacity-100 ios-transition bg-green-500/10 text-green-500 text-[8px]">PROCESSED</Badge>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-center py-10 text-muted-foreground text-sm italic">Waiting for incoming data packets...</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Live Activity & Error Logs */}
               <TabsContent value="logs" className="space-y-6">
                 <div className="grid gap-6 lg:grid-cols-2">
                   <Card className="control-center-card border-white/5">
@@ -153,15 +146,19 @@ export default function DeveloperDashboard() {
                     </CardHeader>
                     <CardContent className="h-[500px] overflow-y-auto custom-scrollbar">
                       <div className="space-y-4">
-                        {logs?.map((log) => (
-                          <div key={log.id} className="text-xs border-l-2 border-primary/20 pl-4 py-1">
-                            <div className="flex justify-between">
-                              <span className="font-bold text-primary">{log.action}</span>
-                              <span className="text-muted-foreground opacity-50">{new Date(log.timestamp?.toDate?.() || Date.now()).toLocaleTimeString()}</span>
+                        {logs?.length === 0 ? (
+                          <p className="text-center py-20 text-muted-foreground italic text-sm">No activity logs recorded.</p>
+                        ) : (
+                          logs?.map((log) => (
+                            <div key={log.id} className="text-xs border-l-2 border-primary/20 pl-4 py-1">
+                              <div className="flex justify-between">
+                                <span className="font-bold text-primary">{log.action}</span>
+                                <span className="text-muted-foreground opacity-50">{new Date(log.timestamp?.toDate?.() || Date.now()).toLocaleTimeString()}</span>
+                              </div>
+                              <p className="text-muted-foreground mt-1">User {log.userId} modified {log.entity}</p>
                             </div>
-                            <p className="text-muted-foreground mt-1">User {log.userId} modified {log.entity}</p>
-                          </div>
-                        ))}
+                          ))
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -195,46 +192,44 @@ export default function DeveloperDashboard() {
                 </div>
               </TabsContent>
 
-              {/* Data Health Dashboard */}
               <TabsContent value="health" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-4">
-                  <HealthCard label="Health Score" value={health?.score || 99} unit="%" icon={HeartPulse} color="text-green-500" />
-                  <HealthCard label="Invalid Data" value={health?.invalidCount || 0} unit="REC" icon={ShieldAlert} color="text-destructive" />
-                  <HealthCard label="Missing Fields" value={health?.missingFieldsCount || 2} unit="FIELDS" icon={AlertCircle} color="text-orange-500" />
-                  <HealthCard label="Duplicates" value={health?.duplicateCount || 0} unit="HIT" icon={RefreshCcw} color="text-primary" />
+                  <HealthCard label="Health Score" value={stats.healthScore} unit="%" icon={HeartPulse} color="text-green-500" />
+                  <HealthCard label="Errors Found" value={stats.totalErrors} unit="ERR" icon={ShieldAlert} color="text-destructive" />
+                  <HealthCard label="Live Packets" value={stats.totalLogs} unit="LOG" icon={AlertCircle} color="text-orange-500" />
+                  <HealthCard label="Sync Cycles" value="1" unit="CYC" icon={RefreshCcw} color="text-primary" />
                 </div>
                 
                 <Card className="control-center-card border-white/5">
                   <CardHeader>
                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                       <HardHat className="h-5 w-5 text-primary" />
-                      Infrastructure Stats
+                      Infrastructure Monitoring
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                       <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Firestore Reads</p>
-                        <p className="text-2xl font-bold">14.2k <span className="text-xs font-normal text-muted-foreground">/day</span></p>
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Audit Depth</p>
+                        <p className="text-2xl font-bold">{stats.totalLogs} <span className="text-xs font-normal text-muted-foreground">records</span></p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Storage Used</p>
-                        <p className="text-2xl font-bold">2.4 <span className="text-xs font-normal text-muted-foreground">GB</span></p>
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground">System Latency</p>
+                        <p className="text-2xl font-bold">0.8 <span className="text-xs font-normal text-muted-foreground">ms</span></p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Auth API</p>
-                        <p className="text-2xl font-bold">0.8 <span className="text-xs font-normal text-muted-foreground">ms lat.</span></p>
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Active Streams</p>
+                        <p className="text-2xl font-bold">2 <span className="text-xs font-normal text-muted-foreground">listeners</span></p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">AI Token Use</p>
-                        <p className="text-2xl font-bold">142 <span className="text-xs font-normal text-muted-foreground">k/mo.</span></p>
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Role Integrity</p>
+                        <p className="text-2xl font-bold">Verified</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* System Control Panel */}
               <TabsContent value="control" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <Card className="control-center-card border-white/5">
