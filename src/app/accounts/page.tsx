@@ -103,16 +103,11 @@ export default function ChartOfAccountsPage() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-black font-black text-xl">N</span>
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3">
-                    Chart of Accounts
-                  </h1>
-                  <p className="text-muted-foreground">Master list of all ledger accounts across divisions.</p>
-                </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3">
+                  Chart of Accounts
+                </h1>
+                <p className="text-muted-foreground">Master list of all ledger accounts across divisions.</p>
               </div>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>

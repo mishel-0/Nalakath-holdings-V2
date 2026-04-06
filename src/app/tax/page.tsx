@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -235,7 +234,7 @@ export default function TaxEnginePage() {
                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                       <Calculator className="h-5 w-5 text-primary" />
                       Live Breakdown
-                    </Calculator>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="p-6 rounded-[2rem] bg-background/50 border border-white/5 space-y-4">

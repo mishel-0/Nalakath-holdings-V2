@@ -49,9 +49,6 @@ export default function LogsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
-            <span className="text-black font-black text-3xl">N</span>
-          </div>
           <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Verifying Credentials...</p>
         </div>
       </div>
@@ -67,9 +64,6 @@ export default function LogsPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-black font-black text-xl">N</span>
-                </div>
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className="rounded-full px-3 py-1 bg-primary/10 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-widest">
                     System Audit
