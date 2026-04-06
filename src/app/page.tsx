@@ -65,15 +65,15 @@ export default function Dashboard() {
     const projectCosts = projects?.reduce((acc, proj) => acc + (proj.actualCost || 0), 0) || 0;
     const pendingVouchers = vouchers?.filter(v => v.status === "Pending").length || 0;
 
-    // Aggregate cost allocations for HQ
-    let allocations = { material: 45, labour: 30, land: 15, profit: 10 };
+    // Aggregate cost allocations for HQ - INITIALIZED TO ZERO
+    let allocations = { material: 0, labour: 0, land: 0, profit: 0 };
     if (projects && projects.length > 0) {
       const avg = (field: string) => projects.reduce((acc, p) => acc + (p[field] || 0), 0) / projects.length;
       allocations = {
-        material: avg('materialAllocation') || 45,
-        labour: avg('labourAllocation') || 30,
-        land: avg('landAllocation') || 15,
-        profit: avg('profitMarginAllocation') || 10
+        material: avg('materialAllocation') || 0,
+        labour: avg('labourAllocation') || 0,
+        land: avg('landAllocation') || 0,
+        profit: avg('profitMarginAllocation') || 0
       };
     }
 
