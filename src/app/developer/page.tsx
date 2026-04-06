@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -24,7 +24,7 @@ import {
   HeartPulse
 } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase";
-import { collection, query, orderBy, limit, doc, deleteDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -33,6 +33,11 @@ export default function DeveloperDashboard() {
   const { user } = useUser();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("engine");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -60,7 +65,8 @@ export default function DeveloperDashboard() {
     toast({ title: "System Triggered", description: `Command: ${action} initiated.` });
   };
 
-  if (isProfileLoading) return <LoadingScreen />;
+  if (!mounted || isProfileLoading) return <LoadingScreen mounted={mounted} />;
+  
   if (profile?.role !== "Developer" && profile?.role !== "Admin") {
     return <AccessDenied />;
   }
@@ -119,12 +125,12 @@ export default function DeveloperDashboard() {
                               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <Zap className="h-5 w-5" />
                               </div>
-                              <div>
-                                <p className="text-sm font-bold">{log.entity} <span className="text-muted-foreground font-normal">({log.action})</span></p>
-                                <p className="text-[10px] font-mono text-muted-foreground">{log.entityId}</p>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold truncate">{log.entity} <span className="text-muted-foreground font-normal">({log.action})</span></p>
+                                <p className="text-[10px] font-mono text-muted-foreground truncate">{log.entityId}</p>
                               </div>
                             </div>
-                            <Badge variant="outline" className="opacity-0 group-hover:opacity-100 ios-transition bg-green-500/10 text-green-500 text-[8px]">PROCESSED</Badge>
+                            <Badge variant="outline" className="opacity-0 group-hover:opacity-100 ios-transition bg-green-500/10 text-green-500 text-[8px] shrink-0">PROCESSED</Badge>
                           </div>
                         ))
                       ) : (
@@ -150,12 +156,12 @@ export default function DeveloperDashboard() {
                           <p className="text-center py-20 text-muted-foreground italic text-sm">No activity logs recorded.</p>
                         ) : (
                           logs?.map((log) => (
-                            <div key={log.id} className="text-xs border-l-2 border-primary/20 pl-4 py-1">
-                              <div className="flex justify-between">
-                                <span className="font-bold text-primary">{log.action}</span>
-                                <span className="text-muted-foreground opacity-50">{new Date(log.timestamp?.toDate?.() || Date.now()).toLocaleTimeString()}</span>
+                            <div key={log.id} className="text-xs border-l-2 border-primary/20 pl-4 py-1 min-w-0">
+                              <div className="flex justify-between gap-2 overflow-hidden">
+                                <span className="font-bold text-primary truncate">{log.action}</span>
+                                <span className="text-muted-foreground opacity-50 shrink-0">{new Date(log.timestamp?.toDate?.() || Date.now()).toLocaleTimeString()}</span>
                               </div>
-                              <p className="text-muted-foreground mt-1">User {log.userId} modified {log.entity}</p>
+                              <p className="text-muted-foreground mt-1 truncate">User {log.userId} modified {log.entity}</p>
                             </div>
                           ))
                         )}
@@ -176,13 +182,13 @@ export default function DeveloperDashboard() {
                           <p className="text-center py-20 text-muted-foreground italic text-sm">No critical exceptions detected.</p>
                         ) : (
                           errors?.map((err) => (
-                            <div key={err.id} className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20">
-                              <div className="flex justify-between items-start mb-2">
-                                <Badge variant="destructive" className="text-[8px] tracking-widest">{err.severity}</Badge>
-                                <span className="text-[10px] font-mono text-muted-foreground">{err.timestamp}</span>
+                            <div key={err.id} className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 min-w-0">
+                              <div className="flex justify-between items-start mb-2 gap-2 overflow-hidden">
+                                <Badge variant="destructive" className="text-[8px] tracking-widest shrink-0">{err.severity}</Badge>
+                                <span className="text-[10px] font-mono text-muted-foreground truncate">{err.timestamp}</span>
                               </div>
-                              <p className="text-sm font-bold text-destructive">{err.message}</p>
-                              <p className="text-[10px] text-muted-foreground mt-1 font-mono">SOURCE: {err.source}</p>
+                              <p className="text-sm font-bold text-destructive truncate">{err.message}</p>
+                              <p className="text-[10px] text-muted-foreground mt-1 font-mono truncate">SOURCE: {err.source}</p>
                             </div>
                           ))
                         )}
@@ -209,21 +215,21 @@ export default function DeveloperDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                      <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Audit Depth</p>
-                        <p className="text-2xl font-bold">{stats.totalLogs} <span className="text-xs font-normal text-muted-foreground">records</span></p>
+                      <div className="space-y-1 min-w-0">
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground truncate">Audit Depth</p>
+                        <p className="text-2xl font-bold truncate">{stats.totalLogs} <span className="text-xs font-normal text-muted-foreground">records</span></p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">System Latency</p>
-                        <p className="text-2xl font-bold">0.8 <span className="text-xs font-normal text-muted-foreground">ms</span></p>
+                      <div className="space-y-1 min-w-0">
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground truncate">System Latency</p>
+                        <p className="text-2xl font-bold truncate">0.8 <span className="text-xs font-normal text-muted-foreground">ms</span></p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Active Streams</p>
-                        <p className="text-2xl font-bold">2 <span className="text-xs font-normal text-muted-foreground">listeners</span></p>
+                      <div className="space-y-1 min-w-0">
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground truncate">Active Streams</p>
+                        <p className="text-2xl font-bold truncate">2 <span className="text-xs font-normal text-muted-foreground">listeners</span></p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Role Integrity</p>
-                        <p className="text-2xl font-bold">Verified</p>
+                      <div className="space-y-1 min-w-0">
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground truncate">Role Integrity</p>
+                        <p className="text-2xl font-bold truncate">Verified</p>
                       </div>
                     </div>
                   </CardContent>
@@ -251,14 +257,14 @@ export default function DeveloperDashboard() {
                       <CardDescription>Advanced auditing and log management.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex justify-between items-center">
-                        <div>
-                          <p className="text-sm font-bold">Developer Auditing</p>
-                          <p className="text-[10px] text-muted-foreground">Log all Dev Console actions to Kernel.</p>
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex justify-between items-center gap-4 min-w-0">
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold truncate">Developer Auditing</p>
+                          <p className="text-[10px] text-muted-foreground truncate">Log all Dev Console actions to Kernel.</p>
                         </div>
-                        <Badge className="bg-green-500 text-black">ACTIVE</Badge>
+                        <Badge className="bg-green-500 text-black shrink-0">ACTIVE</Badge>
                       </div>
-                      <Button variant="outline" className="w-full rounded-2xl border-destructive/20 text-destructive hover:bg-destructive/10">
+                      <Button variant="outline" className="w-full rounded-2xl border-destructive/20 text-destructive hover:bg-destructive/10 truncate">
                         Clear Audit Trail (Restricted)
                       </Button>
                     </CardContent>
@@ -280,18 +286,18 @@ export default function DeveloperDashboard() {
 
 function MetricCard({ title, value, sub, icon: Icon, color }: any) {
   return (
-    <Card className="control-center-card border-white/5 group">
-      <div className="flex flex-col gap-1">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">{title}</p>
-        <div className="flex items-center justify-between">
-          <div className={cn("text-3xl font-bold font-mono tracking-tighter", color)}>
+    <Card className="control-center-card border-white/5 group min-w-0">
+      <div className="flex flex-col gap-1 relative overflow-hidden">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 truncate">{title}</p>
+        <div className="flex items-center justify-between gap-2 overflow-hidden">
+          <div className={cn("text-3xl font-bold font-mono tracking-tighter truncate", color)} title={String(value)}>
             {value}
           </div>
-          <div className="h-10 w-10 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary ios-transition">
+          <div className="h-10 w-10 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary ios-transition shrink-0">
             <Icon className="h-5 w-5" />
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-4 font-medium uppercase tracking-widest opacity-60">{sub}</p>
+        <p className="text-[10px] text-muted-foreground mt-4 font-medium uppercase tracking-widest opacity-60 truncate">{sub}</p>
       </div>
     </Card>
   );
@@ -299,13 +305,13 @@ function MetricCard({ title, value, sub, icon: Icon, color }: any) {
 
 function HealthCard({ label, value, unit, icon: Icon, color }: any) {
   return (
-    <div className="p-6 rounded-[2rem] glass border border-white/5 flex flex-col gap-4">
+    <div className="p-6 rounded-[2rem] glass border border-white/5 flex flex-col gap-4 min-w-0">
       <div className={cn("p-3 rounded-2xl bg-white/5 w-fit", color)}>
         <Icon className="h-5 w-5" />
       </div>
-      <div>
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
-        <p className="text-2xl font-black font-mono mt-1">{value} <span className="text-xs font-normal opacity-40">{unit}</span></p>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{label}</p>
+        <p className="text-2xl font-black font-mono mt-1 truncate">{value} <span className="text-xs font-normal opacity-40">{unit}</span></p>
       </div>
     </div>
   );
@@ -317,22 +323,28 @@ function ControlButton({ icon: Icon, label, onClick, variant = "default" }: any)
       onClick={onClick}
       variant="ghost" 
       className={cn(
-        "h-24 rounded-[2rem] glass flex flex-col gap-2 border border-white/5 hover:border-white/10 ios-transition",
+        "h-24 rounded-[2rem] glass flex flex-col gap-2 border border-white/5 hover:border-white/10 ios-transition min-w-0 overflow-hidden",
         variant === "destructive" ? "hover:bg-destructive/10 hover:text-destructive" : "hover:bg-primary/10 hover:text-primary"
       )}
     >
-      <Icon className="h-6 w-6" />
-      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+      <Icon className="h-6 w-6 shrink-0" />
+      <span className="text-[10px] font-bold uppercase tracking-widest truncate w-full px-2">{label}</span>
     </Button>
   );
 }
 
-function LoadingScreen() {
+function LoadingScreen({ mounted }: { mounted: boolean }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="flex flex-col items-center gap-4">
-        <div className="h-16 w-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-        <p className="text-primary font-mono text-xs uppercase tracking-[0.3em] animate-pulse">Initializing Kernel...</p>
+        {mounted ? (
+          <>
+            <div className="h-16 w-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
+            <p className="text-primary font-mono text-xs uppercase tracking-[0.3em] animate-pulse">Initializing Kernel...</p>
+          </>
+        ) : (
+          <div className="h-16 w-16" />
+        )}
       </div>
     </div>
   );
@@ -347,7 +359,7 @@ function AccessDenied() {
         <p className="text-muted-foreground text-sm leading-relaxed">
           This environment is restricted to the Developer role. Your attempt has been logged and reported to the system overseer.
         </p>
-        <Button className="mt-8 rounded-full px-8" asChild>
+        <Button className="mt-8 rounded-full px-8 truncate" asChild>
           <a href="/">Return to Dashboard</a>
         </Button>
       </Card>
