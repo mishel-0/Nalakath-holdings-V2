@@ -23,7 +23,6 @@ import {
   Clock,
   Layers,
   FolderPlus,
-  Settings2,
   Send
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -165,10 +164,11 @@ export default function ExpensesPage() {
     const phaseName = phases?.find(p => p.id === exp.phaseId)?.name || "Unassigned";
     const now = new Date().toISOString();
     
+    // ENSURING ALL FIELDS ARE SYNCED TO THE VOUCHER MODULE
     const newVoucher = {
       companyId,
       expenseId: exp.id,
-      voucherNumber: `V-${exp.id.substring(0, 6).toUpperCase()}`,
+      voucherNumber: exp.invoiceNumber || `V-${exp.id.substring(0, 6).toUpperCase()}`,
       division: activeDivision.division,
       vendorName: exp.clientName || "General Vendor",
       date: exp.expenseDate,
@@ -177,13 +177,13 @@ export default function ExpensesPage() {
       status: exp.status === "Paid" ? "Paid" : "Pending",
       phaseName: phaseName,
       description: exp.description,
-      expenseCategory: exp.expenseCategory,
+      expenseCategory: exp.expenseType || exp.expenseCategory || "Operational",
       createdAt: now,
       updatedAt: now,
     };
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "vouchers"), newVoucher);
-    toast({ title: "Voucher Generated", description: `Financial record pushed to Payment Vouchers for ${phaseName}.` });
+    toast({ title: "Voucher Sync Complete", description: `Record pushed to Payment Vouchers for Audit.` });
   };
 
   const handlePrint = () => {
@@ -439,7 +439,7 @@ export default function ExpensesPage() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="glass rounded-2xl">
                                       <DropdownMenuItem onClick={() => handleCreateVoucherFromExpense(exp)} className="text-xs font-bold text-green-500 cursor-pointer">
-                                        <Send className="h-3 w-3 mr-2" /> Push to Vouchers
+                                        <Send className="h-3 w-3 mr-2" /> Push to Audit Vouchers
                                       </DropdownMenuItem>
                                       {exp.expenseType === "Client Invoice" && (
                                         <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
