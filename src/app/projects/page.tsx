@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Activity, HardHat, Pencil, Trash2, MoreVertical } from "lucide-react";
+import { Plus, Activity, HardHat, Pencil, Trash2, MoreVertical, Droplets } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -84,6 +84,7 @@ export default function ProjectsPage() {
       actualCost: 0,
       image: "https://picsum.photos/seed/" + Math.random() + "/600/400",
       progress: 0,
+      liquidityPercentage: Number(formData.get("liquidity")) || 0,
       createdAt: now,
       updatedAt: now,
     };
@@ -104,6 +105,7 @@ export default function ProjectsPage() {
       startDate: formData.get("startDate") as string,
       budgetAmount: Number(formData.get("budget")),
       progress: Number(formData.get("progress")),
+      liquidityPercentage: Number(formData.get("liquidity")),
       actualCost: Number(formData.get("actualCost")),
       status: formData.get("status") as string,
       updatedAt: new Date().toISOString(),
@@ -161,9 +163,15 @@ export default function ProjectsPage() {
                       <Label htmlFor="description">Description</Label>
                       <Textarea id="description" name="description" required className="bg-white/5 border-white/10 rounded-xl" />
                     </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="budget">Total Budget (₹)</Label>
-                      <Input id="budget" name="budget" type="number" required className="bg-white/5 border-white/10 rounded-xl" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="budget">Total Budget (₹)</Label>
+                        <Input id="budget" name="budget" type="number" required className="bg-white/5 border-white/10 rounded-xl" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="liquidity">Liquidity (%)</Label>
+                        <Input id="liquidity" name="liquidity" type="number" min="0" max="100" defaultValue="100" required className="bg-white/5 border-white/10 rounded-xl" />
+                      </div>
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="startDate">Start Date</Label>
@@ -229,13 +237,25 @@ export default function ProjectsPage() {
                     </div>
                     <CardContent className="pt-6">
                       <div className="space-y-4">
-                        <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest mb-1">
-                          <span className="text-muted-foreground flex items-center gap-1">
-                            <Activity className="h-3 w-3" /> Progress
-                          </span>
-                          <span className="text-foreground">{project.progress}%</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest mb-1">
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <Activity className="h-3 w-3" /> Progress
+                            </span>
+                            <span className="text-foreground">{project.progress || 0}%</span>
+                          </div>
+                          <Progress value={project.progress || 0} className="h-1.5 bg-secondary/50" />
                         </div>
-                        <Progress value={project.progress} className="h-1.5 bg-secondary/50" />
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest mb-1">
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <Droplets className="h-3 w-3" /> Liquidity
+                            </span>
+                            <span className="text-primary">{project.liquidityPercentage || 0}%</span>
+                          </div>
+                          <Progress value={project.liquidityPercentage || 0} className="h-1.5 bg-secondary/50" />
+                        </div>
                         
                         <div className="grid grid-cols-2 gap-4 pt-2">
                           <div className="space-y-1 min-w-0">
@@ -293,9 +313,13 @@ export default function ProjectsPage() {
                   <Input id="edit-p-progress" name="progress" type="number" min="0" max="100" defaultValue={editingProject.progress} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-p-status">Status</Label>
-                  <Input id="edit-p-status" name="status" defaultValue={editingProject.status} required className="bg-white/5 border-white/10 rounded-xl" />
+                  <Label htmlFor="edit-p-liquidity">Liquidity (%)</Label>
+                  <Input id="edit-p-liquidity" name="liquidity" type="number" min="0" max="100" defaultValue={editingProject.liquidityPercentage} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-p-status">Status</Label>
+                <Input id="edit-p-status" name="status" defaultValue={editingProject.status} required className="bg-white/5 border-white/10 rounded-xl" />
               </div>
               <DialogFooter>
                 <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Project</Button>
