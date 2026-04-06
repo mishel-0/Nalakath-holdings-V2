@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -23,7 +22,8 @@ import {
   CheckCircle2,
   Clock,
   Layers,
-  FolderPlus
+  FolderPlus,
+  Settings2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -43,6 +43,7 @@ export default function ExpensesPage() {
   const { activeDivision } = useDivision();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isPhaseOpen, setIsPhaseOpen] = useState(false);
+  const [editingPhase, setEditingPhase] = useState<any>(null);
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [invoiceToPrint, setInvoiceToPrint] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("all");
@@ -88,6 +89,23 @@ export default function ExpensesPage() {
     toast({ title: "Phase Created", description: `Initialized ${newPhase.name} for ${activeDivision.name}.` });
   };
 
+  const handleUpdatePhase = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingPhase) return;
+    const formData = new FormData(e.currentTarget);
+    updateDocumentNonBlocking(doc(db, "companies", companyId, "phases", editingPhase.id), {
+      name: formData.get("name") as string,
+    });
+    setEditingPhase(null);
+    toast({ title: "Phase Updated", description: "Phase name modified successfully." });
+  };
+
+  const handleDeletePhase = (id: string) => {
+    deleteDocumentNonBlocking(doc(db, "companies", companyId, "phases", id));
+    if (selectedPhaseId === id) setSelectedPhaseId("all");
+    toast({ variant: "destructive", title: "Phase Deleted", description: "Phase removed from timeline." });
+  };
+
   const handleAddExpense = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -127,6 +145,8 @@ export default function ExpensesPage() {
       expenseCategory: formData.get("category") as string,
       expenseType: formData.get("expenseType"),
       clientName: formData.get("clientName") || "",
+      clientGstin: formData.get("clientGstin") || "",
+      invoiceNumber: formData.get("invoiceNumber") || "",
       status: formData.get("status"),
       updatedAt: new Date().toISOString(),
     };
@@ -144,6 +164,9 @@ export default function ExpensesPage() {
   const handlePrint = () => {
     window.print();
   };
+
+  const currentInvoicePhase = phases?.find(p => p.id === invoiceToPrint?.phaseId);
+  const isNalakathInvoice = currentInvoicePhase && !currentInvoicePhase.name.toLowerCase().includes("phase 1");
 
   return (
     <div className="min-h-screen">
@@ -171,7 +194,7 @@ export default function ExpensesPage() {
                     <form onSubmit={handleAddPhase} className="space-y-4 py-4">
                       <div className="grid gap-2">
                         <Label>Phase Name</Label>
-                        <Input name="name" placeholder="e.g. Phase 1: Foundation" required />
+                        <Input name="name" placeholder="e.g. Phase 1: Planning" required />
                       </div>
                       <DialogFooter>
                         <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Create Phase</Button>
@@ -257,6 +280,10 @@ export default function ExpensesPage() {
                             <Input name="invoiceNumber" placeholder="INV-000" />
                           </div>
                         </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px]">GSTIN (for Client Invoices)</Label>
+                          <Input name="clientGstin" placeholder="GST Registration No." />
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -290,19 +317,35 @@ export default function ExpensesPage() {
                   All Phases
                 </Button>
                 {phases?.map(p => (
-                  <Button 
-                    key={p.id}
-                    variant={selectedPhaseId === p.id ? "default" : "outline"} 
-                    onClick={() => setSelectedPhaseId(p.id)}
-                    className={cn("rounded-full h-10 px-6 shrink-0", selectedPhaseId === p.id ? "gold-gradient text-black border-none" : "border-white/10")}
-                  >
-                    {p.name}
-                  </Button>
+                  <div key={p.id} className="flex items-center gap-1 shrink-0 group">
+                    <Button 
+                      variant={selectedPhaseId === p.id ? "default" : "outline"} 
+                      onClick={() => setSelectedPhaseId(p.id)}
+                      className={cn("rounded-full h-10 px-6", selectedPhaseId === p.id ? "gold-gradient text-black border-none" : "border-white/10")}
+                    >
+                      {p.name}
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 ios-transition">
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="glass">
+                        <DropdownMenuItem onClick={() => setEditingPhase(p)} className="text-xs cursor-pointer">
+                          <Pencil className="h-3 w-3 mr-2" /> Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeletePhase(p.id)} className="text-xs text-destructive cursor-pointer">
+                          <Trash2 className="h-3 w-3 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 ))}
               </div>
 
               <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-                <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10">
+                <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10 overflow-x-auto max-w-full">
                   <TabsTrigger value="all" className="rounded-full px-6 text-[10px] uppercase font-bold tracking-widest">Total Feed</TabsTrigger>
                   <TabsTrigger value="Client Invoice" className="rounded-full px-6 text-[10px] uppercase font-bold tracking-widest">Client Invoices</TabsTrigger>
                   <TabsTrigger value="Supplier Payment" className="rounded-full px-6 text-[10px] uppercase font-bold tracking-widest">Suppliers</TabsTrigger>
@@ -399,7 +442,27 @@ export default function ExpensesPage() {
         </main>
       </div>
 
-      {/* Edit Dialog */}
+      {/* Edit Phase Dialog */}
+      <Dialog open={!!editingPhase} onOpenChange={(open) => !open && setEditingPhase(null)}>
+        <DialogContent className="glass border-white/10 sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Edit Phase Details</DialogTitle>
+          </DialogHeader>
+          {editingPhase && (
+            <form onSubmit={handleUpdatePhase} className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>Phase Name</Label>
+                <Input name="name" defaultValue={editingPhase.name} required />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Update Phase</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Expense Dialog */}
       <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
         <DialogContent className="glass border-white/10 sm:max-w-[425px]">
           <DialogHeader>
@@ -443,6 +506,14 @@ export default function ExpensesPage() {
                 <Input name="clientName" defaultValue={editingExpense.clientName} />
               </div>
               <div className="grid gap-2">
+                <Label>Invoice/Reference #</Label>
+                <Input name="invoiceNumber" defaultValue={editingExpense.invoiceNumber} />
+              </div>
+              <div className="grid gap-2">
+                <Label>GSTIN</Label>
+                <Input name="clientGstin" defaultValue={editingExpense.clientGstin} />
+              </div>
+              <div className="grid gap-2">
                 <Label>Description</Label>
                 <Input name="description" defaultValue={editingExpense.description} required />
               </div>
@@ -475,8 +546,12 @@ export default function ExpensesPage() {
               <header className="flex justify-between items-start border-b-4 border-zinc-900 pb-10">
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <h2 className="text-3xl font-black tracking-tighter uppercase leading-none text-zinc-900">Nalakath Construction Company</h2>
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">Infrastructure & Portfolio Development Unit</p>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase leading-none text-zinc-900">
+                      {isNalakathInvoice ? "Nalakath Construction Company" : "Universal Construction Hub"}
+                    </h2>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">
+                      {isNalakathInvoice ? "Infrastructure & Portfolio Development Unit" : "General Contracting Division"}
+                    </p>
                   </div>
                   <div className="pt-2">
                     <div className="px-4 py-1.5 bg-zinc-900 text-white w-fit rounded-full mb-2">
@@ -504,7 +579,7 @@ export default function ExpensesPage() {
                 <div className="space-y-4">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">Billed To (Client Identity)</p>
                   <div className="space-y-1 pt-2">
-                    <p className="text-2xl font-black text-zinc-900">{activeDivision.name === "Oval Palace Resort" ? "Oval Palace Resort" : invoiceToPrint.clientName || activeDivision.name}</p>
+                    <p className="text-2xl font-black text-zinc-900">{isNalakathInvoice ? "Oval Palace Resort" : invoiceToPrint.clientName || activeDivision.name}</p>
                     <p className="text-xs font-mono text-zinc-500 uppercase">Division: {activeDivision.division} Portfolio Unit</p>
                     <p className="text-xs font-mono text-zinc-500">GSTIN: {invoiceToPrint.clientGstin || "Unregistered / Internal Transfer"}</p>
                   </div>
@@ -513,9 +588,9 @@ export default function ExpensesPage() {
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">Fiscal Metadata</p>
                   <div className="pt-2">
                     <p className="text-xs leading-relaxed text-zinc-500 font-medium">
-                      Generated via Nalakath Kernel V4.0<br />
+                      Generated via Nalakath Kernel V4.5<br />
                       Primary Project: {activeDivision.name}<br />
-                      Compliance Phase: {phases?.find(p => p.id === invoiceToPrint.phaseId)?.name || 'N/A'}
+                      Compliance Phase: {currentInvoicePhase?.name || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -535,6 +610,12 @@ export default function ExpensesPage() {
                       <td className="py-8">
                         <p className="font-bold text-xl text-zinc-900 leading-tight">{invoiceToPrint.description}</p>
                         <p className="text-[10px] text-zinc-400 uppercase font-bold mt-1 tracking-widest">Construction Operations: {invoiceToPrint.expenseCategory}</p>
+                        {isNalakathInvoice && (
+                          <div className="mt-4 flex gap-4">
+                            <Badge variant="outline" className="border-zinc-200 text-zinc-400 text-[8px] uppercase">Inclusive of Supplier Costs</Badge>
+                            <Badge variant="outline" className="border-zinc-200 text-zinc-400 text-[8px] uppercase">Inclusive of Labour Payroll</Badge>
+                          </div>
+                        )}
                       </td>
                       <td className="py-8">
                         <Badge variant="outline" className="bg-zinc-50 text-zinc-600 border-zinc-200 text-[9px] font-bold uppercase tracking-widest">{invoiceToPrint.expenseType}</Badge>
@@ -550,7 +631,7 @@ export default function ExpensesPage() {
                   <div className="space-y-2">
                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Protocol & Terms</p>
                     <p className="text-[10px] leading-relaxed text-zinc-400 font-medium italic">
-                      1. This is a secure electronically generated fiscal document from Nalakath Construction Company.<br />
+                      1. This is a secure electronically generated fiscal document from {isNalakathInvoice ? "Nalakath Construction" : "the Group Authorized Vendor"}.<br />
                       2. Valid for all internal and external group audit procedures for the Oval Palace development.<br />
                       3. Nalakath Construction reserves all rights under the 2026 Fiscal Charter.<br />
                       4. Inquiries should be directed to the Group Infrastructure HQ.
