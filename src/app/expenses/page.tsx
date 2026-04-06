@@ -23,7 +23,8 @@ import {
   Clock,
   Layers,
   FolderPlus,
-  Settings2
+  Settings2,
+  Send
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -50,7 +51,6 @@ export default function ExpensesPage() {
   const [selectedPhaseId, setSelectedPhaseId] = useState("all");
   const companyId = activeDivision.id;
 
-  // Data Listeners
   const phasesQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "phases"), orderBy("createdAt", "asc"));
   }, [db, companyId]);
@@ -159,6 +159,31 @@ export default function ExpensesPage() {
   const handleDeleteExpense = (id: string) => {
     deleteDocumentNonBlocking(doc(db, "companies", companyId, "expenses", id));
     toast({ variant: "destructive", title: "Record Deleted", description: "Entry removed from ledger." });
+  };
+
+  const handleCreateVoucherFromExpense = (exp: any) => {
+    const phaseName = phases?.find(p => p.id === exp.phaseId)?.name || "Unassigned";
+    const now = new Date().toISOString();
+    
+    const newVoucher = {
+      companyId,
+      expenseId: exp.id,
+      voucherNumber: `V-${exp.id.substring(0, 6).toUpperCase()}`,
+      division: activeDivision.division,
+      vendorName: exp.clientName || "General Vendor",
+      date: exp.expenseDate,
+      amount: exp.amount,
+      paymentMethod: "Journal Transfer",
+      status: exp.status === "Paid" ? "Paid" : "Pending",
+      phaseName: phaseName,
+      description: exp.description,
+      expenseCategory: exp.expenseCategory,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    addDocumentNonBlocking(collection(db, "companies", companyId, "vouchers"), newVoucher);
+    toast({ title: "Voucher Generated", description: `Financial record pushed to Payment Vouchers for ${phaseName}.` });
   };
 
   const handlePrint = () => {
@@ -306,7 +331,6 @@ export default function ExpensesPage() {
               </div>
             </header>
 
-            {/* Phase Selector Bar */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                 <Button 
@@ -414,6 +438,9 @@ export default function ExpensesPage() {
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="glass rounded-2xl">
+                                      <DropdownMenuItem onClick={() => handleCreateVoucherFromExpense(exp)} className="text-xs font-bold text-green-500 cursor-pointer">
+                                        <Send className="h-3 w-3 mr-2" /> Push to Vouchers
+                                      </DropdownMenuItem>
                                       {exp.expenseType === "Client Invoice" && (
                                         <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
                                           <FileText className="h-3 w-3 mr-2" /> Generate Tax Invoice
@@ -442,7 +469,6 @@ export default function ExpensesPage() {
         </main>
       </div>
 
-      {/* Edit Phase Dialog */}
       <Dialog open={!!editingPhase} onOpenChange={(open) => !open && setEditingPhase(null)}>
         <DialogContent className="glass border-white/10 sm:max-w-[400px]">
           <DialogHeader>
@@ -462,7 +488,6 @@ export default function ExpensesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Expense Dialog */}
       <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
         <DialogContent className="glass border-white/10 sm:max-w-[425px]">
           <DialogHeader>
@@ -529,7 +554,6 @@ export default function ExpensesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Executive Invoice Generator Modal */}
       {invoiceToPrint && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white overflow-y-auto">
           <Card className="w-full max-w-4xl bg-white text-black overflow-hidden rounded-[2.5rem] print:rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300">
