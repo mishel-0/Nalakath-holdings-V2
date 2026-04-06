@@ -65,7 +65,7 @@ export default function DeveloperDashboard() {
     toast({ title: "System Triggered", description: `Command: ${action} initiated.` });
   };
 
-  if (!mounted || isProfileLoading) return <LoadingScreen mounted={mounted} />;
+  if (!mounted || isProfileLoading) return <LoadingScreen />;
   
   if (profile?.role !== "Developer" && profile?.role !== "Admin") {
     return <AccessDenied />;
@@ -333,18 +333,12 @@ function ControlButton({ icon: Icon, label, onClick, variant = "default" }: any)
   );
 }
 
-function LoadingScreen({ mounted }: { mounted: boolean }) {
+function LoadingScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="flex flex-col items-center gap-4">
-        {mounted ? (
-          <>
-            <div className="h-16 w-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-            <p className="text-primary font-mono text-xs uppercase tracking-[0.3em] animate-pulse">Initializing Kernel...</p>
-          </>
-        ) : (
-          <div className="h-16 w-16" />
-        )}
+      <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
+        <div className="h-16 w-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
+        <p className="text-primary font-mono text-xs uppercase tracking-[0.3em] animate-pulse">Initializing Kernel...</p>
       </div>
     </div>
   );
