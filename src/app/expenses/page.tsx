@@ -18,14 +18,12 @@ import {
   Pencil, 
   Trash2, 
   FileText, 
-  Users, 
-  HardHat, 
   Printer, 
-  Download,
   X,
-  CreditCard,
   CheckCircle2,
-  Clock
+  Clock,
+  Layers,
+  FolderPlus
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -44,36 +42,65 @@ export default function ExpensesPage() {
   const { toast } = useToast();
   const { activeDivision } = useDivision();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isPhaseOpen, setIsPhaseOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [invoiceToPrint, setInvoiceToPrint] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [selectedPhaseId, setSelectedPhaseId] = useState("all");
   const companyId = activeDivision.id;
+
+  // Data Listeners
+  const phasesQuery = useMemoFirebase(() => {
+    return query(collection(db, "companies", companyId, "phases"), orderBy("createdAt", "asc"));
+  }, [db, companyId]);
 
   const expensesQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt", "desc"));
   }, [db, companyId]);
 
-  const { data: expenses, isLoading } = useCollection(expensesQuery);
+  const { data: phases, isLoading: isPhasesLoading } = useCollection(phasesQuery);
+  const { data: expenses, isLoading: isExpensesLoading } = useCollection(expensesQuery);
 
   const filteredExpenses = useMemo(() => {
     if (!expenses) return [];
-    if (activeTab === "all") return expenses;
-    return expenses.filter(e => e.expenseType === activeTab);
-  }, [expenses, activeTab]);
+    let filtered = expenses;
+    if (selectedPhaseId !== "all") {
+      filtered = filtered.filter(e => e.phaseId === selectedPhaseId);
+    }
+    if (activeTab !== "all") {
+      filtered = filtered.filter(e => e.expenseType === activeTab);
+    }
+    return filtered;
+  }, [expenses, selectedPhaseId, activeTab]);
+
+  const handleAddPhase = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const now = new Date().toISOString();
+    
+    const newPhase = {
+      name: formData.get("name") as string,
+      createdAt: now,
+    };
+
+    addDocumentNonBlocking(collection(db, "companies", companyId, "phases"), newPhase);
+    setIsPhaseOpen(false);
+    toast({ title: "Phase Created", description: `Initialized ${newPhase.name} for ${activeDivision.name}.` });
+  };
 
   const handleAddExpense = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const now = new Date().toISOString();
-    const type = formData.get("expenseType") as string;
     
     const newExpense = {
       companyId,
+      phaseId: formData.get("phaseId") as string,
       expenseDate: formData.get("date") as string,
       description: formData.get("description") as string,
       amount: Number(formData.get("amount")),
       expenseCategory: formData.get("category") as string,
-      expenseType: type,
+      expenseType: formData.get("expenseType") as string,
       clientName: formData.get("clientName") || "",
       clientGstin: formData.get("clientGstin") || "",
       invoiceNumber: formData.get("invoiceNumber") || "",
@@ -84,7 +111,7 @@ export default function ExpensesPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "expenses"), newExpense);
     setIsAddOpen(false);
-    toast({ title: "Record Initialized", description: `Financial entry saved for ${activeDivision.name}.` });
+    toast({ title: "Entry Logged", description: "Financial record saved successfully." });
   };
 
   const handleUpdateExpense = (e: React.FormEvent<HTMLFormElement>) => {
@@ -93,6 +120,7 @@ export default function ExpensesPage() {
 
     const formData = new FormData(e.currentTarget);
     const updatedData = {
+      phaseId: formData.get("phaseId") as string,
       expenseDate: formData.get("date") as string,
       description: formData.get("description") as string,
       amount: Number(formData.get("amount")),
@@ -105,7 +133,7 @@ export default function ExpensesPage() {
 
     updateDocumentNonBlocking(doc(db, "companies", companyId, "expenses", editingExpense.id), updatedData);
     setEditingExpense(null);
-    toast({ title: "Record Updated", description: "Entry modified successfully." });
+    toast({ title: "Entry Updated", description: "Record modified successfully." });
   };
 
   const handleDeleteExpense = (id: string) => {
@@ -127,177 +155,246 @@ export default function ExpensesPage() {
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="min-w-0">
                 <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Financial Ops</h1>
-                <p className="text-muted-foreground truncate">Operational ledger for {activeDivision.name}.</p>
+                <p className="text-muted-foreground truncate">Phase-based ledger for {activeDivision.name}.</p>
               </div>
-              <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogTrigger asChild>
-                  <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90 shadow-lg shadow-primary/20 px-6 h-11 shrink-0">
-                    <Plus className="h-4 w-4" /> New Entry
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="glass border-white/10 sm:max-w-[500px]">
-                  <DialogHeader>
-                    <DialogTitle>Log Operation</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddExpense} className="space-y-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <Dialog open={isPhaseOpen} onOpenChange={setIsPhaseOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-11 px-6">
+                      <FolderPlus className="h-4 w-4" /> New Phase
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="glass border-white/10 sm:max-w-[400px]">
+                    <DialogHeader>
+                      <DialogTitle>Add Project Phase</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleAddPhase} className="space-y-4 py-4">
                       <div className="grid gap-2">
-                        <Label>Type</Label>
-                        <Select name="expenseType" defaultValue="General">
-                          <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-11">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="glass">
-                            <SelectItem value="General">General Expense</SelectItem>
-                            <SelectItem value="Client Invoice">Client Invoice</SelectItem>
-                            <SelectItem value="Supplier Payment">Supplier Payment</SelectItem>
-                            <SelectItem value="Labour Payment">Labour Payment</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label>Phase Name</Label>
+                        <Input name="name" placeholder="e.g. Phase 1: Foundation" required />
                       </div>
-                      <div className="grid gap-2">
-                        <Label>Payment Status</Label>
-                        <Select name="status" defaultValue="Unpaid">
-                          <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-11">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="glass">
-                            <SelectItem value="Paid">Paid (Settled)</SelectItem>
-                            <SelectItem value="Unpaid">Unpaid (Due)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                      <DialogFooter>
+                        <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Create Phase</Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Input id="description" name="description" required className="bg-white/5 border-white/10 rounded-xl h-11" />
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-                      <p className="text-[9px] uppercase font-bold tracking-widest text-primary">Contextual Details</p>
+                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90 shadow-lg shadow-primary/20 px-6 h-11 shrink-0">
+                      <Plus className="h-4 w-4" /> New Entry
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="glass border-white/10 sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Log Operational Entry</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleAddExpense} className="space-y-4 py-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label className="text-[10px]">Client / Supplier Name</Label>
-                          <Input name="clientName" placeholder="Entity Name" className="bg-white/5 border-white/10 rounded-xl h-10" />
+                          <Label>Assigned Phase</Label>
+                          <Select name="phaseId" required>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Phase" />
+                            </SelectTrigger>
+                            <SelectContent className="glass">
+                              {phases?.map(p => (
+                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="grid gap-2">
-                          <Label className="text-[10px]">Reference / Inv #</Label>
-                          <Input name="invoiceNumber" placeholder="REF-000" className="bg-white/5 border-white/10 rounded-xl h-10" />
+                          <Label>Type</Label>
+                          <Select name="expenseType" defaultValue="General">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="glass">
+                              <SelectItem value="General">General Expense</SelectItem>
+                              <SelectItem value="Client Invoice">Client Invoice</SelectItem>
+                              <SelectItem value="Supplier Payment">Supplier Payment</SelectItem>
+                              <SelectItem value="Labour Payment">Labour Payment</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="amount">Amount (₹)</Label>
-                        <Input id="amount" name="amount" type="number" step="0.01" required className="bg-white/5 border-white/10 rounded-xl h-11 font-mono" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label>Status</Label>
+                          <Select name="status" defaultValue="Unpaid">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="glass">
+                              <SelectItem value="Paid">Paid</SelectItem>
+                              <SelectItem value="Unpaid">Unpaid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Date</Label>
+                          <Input name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
+                        </div>
                       </div>
+
                       <div className="grid gap-2">
-                        <Label htmlFor="date">Date</Label>
-                        <Input id="date" name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="bg-white/5 border-white/10 rounded-xl h-11" />
+                        <Label>Description</Label>
+                        <Input name="description" required placeholder="Description of work or purchase" />
                       </div>
-                    </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Input id="category" name="category" placeholder="e.g. Infrastructure, Maintenance" required className="bg-white/5 border-white/10 rounded-xl h-11" />
-                    </div>
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                        <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Contextual Details</p>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="grid gap-2">
+                            <Label className="text-[10px]">Entity Name</Label>
+                            <Input name="clientName" placeholder="Client/Vendor" />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-[10px]">Reference #</Label>
+                            <Input name="invoiceNumber" placeholder="INV-000" />
+                          </div>
+                        </div>
+                      </div>
 
-                    <DialogFooter>
-                      <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl mt-2">Initialize Record</Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label>Amount (₹)</Label>
+                          <Input name="amount" type="number" step="0.01" required className="font-mono" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Category</Label>
+                          <Input name="category" placeholder="Infrastructure, etc." required />
+                        </div>
+                      </div>
+
+                      <DialogFooter>
+                        <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl mt-2">Initialize Record</Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </header>
 
-            <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10 overflow-x-auto max-w-full">
-                <TabsTrigger value="all" className="rounded-full px-6 text-[10px] uppercase tracking-widest font-bold">Total Feed</TabsTrigger>
-                <TabsTrigger value="Client Invoice" className="rounded-full px-6 text-[10px] uppercase tracking-widest font-bold">Client Invoices</TabsTrigger>
-                <TabsTrigger value="Supplier Payment" className="rounded-full px-6 text-[10px] uppercase tracking-widest font-bold">Suppliers</TabsTrigger>
-                <TabsTrigger value="Labour Payment" className="rounded-full px-6 text-[10px] uppercase tracking-widest font-bold">Labour</TabsTrigger>
-              </TabsList>
+            {/* Phase Selector Bar */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                <Button 
+                  variant={selectedPhaseId === "all" ? "default" : "outline"} 
+                  onClick={() => setSelectedPhaseId("all")}
+                  className={cn("rounded-full h-10 px-6 shrink-0", selectedPhaseId === "all" ? "gold-gradient text-black border-none" : "border-white/10")}
+                >
+                  All Phases
+                </Button>
+                {phases?.map(p => (
+                  <Button 
+                    key={p.id}
+                    variant={selectedPhaseId === p.id ? "default" : "outline"} 
+                    onClick={() => setSelectedPhaseId(p.id)}
+                    className={cn("rounded-full h-10 px-6 shrink-0", selectedPhaseId === p.id ? "gold-gradient text-black border-none" : "border-white/10")}
+                  >
+                    {p.name}
+                  </Button>
+                ))}
+              </div>
 
-              <Card className="glass border-white/5 overflow-hidden rounded-[2.5rem]">
-                <CardHeader className="border-b border-white/5 bg-white/5 px-6 py-4 flex flex-row items-center justify-between">
-                  <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search operation stream..." className="pl-9 h-10 rounded-full border-white/10 bg-white/5" />
-                  </div>
-                  <Badge variant="outline" className="hidden md:flex bg-primary/5 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-widest px-3">
-                    {filteredExpenses.length} Entries Logged
-                  </Badge>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader className="bg-white/5">
-                      <TableRow className="border-white/5">
-                        <TableHead className="uppercase tracking-widest text-[9px] font-bold px-6">Date</TableHead>
-                        <TableHead className="uppercase tracking-widest text-[9px] font-bold">Entity / Ref</TableHead>
-                        <TableHead className="uppercase tracking-widest text-[9px] font-bold">Status</TableHead>
-                        <TableHead className="text-right uppercase tracking-widest text-[9px] font-bold px-6">Amount (₹)</TableHead>
-                        <TableHead className="w-16"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {isLoading ? (
-                        <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse uppercase tracking-widest text-[10px] font-bold font-mono">Syncing Kernel...</TableCell></TableRow>
-                      ) : filteredExpenses.length === 0 ? (
-                        <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground italic text-sm">No specialized records found for this unit.</TableCell></TableRow>
-                      ) : (
-                        filteredExpenses.map((exp) => (
-                          <TableRow key={exp.id} className="border-white/5 hover:bg-white/5 ios-transition group">
-                            <TableCell className="text-muted-foreground font-mono text-xs px-6">{exp.expenseDate}</TableCell>
-                            <TableCell className="py-4">
-                              <div className="flex flex-col gap-0.5 min-w-0">
-                                <span className="font-bold text-sm truncate max-w-[200px]">{exp.clientName || "General Entry"}</span>
-                                <span className="text-[10px] text-muted-foreground italic truncate max-w-[180px]">{exp.description}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={cn(
-                                "rounded-full text-[8px] uppercase font-bold tracking-widest px-2.5 py-0.5 flex items-center gap-1 w-fit",
-                                exp.status === "Paid" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-orange-500/10 text-orange-500 border-orange-500/20"
-                              )} variant="outline">
-                                {exp.status === "Paid" ? <CheckCircle2 className="h-2.5 w-2.5" /> : <Clock className="h-2.5 w-2.5" />}
-                                {exp.status || "Unpaid"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right font-mono font-bold text-sm px-6 truncate overflow-hidden max-w-[150px]">
-                              ₹{exp.amount?.toLocaleString('en-IN')}
-                            </TableCell>
-                            <TableCell>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="glass rounded-2xl">
-                                  {exp.expenseType === "Client Invoice" && (
-                                    <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
-                                      <FileText className="h-3 w-3 mr-2" /> Generate Tax Invoice
-                                    </DropdownMenuItem>
-                                  )}
-                                  <DropdownMenuItem onClick={() => setEditingExpense(exp)} className="text-xs cursor-pointer">
-                                    <Pencil className="h-3 w-3 mr-2" /> Modify Entry
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleDeleteExpense(exp.id)} className="text-xs text-destructive cursor-pointer">
-                                    <Trash2 className="h-3 w-3 mr-2" /> Purge Record
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </Tabs>
+              <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+                <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10">
+                  <TabsTrigger value="all" className="rounded-full px-6 text-[10px] uppercase font-bold tracking-widest">Total Feed</TabsTrigger>
+                  <TabsTrigger value="Client Invoice" className="rounded-full px-6 text-[10px] uppercase font-bold tracking-widest">Client Invoices</TabsTrigger>
+                  <TabsTrigger value="Supplier Payment" className="rounded-full px-6 text-[10px] uppercase font-bold tracking-widest">Suppliers</TabsTrigger>
+                  <TabsTrigger value="Labour Payment" className="rounded-full px-6 text-[10px] uppercase font-bold tracking-widest">Labour</TabsTrigger>
+                </TabsList>
+
+                <Card className="glass border-white/5 overflow-hidden rounded-[2.5rem]">
+                  <CardHeader className="border-b border-white/5 bg-white/5 px-6 py-4 flex flex-row items-center justify-between">
+                    <div className="relative w-full md:w-96">
+                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="Search records..." className="pl-9 h-10 rounded-full border-white/10 bg-white/5" />
+                    </div>
+                    <Badge variant="outline" className="hidden md:flex bg-primary/5 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-widest px-3">
+                      {filteredExpenses.length} Entries in {selectedPhaseId === 'all' ? 'All Phases' : phases?.find(p => p.id === selectedPhaseId)?.name}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader className="bg-white/5">
+                        <TableRow className="border-white/5">
+                          <TableHead className="uppercase tracking-widest text-[9px] font-bold px-6">Date</TableHead>
+                          <TableHead className="uppercase tracking-widest text-[9px] font-bold">Entity / Description</TableHead>
+                          <TableHead className="uppercase tracking-widest text-[9px] font-bold">Phase</TableHead>
+                          <TableHead className="uppercase tracking-widest text-[9px] font-bold">Status</TableHead>
+                          <TableHead className="text-right uppercase tracking-widest text-[9px] font-bold px-6">Amount (₹)</TableHead>
+                          <TableHead className="w-16"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {isExpensesLoading ? (
+                          <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-[10px] tracking-widest uppercase">Syncing Kernel...</TableCell></TableRow>
+                        ) : filteredExpenses.length === 0 ? (
+                          <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground italic text-sm">No records found for this criteria.</TableCell></TableRow>
+                        ) : (
+                          filteredExpenses.map((exp) => {
+                            const phaseName = phases?.find(p => p.id === exp.phaseId)?.name || "Unassigned";
+                            return (
+                              <TableRow key={exp.id} className="border-white/5 hover:bg-white/5 ios-transition group">
+                                <TableCell className="text-muted-foreground font-mono text-xs px-6">{exp.expenseDate}</TableCell>
+                                <TableCell className="py-4">
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="font-bold text-sm truncate max-w-[200px]">{exp.clientName || "General Entry"}</span>
+                                    <span className="text-[10px] text-muted-foreground italic truncate max-w-[180px]">{exp.description}</span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="text-[8px] uppercase border-white/10 text-muted-foreground">{phaseName}</Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={cn(
+                                    "rounded-full text-[8px] uppercase font-bold tracking-widest px-2.5 py-0.5 flex items-center gap-1 w-fit",
+                                    exp.status === "Paid" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-orange-500/10 text-orange-500 border-orange-500/20"
+                                  )} variant="outline">
+                                    {exp.status === "Paid" ? <CheckCircle2 className="h-2.5 w-2.5" /> : <Clock className="h-2.5 w-2.5" />}
+                                    {exp.status || "Unpaid"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right font-mono font-bold text-sm px-6 truncate">
+                                  ₹{exp.amount?.toLocaleString('en-IN')}
+                                </TableCell>
+                                <TableCell>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="glass rounded-2xl">
+                                      {exp.expenseType === "Client Invoice" && (
+                                        <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
+                                          <FileText className="h-3 w-3 mr-2" /> Generate Tax Invoice
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuItem onClick={() => setEditingExpense(exp)} className="text-xs cursor-pointer">
+                                        <Pencil className="h-3 w-3 mr-2" /> Modify Entry
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleDeleteExpense(exp.id)} className="text-xs text-destructive cursor-pointer">
+                                        <Trash2 className="h-3 w-3 mr-2" /> Purge Record
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </Tabs>
+            </div>
           </div>
         </main>
       </div>
@@ -310,10 +407,23 @@ export default function ExpensesPage() {
           </DialogHeader>
           {editingExpense && (
             <form onSubmit={handleUpdateExpense} className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>Phase</Label>
+                <Select name="phaseId" defaultValue={editingExpense.phaseId}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="glass">
+                    {phases?.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Status</Label>
-                  <Select name="status" defaultValue={editingExpense.status || "Unpaid"}>
+                  <Select name="status" defaultValue={editingExpense.status}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -324,21 +434,21 @@ export default function ExpensesPage() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-exp-date">Date</Label>
-                  <Input id="edit-exp-date" name="date" type="date" defaultValue={editingExpense.expenseDate} required className="h-10" />
+                  <Label>Date</Label>
+                  <Input name="date" type="date" defaultValue={editingExpense.expenseDate} required />
                 </div>
               </div>
               <div className="grid gap-2">
                 <Label>Entity Name</Label>
-                <Input name="clientName" defaultValue={editingExpense.clientName} className="h-10" />
+                <Input name="clientName" defaultValue={editingExpense.clientName} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-exp-description">Description</Label>
-                <Input id="edit-exp-description" name="description" defaultValue={editingExpense.description} required className="h-10" />
+                <Label>Description</Label>
+                <Input name="description" defaultValue={editingExpense.description} required />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-exp-amount">Amount (₹)</Label>
-                <Input id="edit-exp-amount" name="amount" type="number" step="0.01" defaultValue={editingExpense.amount} required className="h-10" />
+                <Label>Amount (₹)</Label>
+                <Input name="amount" type="number" step="0.01" defaultValue={editingExpense.amount} required />
               </div>
               <DialogFooter>
                 <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Record</Button>
@@ -348,9 +458,9 @@ export default function ExpensesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Corporate Invoice Generator Modal */}
+      {/* Corporate Invoice Generator Modal (Preserved from previous implementation) */}
       {invoiceToPrint && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white overflow-y-auto">
           <Card className="w-full max-w-4xl bg-white text-black overflow-hidden rounded-[2.5rem] print:rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300">
             <Button 
               variant="ghost" 
@@ -361,7 +471,7 @@ export default function ExpensesPage() {
               <X className="h-5 w-5" />
             </Button>
             
-            <div className="p-16 print:p-10 space-y-12 h-full overflow-y-auto max-h-[90vh] print:max-h-none print:overflow-visible custom-scrollbar">
+            <div className="p-16 print:p-10 space-y-12">
               <header className="flex justify-between items-start border-b-4 border-zinc-900 pb-10">
                 <div className="space-y-6">
                   <div className="space-y-1">
@@ -404,7 +514,7 @@ export default function ExpensesPage() {
                     <p className="text-xs leading-relaxed text-zinc-500 font-medium">
                       Generated via Nalakath Kernel V4.0<br />
                       Authorized Division Representative<br />
-                      Compliance Period: Q2 2026
+                      Compliance Phase: {phases?.find(p => p.id === invoiceToPrint.phaseId)?.name || 'N/A'}
                     </p>
                   </div>
                 </div>
