@@ -14,6 +14,47 @@
       },
       "required": ["id", "firstName", "lastName", "email", "role"]
     },
+    "TaxRecord": {
+      "title": "TaxRecord",
+      "type": "object",
+      "description": "Individual tax calculation records for transactions.",
+      "properties": {
+        "id": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "baseAmount": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "cgst": { "type": "number" },
+        "sgst": { "type": "number" },
+        "igst": { "type": "number" },
+        "otherTaxes": { "type": "array", "items": { "type": "object" } },
+        "totalTax": { "type": "number" },
+        "finalAmount": { "type": "number" },
+        "type": { "type": "string", "enum": ["Input", "Output"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "TaxPreset": {
+      "title": "TaxPreset",
+      "type": "object",
+      "description": "Saved tax configurations.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "config": { "type": "object" },
+        "createdBy": { "type": "string" }
+      }
+    },
+    "TaxRule": {
+      "title": "TaxRule",
+      "type": "object",
+      "description": "Dynamic tax logic rules.",
+      "properties": {
+        "id": { "type": "string" },
+        "condition": { "type": "string" },
+        "action": { "type": "string" },
+        "isActive": { "type": "boolean" }
+      }
+    },
     "AuditLog": {
       "title": "AuditLog",
       "type": "object",
@@ -28,33 +69,6 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "action", "entity", "timestamp"]
-    },
-    "SystemError": {
-      "title": "SystemError",
-      "type": "object",
-      "description": "Tracks all system-level exceptions and errors.",
-      "properties": {
-        "id": { "type": "string" },
-        "message": { "type": "string" },
-        "source": { "type": "string" },
-        "severity": { "type": "string", "enum": ["warning", "critical"] },
-        "userId": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" }
-      },
-      "required": ["message", "source", "severity", "timestamp"]
-    },
-    "DataHealthMetric": {
-      "title": "DataHealthMetric",
-      "type": "object",
-      "description": "Periodic snapshot of data quality metrics.",
-      "properties": {
-        "id": { "type": "string" },
-        "score": { "type": "number" },
-        "invalidCount": { "type": "number" },
-        "missingFieldsCount": { "type": "number" },
-        "duplicateCount": { "type": "number" },
-        "timestamp": { "type": "string", "format": "date-time" }
-      }
     }
   },
   "auth": {
@@ -65,17 +79,21 @@
       "schema": { "$ref": "#/backend/entities/UserProfile" },
       "description": "Global user profiles."
     },
+    "/taxRecords/{recordId}": {
+      "schema": { "$ref": "#/backend/entities/TaxRecord" },
+      "description": "Detailed tax calculation history."
+    },
+    "/taxPresets/{presetId}": {
+      "schema": { "$ref": "#/backend/entities/TaxPreset" },
+      "description": "Saved tax configurations."
+    },
+    "/taxRules/{ruleId}": {
+      "schema": { "$ref": "#/backend/entities/TaxRule" },
+      "description": "Dynamic tax calculation logic."
+    },
     "/auditLogs/{logId}": {
       "schema": { "$ref": "#/backend/entities/AuditLog" },
       "description": "Stores all system activity logs."
-    },
-    "/systemErrors/{errorId}": {
-      "schema": { "$ref": "#/backend/entities/SystemError" },
-      "description": "Central repository for error logs."
-    },
-    "/dataHealthMetrics/{metricId}": {
-      "schema": { "$ref": "#/backend/entities/DataHealthMetric" },
-      "description": "Data quality snapshots."
     }
   }
 }
