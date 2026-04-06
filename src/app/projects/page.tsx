@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -41,6 +42,17 @@ export default function ProjectsPage() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
 
   useEffect(() => {
+    // Only Nalakath Holdings Main can access Projects
+    if (activeDivision.id !== "nalakath-holdings-main") {
+      toast({
+        variant: "destructive",
+        title: "Section Unavailable",
+        description: "The Projects module is restricted to Group HQ.",
+      });
+      router.replace("/");
+      return;
+    }
+
     if (!isProfileLoading && profile && profile.role !== "Admin") {
       toast({
         variant: "destructive",
@@ -49,7 +61,7 @@ export default function ProjectsPage() {
       });
       router.replace("/");
     }
-  }, [profile, isProfileLoading, router, toast]);
+  }, [profile, isProfileLoading, router, toast, activeDivision]);
 
   const projectsQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "projects"), orderBy("createdAt", "desc"));
@@ -107,12 +119,12 @@ export default function ProjectsPage() {
     toast({ variant: "destructive", title: "Project Deleted", description: "Venture removed from records." });
   };
 
-  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+  if (isProfileLoading || (profile && profile.role !== "Admin") || activeDivision.id !== "nalakath-holdings-main") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
           <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-          <p className="text-primary font-mono tracking-widest uppercase text-xs">Validating...</p>
+          <p className="text-primary font-mono tracking-widest uppercase text-[10px] opacity-50">Authorizing Entry...</p>
         </div>
       </div>
     );
@@ -143,19 +155,19 @@ export default function ProjectsPage() {
                   <form onSubmit={handleAddProject} className="space-y-4 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="name">Project Name</Label>
-                      <Input id="name" name="name" required />
+                      <Input id="name" name="name" required className="bg-white/5 border-white/10 rounded-xl" />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="description">Description</Label>
-                      <Textarea id="description" name="description" required />
+                      <Textarea id="description" name="description" required className="bg-white/5 border-white/10 rounded-xl" />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="budget">Total Budget (₹)</Label>
-                      <Input id="budget" name="budget" type="number" required />
+                      <Input id="budget" name="budget" type="number" required className="bg-white/5 border-white/10 rounded-xl" />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="startDate">Start Date</Label>
-                      <Input id="startDate" name="startDate" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
+                      <Input id="startDate" name="startDate" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="bg-white/5 border-white/10 rounded-xl" />
                     </div>
                     <DialogFooter>
                       <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Start Project</Button>
@@ -259,30 +271,30 @@ export default function ProjectsPage() {
             <form onSubmit={handleUpdateProject} className="space-y-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="edit-p-name">Project Name</Label>
-                <Input id="edit-p-name" name="name" defaultValue={editingProject.name} required />
+                <Input id="edit-p-name" name="name" defaultValue={editingProject.name} required className="bg-white/5 border-white/10 rounded-xl" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-p-desc">Description</Label>
-                <Textarea id="edit-p-desc" name="description" defaultValue={editingProject.description} required />
+                <Textarea id="edit-p-desc" name="description" defaultValue={editingProject.description} required className="bg-white/5 border-white/10 rounded-xl" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="edit-p-budget">Budget (₹)</Label>
-                  <Input id="edit-p-budget" name="budget" type="number" defaultValue={editingProject.budgetAmount} required />
+                  <Input id="edit-p-budget" name="budget" type="number" defaultValue={editingProject.budgetAmount} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="edit-p-cost">Actual Cost (₹)</Label>
-                  <Input id="edit-p-cost" name="actualCost" type="number" defaultValue={editingProject.actualCost} required />
+                  <Input id="edit-p-cost" name="actualCost" type="number" defaultValue={editingProject.actualCost} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="edit-p-progress">Progress (%)</Label>
-                  <Input id="edit-p-progress" name="progress" type="number" min="0" max="100" defaultValue={editingProject.progress} required />
+                  <Input id="edit-p-progress" name="progress" type="number" min="0" max="100" defaultValue={editingProject.progress} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="edit-p-status">Status</Label>
-                  <Input id="edit-p-status" name="status" defaultValue={editingProject.status} required />
+                  <Input id="edit-p-status" name="status" defaultValue={editingProject.status} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
               </div>
               <DialogFooter>

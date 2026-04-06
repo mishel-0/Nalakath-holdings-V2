@@ -15,10 +15,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { useDivision } from "@/context/DivisionContext";
 
 const mobileNav = [
   { name: "Home", href: "/", icon: LayoutDashboard },
-  { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
+  { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true, projectsOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
   { name: "Tax", href: "/tax", icon: Percent },
   { name: "Reports", href: "/reports", icon: BarChart3 },
@@ -29,6 +30,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const { user } = useUser();
   const db = useFirestore();
+  const { activeDivision } = useDivision();
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -38,7 +40,11 @@ export function BottomNav() {
   const { data: profile } = useDoc(profileDocRef);
   const isAdmin = profile?.role === "Admin";
 
-  const filteredNav = mobileNav.filter(item => !item.adminOnly || isAdmin);
+  const filteredNav = mobileNav.filter(item => {
+    if (item.adminOnly && !isAdmin) return false;
+    if (item.projectsOnly && activeDivision.id !== "nalakath-holdings-main") return false;
+    return true;
+  });
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 md:hidden pb-safe">

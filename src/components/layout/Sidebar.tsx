@@ -23,10 +23,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { useDivision } from "@/context/DivisionContext";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
+  { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true, projectsOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
   { name: "Tax Engine", href: "/tax", icon: Percent },
   { name: "Chart of Accounts", href: "/accounts", icon: ListTree },
@@ -45,6 +46,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user } = useUser();
   const db = useFirestore();
+  const { activeDivision } = useDivision();
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -56,8 +58,13 @@ export function Sidebar() {
   const isDev = profile?.role === "Developer";
 
   const filteredNavigation = navigation.filter(item => {
+    // Role based filtering
     if (item.adminOnly && !isAdmin && !isDev) return false;
     if (item.devOnly && !isDev) return false;
+    
+    // Division based filtering for Projects
+    if (item.projectsOnly && activeDivision.id !== "nalakath-holdings-main") return false;
+    
     return true;
   });
 
