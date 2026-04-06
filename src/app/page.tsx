@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -18,7 +19,8 @@ import {
   ChevronRight,
   Activity,
   History,
-  Sparkles
+  Sparkles,
+  PieChart
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -63,12 +65,25 @@ export default function Dashboard() {
     const projectCosts = projects?.reduce((acc, proj) => acc + (proj.actualCost || 0), 0) || 0;
     const pendingVouchers = vouchers?.filter(v => v.status === "Pending").length || 0;
 
+    // Aggregate cost allocations for HQ
+    let allocations = { material: 45, labour: 30, land: 15, profit: 10 };
+    if (projects && projects.length > 0) {
+      const avg = (field: string) => projects.reduce((acc, p) => acc + (p[field] || 0), 0) / projects.length;
+      allocations = {
+        material: avg('materialAllocation') || 45,
+        labour: avg('labourAllocation') || 30,
+        land: avg('landAllocation') || 15,
+        profit: avg('profitMarginAllocation') || 10
+      };
+    }
+
     return {
       revenue: totalRev,
       profit: totalRev - totalExp,
       projectCosts,
       activeProjects: projects?.length || 0,
-      alerts: pendingVouchers
+      alerts: pendingVouchers,
+      allocations
     };
   }, [recentTransactions, expenses, projects, vouchers]);
 
@@ -165,15 +180,16 @@ export default function Dashboard() {
               <Card className="lg:col-span-3 control-center-card overflow-hidden">
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    Segment Analysis
+                    <PieChart className="h-5 w-5 text-primary" />
+                    Capital Allocation
                   </CardTitle>
+                  <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Aggregated Portfolio Breakdown</p>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="OPERATIONS" value="45%" color="gold-gradient" />
-                  <DivisionBar name="INFRASTRUCTURE" value="30%" color="bg-zinc-600" />
-                  <DivisionBar name="R&D / ASSETS" value="15%" color="bg-accent" />
-                  <DivisionBar name="RESERVES" value="10%" color="bg-zinc-400" />
+                  <DivisionBar name="MATERIAL COST" value={`${stats.allocations.material}%`} color="gold-gradient" />
+                  <DivisionBar name="LABOUR COST" value={`${stats.allocations.labour}%`} color="bg-zinc-600" />
+                  <DivisionBar name="LAND COST" value={`${stats.allocations.land}%`} color="bg-accent" />
+                  <DivisionBar name="PROFIT MARGIN" value={`${stats.allocations.profit}%`} color="bg-zinc-400" />
                 </CardContent>
               </Card>
             </div>
