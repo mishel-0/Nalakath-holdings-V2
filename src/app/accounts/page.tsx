@@ -19,6 +19,7 @@ import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlo
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useDivision } from "@/context/DivisionContext";
 
 const accountTypeStyles: Record<string, { color: string, icon: any }> = {
   Asset: { color: "text-blue-400 border-blue-400/20 bg-blue-400/10", icon: Wallet },
@@ -31,10 +32,11 @@ const accountTypeStyles: Record<string, { color: string, icon: any }> = {
 export default function ChartOfAccountsPage() {
   const db = useFirestore();
   const { toast } = useToast();
+  const { activeDivision } = useDivision();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any>(null);
   const [search, setSearch] = useState("");
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   const accountsQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "accounts"), orderBy("accountNumber", "asc"));
@@ -69,7 +71,7 @@ export default function ChartOfAccountsPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "accounts"), newAccount);
     setIsAddOpen(false);
-    toast({ title: "Account Created", description: `Added ${newAccount.name} to COA.` });
+    toast({ title: "Account Created", description: `Added ${newAccount.name} to ${activeDivision.name}.` });
   };
 
   const handleUpdateAccount = (e: React.FormEvent<HTMLFormElement>) => {
@@ -107,7 +109,7 @@ export default function ChartOfAccountsPage() {
                 <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3">
                   Chart of Accounts
                 </h1>
-                <p className="text-muted-foreground">Master list of all ledger accounts across divisions.</p>
+                <p className="text-muted-foreground truncate">Master list for {activeDivision.name}.</p>
               </div>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
@@ -184,7 +186,7 @@ export default function ChartOfAccountsPage() {
                     {isLoading ? (
                       <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs tracking-widest uppercase">Syncing...</TableCell></TableRow>
                     ) : filteredAccounts.length === 0 ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-medium">No accounts found.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-medium">No accounts found for this division.</TableCell></TableRow>
                     ) : (
                       filteredAccounts.map((account) => {
                         const style = accountTypeStyles[account.chartOfAccountTypeId as keyof typeof accountTypeStyles] || { color: "text-muted-foreground", icon: ListTree };
@@ -204,7 +206,7 @@ export default function ChartOfAccountsPage() {
                                 {account.chartOfAccountTypeId}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right font-mono font-bold text-sm px-6">
+                            <TableCell className="text-right font-mono font-bold text-sm px-6 truncate">
                               ₹{account.balance?.toLocaleString('en-IN')}
                             </TableCell>
                             <TableCell>

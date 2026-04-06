@@ -38,11 +38,13 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function ReportsPage() {
   const db = useFirestore();
   const { toast } = useToast();
-  const companyId = "nalakath-holdings-main";
+  const { activeDivision } = useDivision();
+  const companyId = activeDivision.id;
   const [activeTab, setActiveTab] = useState("p&l");
   const [gstSubTab, setGstSubTab] = useState("summary");
 
@@ -96,7 +98,7 @@ export default function ReportsPage() {
   const handleExport = (type: string) => {
     toast({
       title: "Export Initiated",
-      description: `Generating ${type} report for Q2 FY 2026...`,
+      description: `Generating ${type} for ${activeDivision.name} (Q2 2026)...`,
     });
   };
 
@@ -110,7 +112,7 @@ export default function ReportsPage() {
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="min-w-0">
                 <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Financial Hub</h1>
-                <p className="text-muted-foreground text-sm truncate">Certified fiscal reporting and automated GST auditing.</p>
+                <p className="text-muted-foreground text-sm truncate">Fiscal reporting for {activeDivision.name}.</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-6 shrink-0">
@@ -142,7 +144,7 @@ export default function ReportsPage() {
                       <TrendingUp className="h-5 w-5 text-primary" />
                       Performance Trend (LTM)
                     </CardTitle>
-                    <CardDescription>Visual mapping of revenue against operating expenses.</CardDescription>
+                    <CardDescription>Visual mapping for {activeDivision.name}.</CardDescription>
                   </CardHeader>
                   <CardContent className="h-full pt-4">
                     <ResponsiveContainer width="100%" height="75%">
@@ -179,9 +181,9 @@ export default function ReportsPage() {
                 <div className="grid gap-8 lg:grid-cols-5">
                   <Card className="lg:col-span-3 control-center-card min-w-0">
                     <CardHeader className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/5 pb-6 gap-4">
-                      <div>
+                      <div className="min-w-0">
                         <CardTitle className="text-xl">Filing Engine</CardTitle>
-                        <CardDescription>Government-compliant categorization.</CardDescription>
+                        <CardDescription className="truncate">Compliance for {activeDivision.name}.</CardDescription>
                       </div>
                       <Tabs value={gstSubTab} onValueChange={setGstSubTab} className="bg-white/5 p-1 rounded-full shrink-0">
                         <TabsList className="bg-transparent h-8 border-none">
@@ -224,7 +226,7 @@ export default function ReportsPage() {
                       {gstSubTab === "gstr1" && (
                         <div className="space-y-4">
                           <div className="flex justify-between items-center px-2">
-                            <p className="text-xs text-muted-foreground truncate pr-2">Detailed list of B2B transactions for GSTR-1 filing.</p>
+                            <p className="text-xs text-muted-foreground truncate pr-2">Division sales for GSTR-1 filing.</p>
                             <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary shrink-0" onClick={() => handleExport("GSTR-1 Excel")}>
                               <FileSpreadsheet className="h-3 w-3 mr-2" /> Download XLS
                             </Button>
@@ -257,7 +259,7 @@ export default function ReportsPage() {
                       {gstSubTab === "gstr3b" && (
                         <div className="space-y-6">
                           <div className="flex justify-between items-center px-2">
-                            <p className="text-xs text-muted-foreground truncate pr-2">Consolidated self-declaration for GSTR-3B summary.</p>
+                            <p className="text-xs text-muted-foreground truncate pr-2">Consolidated declaration for {activeDivision.name}.</p>
                             <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary shrink-0" onClick={() => handleExport("GSTR-3B Summary")}>
                               <FileText className="h-3 w-3 mr-2" /> Download Summary
                             </Button>
@@ -291,14 +293,14 @@ export default function ReportsPage() {
                           icon={AlertTriangle} 
                           title="Missing GSTINs" 
                           status="2 Flagged" 
-                          desc="Vendors missing registration IDs."
+                          desc="Check vendor registration profiles."
                           warning
                         />
                         <AuditItem 
                           icon={TrendingUp} 
                           title="ITC Variance" 
                           status="0.4%" 
-                          desc="Minor variance between ledger & vouchers."
+                          desc="Minor variance in division ledger."
                         />
                       </CardContent>
                     </Card>
@@ -395,7 +397,7 @@ function AuditItem({ icon: Icon, title, status, desc, warning }: any) {
       <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", warning ? "bg-orange-500/10 text-orange-500" : "bg-green-500/10 text-green-500")}>
         <Icon className="h-5 w-5" />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 overflow-hidden">
           <p className="text-xs font-bold uppercase truncate">{title}</p>
           <Badge variant="outline" className={cn("text-[8px] h-4 rounded-full border-none px-2 shrink-0", warning ? "bg-orange-500/10 text-orange-500" : "bg-green-500/10 text-green-500")}>

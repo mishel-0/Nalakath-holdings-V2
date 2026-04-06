@@ -18,16 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
-const companies = [
-  { id: 1, name: "Nalakath Holdings", division: "Group HQ" },
-  { id: 2, name: "Green Villa", division: "Real Estate" },
-  { id: 3, name: "Oval Palace Resort", division: "Hospitality" },
-  { id: 4, name: "Nalakath Construction", division: "Infrastructure" },
-];
+import { useDivision, companies } from "@/context/DivisionContext";
 
 export function Navbar() {
-  const [activeCompany, setActiveCompany] = useState(companies[0]);
+  const { activeDivision, setDivision } = useDivision();
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const { user } = useUser();
   const auth = useAuth();
@@ -65,9 +59,9 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-foreground/5 rounded-full">
-                <div className="flex flex-col items-start">
-                   <span className="text-[10px] font-bold uppercase tracking-tighter">{activeCompany.name}</span>
-                   <span className="text-[8px] text-muted-foreground uppercase">{activeCompany.division}</span>
+                <div className="flex flex-col items-start text-left">
+                   <span className="text-[10px] font-bold uppercase tracking-tighter truncate max-w-[120px]">{activeDivision.name}</span>
+                   <span className="text-[8px] text-muted-foreground uppercase">{activeDivision.division}</span>
                 </div>
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
@@ -78,7 +72,7 @@ export function Navbar() {
               {companies.map((company) => (
                 <DropdownMenuItem
                   key={company.id}
-                  onClick={() => setActiveCompany(company)}
+                  onClick={() => setDivision(company.id)}
                   className="flex flex-col items-start gap-1 py-3 cursor-pointer hover:bg-foreground/5 rounded-xl"
                 >
                   <span className="font-bold text-sm">{company.name}</span>

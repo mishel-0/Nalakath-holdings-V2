@@ -21,15 +21,17 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function ProjectsPage() {
   const db = useFirestore();
   const { user } = useUser();
+  const { activeDivision } = useDivision();
   const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -76,7 +78,7 @@ export default function ProjectsPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "projects"), newProject);
     setIsAddOpen(false);
-    toast({ title: "Project Created", description: `Initialized ${newProject.name}.` });
+    toast({ title: "Project Created", description: `Initialized ${newProject.name} for ${activeDivision.name}.` });
   };
 
   const handleUpdateProject = (e: React.FormEvent<HTMLFormElement>) => {
@@ -108,7 +110,10 @@ export default function ProjectsPage() {
   if (isProfileLoading || (profile && profile.role !== "Admin")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Validating...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
+          <p className="text-primary font-mono tracking-widest uppercase text-xs">Validating...</p>
+        </div>
       </div>
     );
   }
@@ -122,12 +127,12 @@ export default function ProjectsPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Projects</h1>
-                <p className="text-muted-foreground">Manage ongoing construction and business ventures.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Projects</h1>
+                <p className="text-muted-foreground truncate">Ventures for {activeDivision.name}.</p>
               </div>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
-                  <Button className="rounded-full gap-2 bg-primary text-black hover:bg-primary/90">
+                  <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90 px-6">
                     <Plus className="h-4 w-4" /> New Project
                   </Button>
                 </DialogTrigger>
@@ -153,7 +158,7 @@ export default function ProjectsPage() {
                       <Input id="startDate" name="startDate" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
                     </div>
                     <DialogFooter>
-                      <Button type="submit" className="w-full text-black">Start Project</Button>
+                      <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Start Project</Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
@@ -162,11 +167,11 @@ export default function ProjectsPage() {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
               {isLoading ? (
-                <p className="text-muted-foreground">Syncing...</p>
+                <p className="text-muted-foreground animate-pulse text-xs font-bold uppercase tracking-widest">FETCHING VENTURES...</p>
               ) : projects?.length === 0 ? (
                 <Card className="glass border-white/5 col-span-full py-20 flex flex-col items-center justify-center text-center gap-4 border-dashed">
                   <HardHat className="h-12 w-12 text-primary/20" />
-                  <p className="text-muted-foreground">No active projects found.</p>
+                  <p className="text-muted-foreground">No active projects found for this division.</p>
                 </Card>
               ) : (
                 projects?.map((project) => (
@@ -203,8 +208,8 @@ export default function ProjectsPage() {
                           <p className="text-xs text-white/60 truncate">{project.description}</p>
                         </div>
                         <Badge className={cn(
-                          "rounded-full whitespace-nowrap",
-                          project.actualCost > project.budgetAmount ? "bg-destructive" : "bg-green-500"
+                          "rounded-full whitespace-nowrap text-[9px] uppercase font-bold tracking-widest border-none px-2",
+                          project.actualCost > project.budgetAmount ? "bg-destructive text-white" : "bg-green-500 text-black"
                         )}>
                           {project.status}
                         </Badge>
@@ -212,23 +217,23 @@ export default function ProjectsPage() {
                     </div>
                     <CardContent className="pt-6">
                       <div className="space-y-4">
-                        <div className="flex justify-between text-sm mb-1">
+                        <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest mb-1">
                           <span className="text-muted-foreground flex items-center gap-1">
-                            <Activity className="h-4 w-4" /> Progress
+                            <Activity className="h-3 w-3" /> Progress
                           </span>
-                          <span className="font-semibold">{project.progress}%</span>
+                          <span className="text-foreground">{project.progress}%</span>
                         </div>
-                        <Progress value={project.progress} className="h-2 bg-secondary/50" />
+                        <Progress value={project.progress} className="h-1.5 bg-secondary/50" />
                         
                         <div className="grid grid-cols-2 gap-4 pt-2">
-                          <div className="space-y-1">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</p>
-                            <p className="text-sm font-bold">₹{project.budgetAmount?.toLocaleString('en-IN')}</p>
+                          <div className="space-y-1 min-w-0">
+                            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Budget</p>
+                            <p className="text-sm font-bold truncate">₹{project.budgetAmount?.toLocaleString('en-IN')}</p>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Actual</p>
+                          <div className="space-y-1 text-right min-w-0">
+                            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Actual</p>
                             <p className={cn(
-                              "text-sm font-bold",
+                              "text-sm font-bold truncate",
                               project.actualCost > project.budgetAmount ? "text-destructive" : "text-foreground"
                             )}>
                               ₹{project.actualCost?.toLocaleString('en-IN')}
@@ -281,7 +286,7 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" className="w-full text-black">Update Project</Button>
+                <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Project</Button>
               </DialogFooter>
             </form>
           )}

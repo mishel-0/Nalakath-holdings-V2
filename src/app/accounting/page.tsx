@@ -18,14 +18,16 @@ import { collection, query, orderBy, doc } from "firebase/firestore";
 import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function AccountingPage() {
   const db = useFirestore();
   const { toast } = useToast();
+  const { activeDivision } = useDivision();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<any>(null);
   const [search, setSearch] = useState("");
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   const entriesQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "journalEntries"), orderBy("date", "desc"));
@@ -70,7 +72,7 @@ export default function AccountingPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "journalEntries"), newEntry);
     setIsAddOpen(false);
-    toast({ title: "Entry Posted", description: "Journal entry recorded successfully." });
+    toast({ title: "Entry Posted", description: `Journal entry recorded for ${activeDivision.name}.` });
   };
 
   const handleUpdateEntry = (e: React.FormEvent<HTMLFormElement>) => {
@@ -108,8 +110,8 @@ export default function AccountingPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase">General Ledger</h1>
-                <p className="text-muted-foreground">Comprehensive record of group financial activity.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">General Ledger</h1>
+                <p className="text-muted-foreground truncate">Financial activity for {activeDivision.name}.</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4">
@@ -194,7 +196,7 @@ export default function AccountingPage() {
                     {isLoading ? (
                       <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono tracking-widest">SYNCING...</TableCell></TableRow>
                     ) : filteredEntries.length === 0 ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground">No entries found.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground">No entries found for this division.</TableCell></TableRow>
                     ) : (
                       filteredEntries.map((tx) => (
                         <TableRow key={tx.id} className="border-white/5 hover:bg-white/5 ios-transition group">
@@ -205,10 +207,10 @@ export default function AccountingPage() {
                               {tx.status === "Verified" && <CheckCircle2 className="h-3 w-3 text-primary opacity-50 shrink-0" />}
                             </div>
                           </TableCell>
-                          <TableCell className="text-right font-mono font-medium text-destructive">
+                          <TableCell className="text-right font-mono font-medium text-destructive truncate">
                             {tx.totalDebit > 0 ? `₹${tx.totalDebit.toLocaleString('en-IN')}` : "-"}
                           </TableCell>
-                          <TableCell className="text-right font-mono font-medium text-green-500">
+                          <TableCell className="text-right font-mono font-medium text-green-500 truncate">
                             {tx.totalCredit > 0 ? `₹${tx.totalCredit.toLocaleString('en-IN')}` : "-"}
                           </TableCell>
                           <TableCell>
@@ -239,7 +241,6 @@ export default function AccountingPage() {
         </main>
       </div>
 
-      {/* Edit Dialog */}
       <Dialog open={!!editingEntry} onOpenChange={(open) => !open && setEditingEntry(null)}>
         <DialogContent className="glass border-white/10 sm:max-w-[425px]">
           <DialogHeader>

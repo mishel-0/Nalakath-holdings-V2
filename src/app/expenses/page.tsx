@@ -17,13 +17,15 @@ import { collection, query, orderBy, doc } from "firebase/firestore";
 import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function ExpensesPage() {
   const db = useFirestore();
   const { toast } = useToast();
+  const { activeDivision } = useDivision();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   const expensesQuery = useMemoFirebase(() => {
     return query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt", "desc"));
@@ -50,7 +52,7 @@ export default function ExpensesPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "expenses"), newExpense);
     setIsAddOpen(false);
-    toast({ title: "Expense Saved", description: "Expense record created." });
+    toast({ title: "Expense Saved", description: `Record added to ${activeDivision.name}.` });
   };
 
   const handleUpdateExpense = (e: React.FormEvent<HTMLFormElement>) => {
@@ -85,12 +87,12 @@ export default function ExpensesPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Expenses</h1>
-                <p className="text-muted-foreground">Track company spending and overheads.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Expenses</h1>
+                <p className="text-muted-foreground truncate">Tracking for {activeDivision.name}.</p>
               </div>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
-                  <Button className="rounded-full gap-2 bg-primary text-black hover:bg-primary/90">
+                  <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90">
                     <Plus className="h-4 w-4" /> Log Expense
                   </Button>
                 </DialogTrigger>
@@ -116,7 +118,7 @@ export default function ExpensesPage() {
                       <Input id="date" name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
                     </div>
                     <DialogFooter>
-                      <Button type="submit" className="w-full text-black">Save Expense</Button>
+                      <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Save Expense</Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
@@ -124,7 +126,7 @@ export default function ExpensesPage() {
             </header>
 
             <Card className="glass border-white/5 overflow-hidden">
-              <CardHeader className="border-b border-white/5 bg-white/5">
+              <CardHeader className="border-b border-white/5 bg-white/5 px-6 py-4">
                 <div className="relative w-full md:w-96">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input placeholder="Filter expenses..." className="pl-9 h-10 rounded-full border-white/10 bg-white/5" />
@@ -134,30 +136,30 @@ export default function ExpensesPage() {
                 <Table>
                   <TableHeader className="bg-white/5">
                     <TableRow className="border-white/5">
-                      <TableHead>Date</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead className="text-right">Amount (₹)</TableHead>
+                      <TableHead className="uppercase tracking-widest text-[9px] font-bold px-6">Date</TableHead>
+                      <TableHead className="uppercase tracking-widest text-[9px] font-bold">Description</TableHead>
+                      <TableHead className="uppercase tracking-widest text-[9px] font-bold">Category</TableHead>
+                      <TableHead className="text-right uppercase tracking-widest text-[9px] font-bold px-6">Amount (₹)</TableHead>
                       <TableHead className="w-16"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground animate-pulse uppercase tracking-widest text-xs font-bold">SYNCING...</TableCell></TableRow>
                     ) : expenses?.length === 0 ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No expenses recorded.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No expenses recorded for this division.</TableCell></TableRow>
                     ) : (
                       expenses?.map((exp) => (
-                        <TableRow key={exp.id} className="border-white/5 hover:bg-white/5">
-                          <TableCell className="text-muted-foreground">{exp.expenseDate}</TableCell>
-                          <TableCell className="font-semibold flex items-center gap-2">
-                            <Receipt className="h-4 w-4 text-primary" />
-                            {exp.description}
+                        <TableRow key={exp.id} className="border-white/5 hover:bg-white/5 ios-transition group">
+                          <TableCell className="text-muted-foreground font-mono text-xs px-6">{exp.expenseDate}</TableCell>
+                          <TableCell className="font-semibold flex items-center gap-2 py-4">
+                            <Receipt className="h-4 w-4 text-primary shrink-0" />
+                            <span className="truncate max-w-[200px]">{exp.description}</span>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="bg-white/5 text-xs">{exp.expenseCategory}</Badge>
+                            <Badge variant="outline" className="bg-white/5 text-[9px] font-bold uppercase tracking-widest border-white/10">{exp.expenseCategory}</Badge>
                           </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-destructive">
+                          <TableCell className="text-right font-mono font-bold text-destructive px-6 truncate">
                             ₹{exp.amount?.toLocaleString('en-IN')}
                           </TableCell>
                           <TableCell>
@@ -212,7 +214,7 @@ export default function ExpensesPage() {
                 <Input id="edit-exp-date" name="date" type="date" defaultValue={editingExpense.expenseDate} required />
               </div>
               <DialogFooter>
-                <Button type="submit" className="w-full text-black">Update Expense</Button>
+                <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Expense</Button>
               </DialogFooter>
             </form>
           )}

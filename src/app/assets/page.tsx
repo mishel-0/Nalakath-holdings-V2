@@ -17,15 +17,17 @@ import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlo
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function AssetsPage() {
   const db = useFirestore();
   const { user } = useUser();
+  const { activeDivision } = useDivision();
   const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<any>(null);
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -76,7 +78,7 @@ export default function AssetsPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "assets"), newAsset);
     setIsAddOpen(false);
-    toast({ title: "Asset Registered", description: `Added ${newAsset.name} to asset ledger.` });
+    toast({ title: "Asset Registered", description: `Added ${newAsset.name} to ${activeDivision.name}.` });
   };
 
   const handleUpdateAsset = (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,14 +102,15 @@ export default function AssetsPage() {
 
   const handleDeleteAsset = (id: string) => {
     deleteDocumentNonBlocking(doc(db, "companies", companyId, "assets", id));
-    toast({ variant: "destructive", title: "Asset Removed", description: "Asset deleted from group inventory." });
+    toast({ variant: "destructive", title: "Asset Removed", description: "Asset deleted from inventory." });
   };
 
   if (isProfileLoading || (profile && profile.role !== "Admin")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-4">
-          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Authorizing Access...</p>
+          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
+          <p className="text-primary font-mono tracking-widest uppercase text-xs">Authorizing...</p>
         </div>
       </div>
     );
@@ -122,12 +125,12 @@ export default function AssetsPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Assets</h1>
-                <p className="text-muted-foreground">Capital equipment and property inventory.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Assets</h1>
+                <p className="text-muted-foreground truncate">Inventory for {activeDivision.name}.</p>
               </div>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
-                  <Button className="rounded-full gap-2 bg-primary text-black hover:bg-primary/90">
+                  <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90 px-6">
                     <Plus className="h-4 w-4" /> Add Asset
                   </Button>
                 </DialogTrigger>
@@ -157,7 +160,7 @@ export default function AssetsPage() {
                       <Input id="purchaseDate" name="purchaseDate" type="date" required />
                     </div>
                     <DialogFooter>
-                      <Button type="submit" className="w-full text-black">Register Asset</Button>
+                      <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Register Asset</Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
@@ -166,14 +169,14 @@ export default function AssetsPage() {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {isLoading ? (
-                <p className="text-muted-foreground">Loading assets...</p>
+                <p className="text-muted-foreground animate-pulse uppercase text-xs font-bold tracking-widest">FETCHING ASSETS...</p>
               ) : assets?.length === 0 ? (
-                <Card className="glass border-white/5 col-span-full py-12 text-center">
-                  <p className="text-muted-foreground">No assets found.</p>
+                <Card className="glass border-white/5 col-span-full py-12 text-center border-dashed">
+                  <p className="text-muted-foreground">No assets found for this division.</p>
                 </Card>
               ) : (
                 assets?.map((asset) => (
-                  <Card key={asset.id} className="glass border-white/5 hover:scale-[1.02] ios-transition relative">
+                  <Card key={asset.id} className="glass border-white/5 hover:scale-[1.02] ios-transition relative overflow-hidden">
                     <div className="absolute top-4 right-4 z-10">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -196,22 +199,22 @@ export default function AssetsPage() {
                         <div className="p-3 bg-primary/10 rounded-2xl">
                           <Layers className="h-6 w-6 text-primary" />
                         </div>
-                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
+                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[10px] tracking-widest font-bold uppercase">
                           {asset.assetType}
                         </Badge>
                       </div>
-                      <CardTitle className="mt-4 text-xl">{asset.name}</CardTitle>
+                      <CardTitle className="mt-4 text-xl truncate">{asset.name}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
                         <MapPin className="h-4 w-4" /> {asset.location}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" /> Purchased {asset.purchaseDate}
                       </div>
                       <div className="pt-4 border-t border-white/5">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground">Current Book Value</p>
-                        <p className="text-2xl font-bold font-mono text-primary">₹{asset.currentBookValue?.toLocaleString('en-IN')}</p>
+                        <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1">Current Book Value</p>
+                        <p className="text-2xl font-bold font-mono text-primary truncate" title={asset.currentBookValue?.toLocaleString('en-IN')}>₹{asset.currentBookValue?.toLocaleString('en-IN')}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -252,7 +255,7 @@ export default function AssetsPage() {
                 <Input id="edit-a-location" name="location" defaultValue={editingAsset.location} required />
               </div>
               <DialogFooter>
-                <Button type="submit" className="w-full text-black">Update Asset</Button>
+                <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Asset</Button>
               </DialogFooter>
             </form>
           )}
