@@ -259,9 +259,9 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
       <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-foreground rotate-12" />
       
       <div className="flex flex-col gap-1 relative z-10 min-w-0">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">{title}</p>
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 truncate">{title}</p>
         
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 overflow-hidden">
           <div className="text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate" title={processedValue(value)}>
             {processedValue(value)}
           </div>
@@ -270,16 +270,16 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
           </div>
         </div>
         
-        <div className="flex items-center gap-2 mt-8">
+        <div className="flex items-center gap-2 mt-8 overflow-hidden">
           <Badge className={cn(
-            "text-[9px] font-black tracking-widest h-5 uppercase rounded-full border-none px-3",
+            "text-[9px] font-black tracking-widest h-5 uppercase rounded-full border-none px-3 shrink-0",
             trend === "up" ? 'bg-green-500/10 text-green-500' : 
             trend === "down" ? 'bg-destructive/10 text-destructive' : 
             'bg-foreground/5 text-muted-foreground'
           )}>
             {trend === "up" ? "GAINING" : trend === "down" ? "VARIANCE" : "STABLE"} 
           </Badge>
-          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-40">VS PREV</span>
+          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-40 truncate">VS PREV</span>
         </div>
       </div>
     </Card>
@@ -297,7 +297,7 @@ function DivisionBar({ name, value, color }: any) {
     <div className="space-y-3">
       <div className="flex justify-between text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground">
         <span className="truncate pr-2">{name}</span>
-        <span className="font-mono">{value}</span>
+        <span className="font-mono shrink-0">{value}</span>
       </div>
       <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
         <div className={cn("h-full", color)} style={{ width: value }} />
@@ -309,11 +309,11 @@ function DivisionBar({ name, value, color }: any) {
 function AlertItem({ title, desc, severity }: any) {
   const colors = { high: "bg-destructive", medium: "bg-orange-500", low: "bg-green-500" };
   return (
-    <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer">
+    <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer min-w-0">
       <div className={cn("mt-1.5 h-2.5 w-2.5 rounded-full shrink-0", colors[severity as keyof typeof colors])} />
       <div className="min-w-0">
         <p className="text-sm font-bold leading-none truncate">{title}</p>
-        <p className="text-xs text-muted-foreground mt-3 leading-relaxed">{desc}</p>
+        <p className="text-xs text-muted-foreground mt-3 leading-relaxed line-clamp-2">{desc}</p>
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto self-center shrink-0 group-hover:translate-x-1 ios-transition" />
     </div>
