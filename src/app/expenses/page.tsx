@@ -458,7 +458,7 @@ export default function ExpensesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Corporate Invoice Generator Modal (Preserved from previous implementation) */}
+      {/* Executive Invoice Generator Modal */}
       {invoiceToPrint && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white overflow-y-auto">
           <Card className="w-full max-w-4xl bg-white text-black overflow-hidden rounded-[2.5rem] print:rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300">
@@ -475,19 +475,19 @@ export default function ExpensesPage() {
               <header className="flex justify-between items-start border-b-4 border-zinc-900 pb-10">
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <h2 className="text-3xl font-black tracking-tighter uppercase leading-none">Nalakath Holdings</h2>
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">Executive Parent Group</p>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase leading-none text-zinc-900">Nalakath Construction Company</h2>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">Infrastructure & Portfolio Development Unit</p>
                   </div>
                   <div className="pt-2">
                     <div className="px-4 py-1.5 bg-zinc-900 text-white w-fit rounded-full mb-2">
-                      <h3 className="text-xs font-bold uppercase tracking-widest">{activeDivision.name}</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-primary">Nalakath Holdings Group</h3>
                     </div>
-                    <p className="text-[10px] text-zinc-500 uppercase font-medium tracking-widest pl-1">{activeDivision.division} Portfolio Unit</p>
+                    <p className="text-[10px] text-zinc-500 uppercase font-medium tracking-widest pl-1">Executive Authorized Biller</p>
                   </div>
                 </div>
                 <div className="text-right space-y-2">
                   <h1 className="text-5xl font-black uppercase tracking-tighter text-zinc-900">Tax Invoice</h1>
-                  <p className="text-sm font-mono font-bold text-zinc-400">REF: {invoiceToPrint.invoiceNumber || 'OVAL-' + invoiceToPrint.id.substring(0,6).toUpperCase()}</p>
+                  <p className="text-sm font-mono font-bold text-zinc-400">REF: {invoiceToPrint.invoiceNumber || 'NCC-' + invoiceToPrint.id.substring(0,6).toUpperCase()}</p>
                   <div className="pt-4 space-y-1">
                     <p className="text-xs text-zinc-500 uppercase font-black">Issue Date: {invoiceToPrint.expenseDate}</p>
                     <Badge className={cn(
@@ -502,10 +502,11 @@ export default function ExpensesPage() {
 
               <div className="grid grid-cols-2 gap-20">
                 <div className="space-y-4">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">Client Identity</p>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">Billed To (Client Identity)</p>
                   <div className="space-y-1 pt-2">
-                    <p className="text-2xl font-black text-zinc-900">{invoiceToPrint.clientName || "Recognized Asset"}</p>
-                    <p className="text-xs font-mono text-zinc-500">GSTIN: {invoiceToPrint.clientGstin || "Unregistered / Internal"}</p>
+                    <p className="text-2xl font-black text-zinc-900">{activeDivision.name === "Oval Palace Resort" ? "Oval Palace Resort" : invoiceToPrint.clientName || activeDivision.name}</p>
+                    <p className="text-xs font-mono text-zinc-500 uppercase">Division: {activeDivision.division} Portfolio Unit</p>
+                    <p className="text-xs font-mono text-zinc-500">GSTIN: {invoiceToPrint.clientGstin || "Unregistered / Internal Transfer"}</p>
                   </div>
                 </div>
                 <div className="space-y-4 text-right">
@@ -513,7 +514,7 @@ export default function ExpensesPage() {
                   <div className="pt-2">
                     <p className="text-xs leading-relaxed text-zinc-500 font-medium">
                       Generated via Nalakath Kernel V4.0<br />
-                      Authorized Division Representative<br />
+                      Primary Project: {activeDivision.name}<br />
                       Compliance Phase: {phases?.find(p => p.id === invoiceToPrint.phaseId)?.name || 'N/A'}
                     </p>
                   </div>
@@ -524,7 +525,7 @@ export default function ExpensesPage() {
                 <table className="w-full text-left">
                   <thead className="border-b-2 border-zinc-900">
                     <tr>
-                      <th className="py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Detailed Description</th>
+                      <th className="py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Detailed Description of Services / Works</th>
                       <th className="py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Class</th>
                       <th className="py-5 text-right text-[10px] font-black uppercase tracking-widest text-zinc-400 pr-4">Base Amount</th>
                     </tr>
@@ -533,7 +534,7 @@ export default function ExpensesPage() {
                     <tr>
                       <td className="py-8">
                         <p className="font-bold text-xl text-zinc-900 leading-tight">{invoiceToPrint.description}</p>
-                        <p className="text-[10px] text-zinc-400 uppercase font-bold mt-1 tracking-widest">Operation Category: {invoiceToPrint.expenseCategory}</p>
+                        <p className="text-[10px] text-zinc-400 uppercase font-bold mt-1 tracking-widest">Construction Operations: {invoiceToPrint.expenseCategory}</p>
                       </td>
                       <td className="py-8">
                         <Badge variant="outline" className="bg-zinc-50 text-zinc-600 border-zinc-200 text-[9px] font-bold uppercase tracking-widest">{invoiceToPrint.expenseType}</Badge>
@@ -549,14 +550,14 @@ export default function ExpensesPage() {
                   <div className="space-y-2">
                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Protocol & Terms</p>
                     <p className="text-[10px] leading-relaxed text-zinc-400 font-medium italic">
-                      1. This is a secure electronically generated fiscal document.<br />
-                      2. Valid for all internal and external group audit procedures.<br />
-                      3. Nalakath Holdings reserves all rights under the 2026 Fiscal Charter.<br />
-                      4. Inquiries should be directed to the Group HQ Finance Division.
+                      1. This is a secure electronically generated fiscal document from Nalakath Construction Company.<br />
+                      2. Valid for all internal and external group audit procedures for the Oval Palace development.<br />
+                      3. Nalakath Construction reserves all rights under the 2026 Fiscal Charter.<br />
+                      4. Inquiries should be directed to the Group Infrastructure HQ.
                     </p>
                   </div>
                   <div className="h-12 w-48 bg-zinc-50 rounded-2xl flex items-center justify-center border border-dashed border-zinc-200">
-                    <p className="text-[8px] font-black text-zinc-300 uppercase tracking-[0.4em]">Secure Data Hash Verified</p>
+                    <p className="text-[8px] font-black text-zinc-300 uppercase tracking-[0.4em]">Infrastructure Data Verified</p>
                   </div>
                 </div>
                 
@@ -575,7 +576,7 @@ export default function ExpensesPage() {
                     </div>
                     <div className="pt-6 border-t border-zinc-800 mt-2 flex justify-between items-end">
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-primary">Total Collection</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-primary">Total Amount Due</span>
                         <p className="text-4xl font-black tracking-tighter text-white leading-none">₹{invoiceToPrint.amount.toLocaleString('en-IN')}</p>
                       </div>
                     </div>
