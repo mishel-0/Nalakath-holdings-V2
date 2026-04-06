@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUser } from '@/firebase';
 
+/**
+ * AuthGuard ensures hydration safety by rendering an identical initial state 
+ * on both server and client, then activating animations post-mount.
+ */
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
@@ -20,13 +24,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [user, isUserLoading, router, pathname, mounted]);
 
-  // Handle initial hydration and loading states with an identical structure for server and client
+  // Standardized loading state to prevent hydration mismatches
   if (!mounted || isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
-          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-          <p className="text-primary font-medium animate-pulse tracking-widest uppercase text-[10px]">
+        <div className="flex flex-col items-center gap-4">
+          {/* Static container during hydration, animation activates post-mount */}
+          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/5 shadow-lg shadow-primary/5 flex items-center justify-center">
+            {mounted && <div className="w-8 h-8 rounded-full gold-gradient animate-pulse" />}
+          </div>
+          <p className="text-primary font-medium tracking-widest uppercase text-[10px] opacity-50">
             Syncing Security Protocol...
           </p>
         </div>

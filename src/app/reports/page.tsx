@@ -108,9 +108,9 @@ export default function ReportsPage() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase">Financial Hub</h1>
-                <p className="text-muted-foreground text-sm">Certified fiscal reporting and automated GST auditing.</p>
+              <div className="min-w-0">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Financial Hub</h1>
+                <p className="text-muted-foreground text-sm truncate">Certified fiscal reporting and automated GST auditing.</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-6 shrink-0">
@@ -200,7 +200,7 @@ export default function ReportsPage() {
                               <FilingRow label="B2B Registered Sales" value={stats.revenue * 0.7} />
                               <FilingRow label="B2C Unregistered Sales" value={stats.revenue * 0.3} />
                               <FilingRow label="Export Sales" value={0} />
-                              <div className="pt-3 border-t border-white/5 flex justify-between gap-2 overflow-hidden">
+                              <div className="pt-3 border-t border-white/5 flex justify-between gap-4 overflow-hidden">
                                 <span className="text-xs font-bold shrink-0">Total Output GST (18%)</span>
                                 <span className="text-sm font-mono font-bold text-primary truncate">₹{stats.outputGst.toLocaleString('en-IN')}</span>
                               </div>
@@ -212,7 +212,7 @@ export default function ReportsPage() {
                               <FilingRow label="ITC on Capital Goods" value={stats.opex * 0.2} />
                               <FilingRow label="ITC on Regular Services" value={stats.opex * 0.8} />
                               <FilingRow label="Ineligible ITC" value={stats.inputGst - stats.itcEligible} isNegative />
-                              <div className="pt-3 border-t border-white/5 flex justify-between gap-2 overflow-hidden">
+                              <div className="pt-3 border-t border-white/5 flex justify-between gap-4 overflow-hidden">
                                 <span className="text-xs font-bold shrink-0">Total ITC Claimable</span>
                                 <span className="text-sm font-mono font-bold text-green-500 truncate">₹{stats.itcEligible.toLocaleString('en-IN')}</span>
                               </div>
@@ -362,7 +362,7 @@ function GSTMetricCard({ title, value, sub, color = "text-foreground", highlight
 
 function FilingRow({ label, value, isNegative }: any) {
   return (
-    <div className="flex justify-between items-center text-xs gap-2 overflow-hidden">
+    <div className="flex justify-between items-center text-xs gap-4 overflow-hidden">
       <span className="text-muted-foreground truncate">{label}</span>
       <span className={cn("font-mono font-bold shrink-0", isNegative ? "text-destructive" : "")}>
         {isNegative ? '-' : ''}₹{value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}

@@ -46,7 +46,7 @@ export default function DeveloperDashboard() {
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
 
-  // Data Listeners
+  // Data Listeners - Real-time system monitoring
   const logsQuery = useMemoFirebase(() => query(collection(db, "auditLogs"), orderBy("timestamp", "desc"), limit(50)), [db]);
   const errorsQuery = useMemoFirebase(() => query(collection(db, "systemErrors"), orderBy("timestamp", "desc"), limit(50)), [db]);
   
@@ -65,7 +65,7 @@ export default function DeveloperDashboard() {
     toast({ title: "System Triggered", description: `Command: ${action} initiated.` });
   };
 
-  if (!mounted || isProfileLoading) return <LoadingScreen />;
+  if (!mounted || isProfileLoading) return <LoadingScreen mounted={mounted} />;
   
   if (profile?.role !== "Developer" && profile?.role !== "Admin") {
     return <AccessDenied />;
@@ -290,7 +290,7 @@ function MetricCard({ title, value, sub, icon: Icon, color }: any) {
       <div className="flex flex-col gap-1 relative overflow-hidden">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 truncate">{title}</p>
         <div className="flex items-center justify-between gap-2 overflow-hidden">
-          <div className={cn("text-3xl font-bold font-mono tracking-tighter truncate", color)} title={String(value)}>
+          <div className={cn("text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate", color)} title={String(value)}>
             {value}
           </div>
           <div className="h-10 w-10 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary ios-transition shrink-0">
@@ -311,7 +311,7 @@ function HealthCard({ label, value, unit, icon: Icon, color }: any) {
       </div>
       <div className="min-w-0">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{label}</p>
-        <p className="text-2xl font-black font-mono mt-1 truncate">{value} <span className="text-xs font-normal opacity-40">{unit}</span></p>
+        <p className="text-xl md:text-2xl font-black font-mono mt-1 truncate">{value} <span className="text-xs font-normal opacity-40">{unit}</span></p>
       </div>
     </div>
   );
@@ -333,12 +333,14 @@ function ControlButton({ icon: Icon, label, onClick, variant = "default" }: any)
   );
 }
 
-function LoadingScreen() {
+function LoadingScreen({ mounted }: { mounted: boolean }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
-        <div className="h-16 w-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-        <p className="text-primary font-mono text-xs uppercase tracking-[0.3em] animate-pulse">Initializing Kernel...</p>
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/5 flex items-center justify-center">
+          {mounted && <div className="w-8 h-8 rounded-full gold-gradient animate-pulse" />}
+        </div>
+        <p className="text-primary font-mono text-[10px] uppercase tracking-[0.3em] opacity-50">Initializing Kernel...</p>
       </div>
     </div>
   );
