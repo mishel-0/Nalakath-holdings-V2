@@ -100,7 +100,7 @@ export default function Dashboard() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
+        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0 overflow-hidden">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
             
             <header className="flex flex-col gap-2">
@@ -197,8 +197,8 @@ export default function Dashboard() {
                       <p className="py-10 text-center text-muted-foreground text-sm italic">No recent activity logged for this division.</p>
                     ) : (
                       recentTransactions.map((tx) => (
-                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1.5rem] hover:bg-foreground/5 ios-transition group">
-                          <div className="flex items-center gap-4 min-w-0">
+                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1.5rem] hover:bg-foreground/5 ios-transition group overflow-hidden">
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className={cn(
                               "h-10 w-10 rounded-2xl flex items-center justify-center shrink-0",
                               tx.totalDebit > 0 ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500"
@@ -225,7 +225,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="control-center-card">
+              <Card className="control-center-card overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
@@ -264,7 +264,7 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 truncate">{title}</p>
         
         <div className="flex items-center justify-between gap-2 overflow-hidden">
-          <div className="text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate" title={processedValue(value)}>
+          <div className="text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate flex-1 min-w-0" title={processedValue(value)}>
             {processedValue(value)}
           </div>
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
@@ -296,8 +296,8 @@ function processedValue(val: any) {
 
 function DivisionBar({ name, value, color }: any) {
   return (
-    <div className="space-y-3">
-      <div className="flex justify-between text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground">
+    <div className="space-y-3 overflow-hidden">
+      <div className="flex justify-between text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground overflow-hidden">
         <span className="truncate pr-2">{name}</span>
         <span className="font-mono shrink-0">{value}</span>
       </div>
@@ -311,7 +311,7 @@ function DivisionBar({ name, value, color }: any) {
 function AlertItem({ title, desc, severity }: any) {
   const colors = { high: "bg-destructive", medium: "bg-orange-500", low: "bg-green-500" };
   return (
-    <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer min-w-0">
+    <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer min-w-0 overflow-hidden">
       <div className={cn("mt-1.5 h-2.5 w-2.5 rounded-full shrink-0", colors[severity as keyof typeof colors])} />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold leading-none truncate">{title}</p>

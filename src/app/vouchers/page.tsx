@@ -31,7 +31,6 @@ export default function VouchersPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState<any>(null);
   const [search, setSearch] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const companyId = activeDivision.id;
 
   const profileDocRef = useMemoFirebase(() => {
@@ -93,6 +92,7 @@ export default function VouchersPage() {
       status: formData.get("status") || "Pending",
       phaseName: formData.get("phaseName") || "N/A",
       description: formData.get("description") || "",
+      expenseCategory: "Manual Entry",
       createdAt: now,
       updatedAt: now,
     };
@@ -132,31 +132,51 @@ export default function VouchersPage() {
   const handleExportCSV = () => {
     if (!filteredVouchers.length) return;
     
-    const headers = ["Voucher #", "Date", "Vendor", "Phase", "Description", "Amount (₹)", "Status", "Method"];
+    // Structured headers for professional audit
+    const headers = [
+      "VOUCHER NUMBER",
+      "POSTING DATE",
+      "ENTITY / VENDOR",
+      "PROJECT PHASE",
+      "DESCRIPTION",
+      "CATEGORY",
+      "AMOUNT (INR)",
+      "PAYMENT STATUS",
+      "PAYMENT METHOD",
+      "DIVISION"
+    ];
+
     const rows = filteredVouchers.map(v => [
-      v.voucherNumber,
-      v.date,
-      v.vendorName,
-      v.phaseName || "N/A",
-      v.description?.replace(/,/g, " "),
-      v.amount,
-      v.status,
-      v.paymentMethod
+      v.voucherNumber || '',
+      v.date || '',
+      v.vendorName || '',
+      v.phaseName || 'N/A',
+      (v.description || '').replace(/"/g, '""'),
+      v.expenseCategory || 'General',
+      v.amount || 0,
+      v.status || 'Pending',
+      v.paymentMethod || 'N/A',
+      v.division || ''
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\n"
-      + rows.map(e => e.join(",")).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
+    // Format as CSV with proper quoting for Excel compatibility
+    const csvRows = [headers, ...rows].map(row => 
+      row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(",")
+    );
+    const csvContent = csvRows.join("\n");
+    
+    // Add BOM for UTF-8 Excel support and use Blob for safety
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Vouchers_${activeDivision.id}_${new Date().toLocaleDateString()}.csv`);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `NALAKATH_VOUCHERS_${activeDivision.id.toUpperCase()}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
-    toast({ title: "Export Complete", description: "Voucher database downloaded as Excel-ready CSV." });
+    toast({ title: "Export Complete", description: "Structured audit ledger downloaded for Excel." });
   };
 
   if (isProfileLoading || (profile && profile.role !== "Admin")) {
@@ -175,20 +195,20 @@ export default function VouchersPage() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
+        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0 overflow-hidden">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
+              <div className="min-w-0">
                 <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Payment Vouchers</h1>
                 <p className="text-muted-foreground truncate">Proof of purchase for {activeDivision.name}.</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4 shrink-0" onClick={handleExportCSV}>
-                  <Download className="h-4 w-4" /> Export Excel
+              <div className="flex items-center gap-2 shrink-0">
+                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4" onClick={handleExportCSV}>
+                  <FileSpreadsheet className="h-4 w-4" /> Export Structured Excel
                 </Button>
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
-                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-4 shrink-0">
+                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-4">
                       <Plus className="h-4 w-4" /> New Voucher
                     </Button>
                   </DialogTrigger>
@@ -267,7 +287,7 @@ export default function VouchersPage() {
             </div>
 
             <Card className="glass border-white/5 overflow-hidden">
-              <CardHeader className="border-b border-white/5 bg-white/5">
+              <CardHeader className="border-b border-white/5 bg-white/5 px-6 py-4">
                 <div className="relative w-full md:w-96">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input 
@@ -281,8 +301,8 @@ export default function VouchersPage() {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader className="bg-white/5">
-                    <TableRow className="border-white/5">
-                      <TableHead className="w-24 uppercase tracking-widest text-[9px] font-bold">Voucher #</TableHead>
+                    <TableRow className="border-white/5 hover:bg-transparent">
+                      <TableHead className="w-24 uppercase tracking-widest text-[9px] font-bold px-6">Voucher #</TableHead>
                       <TableHead className="uppercase tracking-widest text-[9px] font-bold">Details & Phase</TableHead>
                       <TableHead className="text-right uppercase tracking-widest text-[9px] font-bold">Amount (₹)</TableHead>
                       <TableHead className="text-center uppercase tracking-widest text-[9px] font-bold px-6">Status</TableHead>
@@ -297,12 +317,12 @@ export default function VouchersPage() {
                     ) : (
                       filteredVouchers.map((v) => (
                         <TableRow key={v.id} className="border-white/5 hover:bg-white/5 ios-transition group">
-                          <TableCell className="font-mono text-xs font-bold text-primary truncate max-w-[100px]">{v.voucherNumber}</TableCell>
+                          <TableCell className="font-mono text-xs font-bold text-primary truncate max-w-[100px] px-6">{v.voucherNumber}</TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-0.5">
-                              <span className="font-bold text-sm truncate max-w-[200px]">{v.vendorName}</span>
+                              <span className="font-bold text-sm truncate max-w-[250px]">{v.vendorName}</span>
                               <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-muted-foreground italic truncate max-w-[150px]">{v.description}</span>
+                                <span className="text-[10px] text-muted-foreground italic truncate max-w-[180px]">{v.description}</span>
                                 {v.phaseName && (
                                   <Badge variant="outline" className="text-[8px] uppercase tracking-tighter h-4 border-white/5 bg-white/5">
                                     <Layers className="h-2 w-2 mr-1" /> {v.phaseName}
@@ -311,7 +331,7 @@ export default function VouchersPage() {
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-sm truncate">
+                          <TableCell className="text-right font-mono font-bold text-sm truncate max-w-[150px]">
                             ₹{v.amount?.toLocaleString('en-IN')}
                           </TableCell>
                           <TableCell className="text-center shrink-0 px-6">
@@ -425,7 +445,7 @@ export default function VouchersPage() {
 
 function StatCard({ title, value, color = "text-foreground" }: any) {
   return (
-    <Card className="glass border-white/5 min-w-0">
+    <Card className="glass border-white/5 min-w-0 overflow-hidden">
       <CardContent className="p-5 flex flex-col gap-1 overflow-hidden">
         <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-muted-foreground truncate">{title}</p>
         <p className={`text-lg md:text-xl font-bold font-mono truncate ${color}`} title={value.toLocaleString('en-IN')}>
