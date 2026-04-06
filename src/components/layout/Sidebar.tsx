@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -16,7 +17,8 @@ import {
   ListTree,
   History,
   RefreshCcw,
-  Terminal
+  Terminal,
+  Percent
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -26,6 +28,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
+  { name: "Tax Engine", href: "/tax", icon: Percent },
   { name: "Chart of Accounts", href: "/accounts", icon: ListTree },
   { name: "Payment Vouchers", href: "/vouchers", icon: ReceiptText, adminOnly: true },
   { name: "Expenses", href: "/expenses", icon: Calculator },
@@ -63,7 +66,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col gap-4 p-4">
         <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1 pt-4">
           {filteredNavigation.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname.startsWith(item.href) && (item.href !== '/' || pathname === '/');
             return (
               <Link
                 key={item.name}

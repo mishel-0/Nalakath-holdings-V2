@@ -9,7 +9,8 @@ import {
   BookOpen, 
   BarChart3, 
   Sparkles,
-  ListTree
+  ListTree,
+  Percent
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -19,7 +20,7 @@ const mobileNav = [
   { name: "Home", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
-  { name: "COA", href: "/accounts", icon: ListTree },
+  { name: "Tax", href: "/tax", icon: Percent },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "AI", href: "/insights", icon: Sparkles },
 ];
