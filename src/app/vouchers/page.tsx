@@ -139,17 +139,17 @@ export default function VouchersPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Payment Vouchers</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase">Payment Vouchers</h1>
                 <p className="text-muted-foreground">Proof of purchase and expenditure across divisions.</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4" onClick={() => fileInputRef.current?.click()}>
+                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4 shrink-0" onClick={() => fileInputRef.current?.click()}>
                   <Upload className="h-4 w-4" /> Import
                 </Button>
                 <input type="file" ref={fileInputRef} className="hidden" />
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
-                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-4">
+                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-4 shrink-0">
                       <Plus className="h-4 w-4" /> New Voucher
                     </Button>
                   </DialogTrigger>
@@ -263,19 +263,19 @@ export default function VouchersPage() {
                     ) : (
                       filteredVouchers.map((v) => (
                         <TableRow key={v.id} className="border-white/5 hover:bg-white/5 ios-transition group">
-                          <TableCell className="font-mono text-xs font-bold text-primary">{v.voucherNumber}</TableCell>
+                          <TableCell className="font-mono text-xs font-bold text-primary truncate max-w-[100px]">{v.voucherNumber}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-tighter opacity-70 border-white/10 px-2 py-0">
+                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-tighter opacity-70 border-white/10 px-2 py-0 truncate max-w-[80px]">
                               {v.division}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-semibold text-sm">{v.vendorName}</TableCell>
-                          <TableCell className="text-right font-mono font-bold text-sm">
+                          <TableCell className="font-semibold text-sm truncate max-w-[150px]">{v.vendorName}</TableCell>
+                          <TableCell className="text-right font-mono font-bold text-sm truncate">
                             ₹{v.amount?.toLocaleString('en-IN')}
                           </TableCell>
-                          <TableCell className="text-center">
+                          <TableCell className="text-center shrink-0">
                             <Badge className={cn(
-                              "rounded-full text-[9px] uppercase font-bold tracking-widest px-2",
+                              "rounded-full text-[9px] uppercase font-bold tracking-widest px-2 whitespace-nowrap",
                               v.status === "Paid" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-primary/10 text-primary border-primary/20"
                             )} variant="outline">
                               {v.status}
@@ -388,10 +388,12 @@ export default function VouchersPage() {
 
 function StatCard({ title, value, color = "text-foreground" }: any) {
   return (
-    <Card className="glass border-white/5">
-      <CardContent className="p-5 flex flex-col gap-1">
-        <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-muted-foreground">{title}</p>
-        <p className={`text-xl font-bold font-mono ${color}`}>₹{value.toLocaleString('en-IN')}</p>
+    <Card className="glass border-white/5 min-w-0">
+      <CardContent className="p-5 flex flex-col gap-1 overflow-hidden">
+        <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-muted-foreground truncate">{title}</p>
+        <p className={`text-lg md:text-xl font-bold font-mono truncate ${color}`} title={value.toLocaleString('en-IN')}>
+          ₹{value.toLocaleString('en-IN')}
+        </p>
       </CardContent>
     </Card>
   );

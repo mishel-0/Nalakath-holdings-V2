@@ -55,9 +55,9 @@ export default function TaxEnginePage() {
   const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries")), [db, companyId]);
   const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db, companyId]);
 
-  const { data: recentRecords } = useCollection(recordsQuery);
   const { data: ledger } = useCollection(ledgerQuery);
   const { data: expenses } = useCollection(expensesQuery);
+  const { data: recentRecords } = useCollection(recordsQuery);
 
   // Calculate Real Dashboard Figures
   const stats = useMemo(() => {
@@ -229,7 +229,7 @@ export default function TaxEnginePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="lg:col-span-2 control-center-card border-primary/20 bg-primary/5">
+                <Card className="lg:col-span-2 control-center-card border-primary/20 bg-primary/5 min-w-0">
                   <CardHeader>
                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                       <Calculator className="h-5 w-5 text-primary" />
@@ -237,30 +237,30 @@ export default function TaxEnginePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="p-6 rounded-[2rem] bg-background/50 border border-white/5 space-y-4">
+                    <div className="p-6 rounded-[2rem] bg-background/50 border border-white/5 space-y-4 overflow-hidden">
                       <BreakdownRow label={reverseMode ? "Gross Amount" : "Base Amount"} value={calculations.base} />
                       <BreakdownRow label={`GST (${gstRate}%)`} value={calculations.tax} color="text-primary" />
                       {extraTaxes.map(t => (
                         <BreakdownRow key={t.id} label={`${t.name} (${t.rate}%)`} value={(calculations.base * t.rate) / 100} />
                       ))}
-                      <div className="pt-4 mt-4 border-t border-white/10 flex justify-between items-end">
-                        <span className="text-xs uppercase font-bold text-muted-foreground">Final Net Payable</span>
-                        <span className="text-3xl font-black font-mono">₹{calculations.total.toLocaleString('en-IN')}</span>
+                      <div className="pt-4 mt-4 border-t border-white/10 flex justify-between items-end gap-2 overflow-hidden">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground mb-1 shrink-0">Final Net Payable</span>
+                        <span className="text-2xl md:text-3xl font-black font-mono truncate" title={calculations.total.toLocaleString('en-IN')}>₹{calculations.total.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
 
-                    <Card className="border-white/5 bg-white/5 rounded-[2rem]">
-                      <CardHeader className="py-4">
+                    <Card className="border-white/5 bg-white/5 rounded-[2rem] overflow-hidden">
+                      <CardHeader className="py-4 px-6 border-b border-white/5">
                         <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Recent Calculations</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        {recentRecords?.length === 0 ? (
+                      <CardContent className="p-4 space-y-3">
+                        {!recentRecords || recentRecords?.length === 0 ? (
                           <p className="text-xs text-muted-foreground italic text-center py-4">No records saved yet.</p>
                         ) : (
                           recentRecords?.map((r) => (
-                            <div key={r.id} className="flex justify-between items-center text-xs">
-                              <span className="font-mono text-muted-foreground">{new Date(r.timestamp).toLocaleTimeString()}</span>
-                              <span className="font-bold">₹{r.finalAmount.toLocaleString('en-IN')}</span>
+                            <div key={r.id} className="flex justify-between items-center text-xs px-2">
+                              <span className="font-mono text-muted-foreground shrink-0">{new Date(r.timestamp).toLocaleTimeString()}</span>
+                              <span className="font-bold truncate pl-4">₹{r.finalAmount.toLocaleString('en-IN')}</span>
                             </div>
                           ))
                         )}
@@ -280,7 +280,7 @@ export default function TaxEnginePage() {
                 <Card className="control-center-card border-white/5 h-[400px] flex items-center justify-center">
                   <div className="text-center space-y-4">
                     <BarChart3 className="h-12 w-12 text-primary mx-auto opacity-20" />
-                    <p className="text-muted-foreground text-sm font-mono uppercase tracking-widest animate-pulse">Synchronizing Visual Data Stream...</p>
+                    <p className="text-muted-foreground text-sm font-mono uppercase tracking-widest animate-pulse px-6">Synchronizing Visual Data Stream...</p>
                   </div>
                 </Card>
               </TabsContent>
@@ -346,37 +346,37 @@ export default function TaxEnginePage() {
 
 function BreakdownRow({ label, value, color = "text-foreground" }: any) {
   return (
-    <div className="flex justify-between items-center text-sm">
-      <span className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">{label}</span>
-      <span className={cn("font-mono font-bold", color)}>₹{value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+    <div className="flex justify-between items-center text-sm gap-2">
+      <span className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold truncate">{label}</span>
+      <span className={cn("font-mono font-bold shrink-0", color)}>₹{value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
     </div>
   );
 }
 
 function TaxStatCard({ title, value, trend, desc, highlight }: any) {
   return (
-    <Card className={cn("control-center-card border-white/5", highlight && "ring-1 ring-primary/20")}>
-      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">{title}</p>
-      <div className="flex items-center justify-between">
-        <div className={cn("text-2xl font-bold font-mono tracking-tighter", highlight ? "text-primary" : "text-foreground")}>
+    <Card className={cn("control-center-card border-white/5 min-w-0", highlight && "ring-1 ring-primary/20")}>
+      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 truncate">{title}</p>
+      <div className="flex items-center justify-between gap-2 overflow-hidden">
+        <div className={cn("text-xl md:text-2xl font-bold font-mono tracking-tighter truncate", highlight ? "text-primary" : "text-foreground")} title={typeof value === 'number' ? `₹${value.toLocaleString('en-IN')}` : value}>
           {typeof value === 'number' ? `₹${value.toLocaleString('en-IN')}` : value}
         </div>
       </div>
-      <p className="text-[10px] text-muted-foreground mt-4 uppercase tracking-widest opacity-60">{desc}</p>
+      <p className="text-[10px] text-muted-foreground mt-4 uppercase tracking-widest opacity-60 truncate">{desc}</p>
     </Card>
   );
 }
 
 function ReportActionCard({ title, desc, icon: Icon, action }: any) {
   return (
-    <Card className="control-center-card border-white/5 hover:border-primary/20 ios-transition">
+    <Card className="control-center-card border-white/5 hover:border-primary/20 ios-transition min-w-0">
       <div className="flex items-center gap-4 mb-4">
-        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
           <Icon className="h-6 w-6" />
         </div>
-        <div>
-          <h3 className="text-lg font-bold">{title}</h3>
-          <p className="text-xs text-muted-foreground">{desc}</p>
+        <div className="min-w-0">
+          <h3 className="text-lg font-bold truncate">{title}</h3>
+          <p className="text-xs text-muted-foreground truncate">{desc}</p>
         </div>
       </div>
       <Button className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-primary hover:text-black font-bold text-xs uppercase tracking-widest gap-2">
@@ -388,13 +388,13 @@ function ReportActionCard({ title, desc, icon: Icon, action }: any) {
 
 function RuleItem({ condition, action, status }: any) {
   return (
-    <div className="p-5 rounded-3xl bg-white/5 border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group hover:border-white/10 ios-transition">
-      <div className="flex-1">
-        <p className="text-xs font-bold text-primary mb-1 uppercase tracking-widest">IF {condition}</p>
-        <p className="text-sm font-medium">THEN {action}</p>
+    <div className="p-5 rounded-3xl bg-white/5 border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group hover:border-white/10 ios-transition min-w-0">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-primary mb-1 uppercase tracking-widest truncate">IF {condition}</p>
+        <p className="text-sm font-medium truncate">THEN {action}</p>
       </div>
       <Badge className={cn(
-        "rounded-full px-4 py-1 text-[9px] font-bold tracking-widest",
+        "rounded-full px-4 py-1 text-[9px] font-bold tracking-widest shrink-0",
         status === "ACTIVE" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
       )} variant="outline">
         {status}

@@ -108,16 +108,16 @@ export default function AccountingPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">General Ledger</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase">General Ledger</h1>
                 <p className="text-muted-foreground">Comprehensive record of group financial activity.</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5">
+                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4">
                   <Download className="h-4 w-4" /> Export
                 </Button>
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
-                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold">
+                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-4">
                       <Plus className="h-4 w-4" /> Post Entry
                     </Button>
                   </DialogTrigger>
@@ -201,8 +201,8 @@ export default function AccountingPage() {
                           <TableCell className="text-muted-foreground font-mono text-xs">{tx.date}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold">{tx.description}</span>
-                              {tx.status === "Verified" && <CheckCircle2 className="h-3 w-3 text-primary opacity-50" />}
+                              <span className="font-semibold truncate max-w-[200px]">{tx.description}</span>
+                              {tx.status === "Verified" && <CheckCircle2 className="h-3 w-3 text-primary opacity-50 shrink-0" />}
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-mono font-medium text-destructive">
@@ -287,10 +287,12 @@ export default function AccountingPage() {
 
 function SummaryCard({ title, value, color }: any) {
   return (
-    <Card className="glass border-white/5 py-4">
-      <CardContent className="p-6 flex flex-col gap-1">
-        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">{title}</p>
-        <p className={`text-2xl font-bold font-mono ${color}`}>₹{Math.abs(value).toLocaleString('en-IN')}</p>
+    <Card className="glass border-white/5 py-4 min-w-0">
+      <CardContent className="p-6 flex flex-col gap-1 overflow-hidden">
+        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground truncate">{title}</p>
+        <p className={`text-xl md:text-2xl font-bold font-mono truncate ${color}`} title={Math.abs(value).toLocaleString('en-IN')}>
+          ₹{Math.abs(value).toLocaleString('en-IN')}
+        </p>
       </CardContent>
     </Card>
   );
