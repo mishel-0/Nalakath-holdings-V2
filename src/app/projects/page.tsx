@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Activity, HardHat, Pencil, Trash2, MoreVertical, Droplets } from "lucide-react";
+import { Plus, Activity, HardHat, Pencil, Trash2, MoreVertical, Droplets, Building2, Wallet } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -42,7 +42,6 @@ export default function ProjectsPage() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
 
   useEffect(() => {
-    // Only Nalakath Holdings Main can access Projects
     if (activeDivision.id !== "nalakath-holdings-main") {
       toast({
         variant: "destructive",
@@ -78,13 +77,19 @@ export default function ProjectsPage() {
       companyId,
       name: formData.get("name") as string,
       description: formData.get("description") as string,
+      vendorName: formData.get("vendorName") as string,
       startDate: formData.get("startDate") as string,
       status: "Planning",
       budgetAmount: Number(formData.get("budget")),
       actualCost: 0,
       image: "https://picsum.photos/seed/" + Math.random() + "/600/400",
       progress: 0,
-      liquidityPercentage: Number(formData.get("liquidity")) || 0,
+      investorLiquidity: Number(formData.get("investorLiquidity")) || 0,
+      companyLiquidity: Number(formData.get("companyLiquidity")) || 0,
+      materialAllocation: Number(formData.get("materialAllocation")) || 0,
+      labourAllocation: Number(formData.get("labourAllocation")) || 0,
+      landAllocation: Number(formData.get("landAllocation")) || 0,
+      profitMarginAllocation: Number(formData.get("profitMarginAllocation")) || 0,
       createdAt: now,
       updatedAt: now,
     };
@@ -100,12 +105,19 @@ export default function ProjectsPage() {
 
     const formData = new FormData(e.currentTarget);
     const updatedData = {
+      ...editingProject,
       name: formData.get("name") as string,
       description: formData.get("description") as string,
+      vendorName: formData.get("vendorName") as string,
       startDate: formData.get("startDate") as string,
       budgetAmount: Number(formData.get("budget")),
       progress: Number(formData.get("progress")),
-      liquidityPercentage: Number(formData.get("liquidity")),
+      investorLiquidity: Number(formData.get("investorLiquidity")),
+      companyLiquidity: Number(formData.get("companyLiquidity")),
+      materialAllocation: Number(formData.get("materialAllocation")),
+      labourAllocation: Number(formData.get("labourAllocation")),
+      landAllocation: Number(formData.get("landAllocation")),
+      profitMarginAllocation: Number(formData.get("profitMarginAllocation")),
       actualCost: Number(formData.get("actualCost")),
       status: formData.get("status") as string,
       updatedAt: new Date().toISOString(),
@@ -141,8 +153,8 @@ export default function ProjectsPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Projects</h1>
-                <p className="text-muted-foreground truncate">Ventures for {activeDivision.name}.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">HQ Projects</h1>
+                <p className="text-muted-foreground truncate">Portfolio for {activeDivision.name}.</p>
               </div>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
@@ -150,32 +162,72 @@ export default function ProjectsPage() {
                     <Plus className="h-4 w-4" /> New Project
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+                <DialogContent className="glass border-white/10 sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar">
                   <DialogHeader>
                     <DialogTitle>Launch New Project</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleAddProject} className="space-y-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="name">Project Name</Label>
-                      <Input id="name" name="name" required className="bg-white/5 border-white/10 rounded-xl" />
+                  <form onSubmit={handleAddProject} className="space-y-6 py-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="grid gap-2">
+                        <Label>Project Name</Label>
+                        <Input name="name" required className="bg-white/5 border-white/10 rounded-xl" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Handling Vendor (Construction)</Label>
+                        <Input name="vendorName" required placeholder="e.g. Nalakath Construction" className="bg-white/5 border-white/10 rounded-xl" />
+                      </div>
                     </div>
+                    
                     <div className="grid gap-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea id="description" name="description" required className="bg-white/5 border-white/10 rounded-xl" />
+                      <Label>Description</Label>
+                      <Textarea name="description" required className="bg-white/5 border-white/10 rounded-xl min-h-[80px]" />
                     </div>
+
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-primary">Liquidity Split (%)</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label className="text-[10px]">Investors</Label>
+                          <Input name="investorLiquidity" type="number" min="0" max="100" defaultValue="50" required className="bg-white/5 border-white/10 rounded-xl" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px]">Company</Label>
+                          <Input name="companyLiquidity" type="number" min="0" max="100" defaultValue="50" required className="bg-white/5 border-white/10 rounded-xl" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-primary">Cost Allocation (%)</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid gap-2">
+                          <Label className="text-[10px]">Material</Label>
+                          <Input name="materialAllocation" type="number" defaultValue="40" className="bg-white/5 border-white/10 rounded-xl" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px]">Labour</Label>
+                          <Input name="labourAllocation" type="number" defaultValue="30" className="bg-white/5 border-white/10 rounded-xl" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px]">Land</Label>
+                          <Input name="landAllocation" type="number" defaultValue="20" className="bg-white/5 border-white/10 rounded-xl" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px]">Profit</Label>
+                          <Input name="profitMarginAllocation" type="number" defaultValue="10" className="bg-white/5 border-white/10 rounded-xl" />
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="budget">Total Budget (₹)</Label>
-                        <Input id="budget" name="budget" type="number" required className="bg-white/5 border-white/10 rounded-xl" />
+                        <Label>Total Budget (₹)</Label>
+                        <Input name="budget" type="number" required className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="liquidity">Liquidity (%)</Label>
-                        <Input id="liquidity" name="liquidity" type="number" min="0" max="100" defaultValue="100" required className="bg-white/5 border-white/10 rounded-xl" />
+                        <Label>Start Date</Label>
+                        <Input name="startDate" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="startDate">Start Date</Label>
-                      <Input id="startDate" name="startDate" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="bg-white/5 border-white/10 rounded-xl" />
                     </div>
                     <DialogFooter>
                       <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Start Project</Button>
@@ -185,7 +237,7 @@ export default function ProjectsPage() {
               </Dialog>
             </header>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {isLoading ? (
                 <p className="text-muted-foreground animate-pulse text-xs font-bold uppercase tracking-widest">FETCHING VENTURES...</p>
               ) : projects?.length === 0 ? (
@@ -225,52 +277,52 @@ export default function ProjectsPage() {
                       <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
                         <div className="max-w-[70%]">
                           <h3 className="text-lg font-bold truncate">{project.name}</h3>
-                          <p className="text-xs text-white/60 truncate">{project.description}</p>
+                          <p className="text-[10px] text-white/60 truncate flex items-center gap-1">
+                            <Building2 className="h-3 w-3" /> {project.vendorName || "Not Assigned"}
+                          </p>
                         </div>
-                        <Badge className={cn(
-                          "rounded-full whitespace-nowrap text-[9px] uppercase font-bold tracking-widest border-none px-2",
-                          project.actualCost > project.budgetAmount ? "bg-destructive text-white" : "bg-green-500 text-black"
-                        )}>
+                        <Badge className="rounded-full bg-green-500 text-black text-[9px] uppercase font-bold tracking-widest border-none px-2">
                           {project.status}
                         </Badge>
                       </div>
                     </div>
-                    <CardContent className="pt-6">
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest mb-1">
-                            <span className="text-muted-foreground flex items-center gap-1">
-                              <Activity className="h-3 w-3" /> Progress
-                            </span>
-                            <span className="text-foreground">{project.progress || 0}%</span>
-                          </div>
-                          <Progress value={project.progress || 0} className="h-1.5 bg-secondary/50" />
+                    <CardContent className="pt-6 space-y-6">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest mb-1">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Activity className="h-3 w-3" /> Construction Progress
+                          </span>
+                          <span className="text-foreground">{project.progress || 0}%</span>
                         </div>
+                        <Progress value={project.progress || 0} className="h-1.5 bg-secondary/50" />
+                      </div>
 
+                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest mb-1">
-                            <span className="text-muted-foreground flex items-center gap-1">
-                              <Droplets className="h-3 w-3" /> Liquidity
-                            </span>
-                            <span className="text-primary">{project.liquidityPercentage || 0}%</span>
+                          <div className="flex justify-between text-[9px] uppercase font-bold tracking-widest">
+                            <span className="text-primary/70 flex items-center gap-1"><Wallet className="h-2.5 w-2.5" /> Investor</span>
+                            <span>{project.investorLiquidity || 0}%</span>
                           </div>
-                          <Progress value={project.liquidityPercentage || 0} className="h-1.5 bg-secondary/50" />
+                          <Progress value={project.investorLiquidity || 0} className="h-1 bg-primary/20" />
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-4 pt-2">
-                          <div className="space-y-1 min-w-0">
-                            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Budget</p>
-                            <p className="text-sm font-bold truncate">₹{project.budgetAmount?.toLocaleString('en-IN')}</p>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[9px] uppercase font-bold tracking-widest">
+                            <span className="text-green-500/70 flex items-center gap-1"><Building2 className="h-2.5 w-2.5" /> Company</span>
+                            <span>{project.companyLiquidity || 0}%</span>
                           </div>
-                          <div className="space-y-1 text-right min-w-0">
-                            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Actual</p>
-                            <p className={cn(
-                              "text-sm font-bold truncate",
-                              project.actualCost > project.budgetAmount ? "text-destructive" : "text-foreground"
-                            )}>
-                              ₹{project.actualCost?.toLocaleString('en-IN')}
-                            </p>
-                          </div>
+                          <Progress value={project.companyLiquidity || 0} className="h-1 bg-green-500/20" />
+                        </div>
+                      </div>
+                      
+                      <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                        <div className="space-y-1 min-w-0">
+                          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Project Budget</p>
+                          <p className="text-sm font-bold truncate">₹{project.budgetAmount?.toLocaleString('en-IN')}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary" title="Allocated">
+                              <Droplets className="h-4 w-4" />
+                           </div>
                         </div>
                       </div>
                     </CardContent>
@@ -283,43 +335,83 @@ export default function ProjectsPage() {
       </div>
 
       <Dialog open={!!editingProject} onOpenChange={(open) => !open && setEditingProject(null)}>
-        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+        <DialogContent className="glass border-white/10 sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
           </DialogHeader>
           {editingProject && (
-            <form onSubmit={handleUpdateProject} className="space-y-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-p-name">Project Name</Label>
-                <Input id="edit-p-name" name="name" defaultValue={editingProject.name} required className="bg-white/5 border-white/10 rounded-xl" />
+            <form onSubmit={handleUpdateProject} className="space-y-6 py-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label>Project Name</Label>
+                  <Input name="name" defaultValue={editingProject.name} required className="bg-white/5 border-white/10 rounded-xl" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Handling Vendor</Label>
+                  <Input name="vendorName" defaultValue={editingProject.vendorName} required className="bg-white/5 border-white/10 rounded-xl" />
+                </div>
               </div>
+              
               <div className="grid gap-2">
-                <Label htmlFor="edit-p-desc">Description</Label>
-                <Textarea id="edit-p-desc" name="description" defaultValue={editingProject.description} required className="bg-white/5 border-white/10 rounded-xl" />
+                <Label>Description</Label>
+                <Textarea name="description" defaultValue={editingProject.description} required className="bg-white/5 border-white/10 rounded-xl" />
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Liquidity Split (%)</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label className="text-[10px]">Investors</Label>
+                    <Input name="investorLiquidity" type="number" defaultValue={editingProject.investorLiquidity} className="bg-white/5 border-white/10 rounded-xl" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="text-[10px]">Company</Label>
+                    <Input name="companyLiquidity" type="number" defaultValue={editingProject.companyLiquidity} className="bg-white/5 border-white/10 rounded-xl" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Cost Allocation (%)</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid gap-2">
+                    <Label className="text-[10px]">Material</Label>
+                    <Input name="materialAllocation" type="number" defaultValue={editingProject.materialAllocation} className="bg-white/5 border-white/10 rounded-xl" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="text-[10px]">Labour</Label>
+                    <Input name="labourAllocation" type="number" defaultValue={editingProject.labourAllocation} className="bg-white/5 border-white/10 rounded-xl" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="text-[10px]">Land</Label>
+                    <Input name="landAllocation" type="number" defaultValue={editingProject.landAllocation} className="bg-white/5 border-white/10 rounded-xl" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="text-[10px]">Profit</Label>
+                    <Input name="profitMarginAllocation" type="number" defaultValue={editingProject.profitMarginAllocation} className="bg-white/5 border-white/10 rounded-xl" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Budget (₹)</Label>
+                  <Input name="budget" type="number" defaultValue={editingProject.budgetAmount} required className="bg-white/5 border-white/10 rounded-xl" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Actual Cost (₹)</Label>
+                  <Input name="actualCost" type="number" defaultValue={editingProject.actualCost} required className="bg-white/5 border-white/10 rounded-xl" />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-p-budget">Budget (₹)</Label>
-                  <Input id="edit-p-budget" name="budget" type="number" defaultValue={editingProject.budgetAmount} required className="bg-white/5 border-white/10 rounded-xl" />
+                  <Label>Progress (%)</Label>
+                  <Input name="progress" type="number" min="0" max="100" defaultValue={editingProject.progress} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-p-cost">Actual Cost (₹)</Label>
-                  <Input id="edit-p-cost" name="actualCost" type="number" defaultValue={editingProject.actualCost} required className="bg-white/5 border-white/10 rounded-xl" />
+                  <Label>Status</Label>
+                  <Input name="status" defaultValue={editingProject.status} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-p-progress">Progress (%)</Label>
-                  <Input id="edit-p-progress" name="progress" type="number" min="0" max="100" defaultValue={editingProject.progress} required className="bg-white/5 border-white/10 rounded-xl" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-p-liquidity">Liquidity (%)</Label>
-                  <Input id="edit-p-liquidity" name="liquidity" type="number" min="0" max="100" defaultValue={editingProject.liquidityPercentage} required className="bg-white/5 border-white/10 rounded-xl" />
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-p-status">Status</Label>
-                <Input id="edit-p-status" name="status" defaultValue={editingProject.status} required className="bg-white/5 border-white/10 rounded-xl" />
               </div>
               <DialogFooter>
                 <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Project</Button>
