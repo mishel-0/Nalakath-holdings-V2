@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -41,11 +42,12 @@ export default function VouchersPage() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
 
   useEffect(() => {
-    if (!isProfileLoading && profile && profile.role !== "Admin") {
+    // Elevating access for Accountants to view vouchers for audit reflection
+    if (!isProfileLoading && profile && profile.role !== "Admin" && profile.role !== "Accountant") {
       toast({
         variant: "destructive",
         title: "Access Restricted",
-        description: "Payment Vouchers are restricted to Administrators.",
+        description: "Payment Vouchers are restricted to Administrators and Accountants.",
       });
       router.replace("/");
     }
@@ -136,32 +138,32 @@ export default function VouchersPage() {
       return;
     }
     
-    // STRUCTURED AUDIT HEADERS
+    // STRICT COLUMN HEADERS FOR FISCAL ACCURACY
     const headers = [
-      "VOUCHER_ID",
       "DATE",
+      "VOUCHER_ID",
+      "DIVISION",
       "PROJECT_PHASE",
       "ENTITY_VENDOR",
       "DESCRIPTION",
       "CATEGORY",
       "AMOUNT_INR",
       "STATUS",
-      "METHOD",
-      "DIVISION"
+      "METHOD"
     ];
 
-    // MAPPING DATA WITH ESCAPING
+    // MAPPING DATA WITH DOUBLE-QUOTING ESCAPING
     const rows = filteredVouchers.map(v => [
-      v.voucherNumber || '',
       v.date || '',
+      v.voucherNumber || '',
+      activeDivision.division || '',
       v.phaseName || 'N/A',
-      (v.vendorName || '').replace(/,/g, ' '), // Clean commas for better Excel compatibility
-      (v.description || '').replace(/,/g, ' ').replace(/"/g, '""'),
+      (v.vendorName || '').replace(/"/g, '""'),
+      (v.description || '').replace(/"/g, '""'),
       v.expenseCategory || 'General',
       v.amount || 0,
       v.status || 'Pending',
-      v.paymentMethod || 'N/A',
-      v.division || ''
+      v.paymentMethod || 'N/A'
     ]);
 
     // Force Excel to use Comma separator and include UTF-8 BOM
@@ -174,16 +176,16 @@ export default function VouchersPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `NALAKATH_AUDIT_${activeDivision.id.toUpperCase()}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `NALAKATH_VOUCHERS_${activeDivision.id.toUpperCase()}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    toast({ title: "Export Successful", description: "Audit-ready ledger downloaded." });
+    toast({ title: "Export Successful", description: "Audit-ready Excel ledger downloaded." });
   };
 
-  if (isProfileLoading || (profile && profile.role !== "Admin")) {
+  if (isProfileLoading || (profile && profile.role !== "Admin" && profile.role !== "Accountant")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-4">

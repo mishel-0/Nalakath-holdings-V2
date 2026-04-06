@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -30,7 +31,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, doc } from "firebase/firestore";
+import { collection, query, orderBy, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -105,12 +106,37 @@ export default function ExpensesPage() {
     toast({ variant: "destructive", title: "Phase Deleted", description: "Phase removed from timeline." });
   };
 
+  const syncToLedger = (expId: string, data: any, isDelete = false) => {
+    const ledgerRef = doc(db, "companies", companyId, "journalEntries", expId);
+    if (isDelete) {
+      deleteDoc(ledgerRef);
+      return;
+    }
+
+    const journalEntry = {
+      companyId,
+      date: data.expenseDate,
+      description: `[${data.expenseType}] ${data.description} - ${data.clientName || 'General'}`,
+      status: "Verified",
+      totalDebit: data.expenseType === "Client Invoice" ? 0 : data.amount,
+      totalCredit: data.expenseType === "Client Invoice" ? data.amount : 0,
+      postedByUserId: "system_sync",
+      sourceModule: "Expenses",
+      sourceId: expId,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setDoc(ledgerRef, journalEntry, { merge: true });
+  };
+
   const handleAddExpense = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const now = new Date().toISOString();
+    const expId = Math.random().toString(36).substring(7);
     
     const newExpense = {
+      id: expId,
       companyId,
       phaseId: formData.get("phaseId") as string,
       expenseDate: formData.get("date") as string,
@@ -126,9 +152,10 @@ export default function ExpensesPage() {
       updatedAt: now,
     };
 
-    addDocumentNonBlocking(collection(db, "companies", companyId, "expenses"), newExpense);
+    setDoc(doc(db, "companies", companyId, "expenses", expId), newExpense);
+    syncToLedger(expId, newExpense);
     setIsAddOpen(false);
-    toast({ title: "Entry Logged", description: "Financial record saved successfully." });
+    toast({ title: "Entry Logged", description: "Financial record saved and synced to Ledger." });
   };
 
   const handleUpdateExpense = (e: React.FormEvent<HTMLFormElement>) => {
@@ -137,6 +164,7 @@ export default function ExpensesPage() {
 
     const formData = new FormData(e.currentTarget);
     const updatedData = {
+      ...editingExpense,
       phaseId: formData.get("phaseId") as string,
       expenseDate: formData.get("date") as string,
       description: formData.get("description") as string,
@@ -150,21 +178,22 @@ export default function ExpensesPage() {
       updatedAt: new Date().toISOString(),
     };
 
-    updateDocumentNonBlocking(doc(db, "companies", companyId, "expenses", editingExpense.id), updatedData);
+    setDoc(doc(db, "companies", companyId, "expenses", editingExpense.id), updatedData);
+    syncToLedger(editingExpense.id, updatedData);
     setEditingExpense(null);
-    toast({ title: "Entry Updated", description: "Record modified successfully." });
+    toast({ title: "Entry Updated", description: "Record and Ledger modified successfully." });
   };
 
   const handleDeleteExpense = (id: string) => {
-    deleteDocumentNonBlocking(doc(db, "companies", companyId, "expenses", id));
-    toast({ variant: "destructive", title: "Record Deleted", description: "Entry removed from ledger." });
+    deleteDoc(doc(db, "companies", companyId, "expenses", id));
+    syncToLedger(id, null, true);
+    toast({ variant: "destructive", title: "Record Deleted", description: "Entry removed from Expenses and Ledger." });
   };
 
   const handleCreateVoucherFromExpense = (exp: any) => {
     const phaseName = phases?.find(p => p.id === exp.phaseId)?.name || "Unassigned";
     const now = new Date().toISOString();
     
-    // ENSURING ALL FIELDS ARE SYNCED TO THE VOUCHER MODULE
     const newVoucher = {
       companyId,
       expenseId: exp.id,

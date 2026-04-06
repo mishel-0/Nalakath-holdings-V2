@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -14,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, doc } from "firebase/firestore";
+import { collection, query, orderBy, doc, setDoc } from "firebase/firestore";
 import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -50,6 +51,19 @@ export default function AccountingPage() {
     }), { debit: 0, credit: 0 });
   }, [entries]);
 
+  const syncBackToSource = (entryData: any) => {
+    if (entryData.sourceModule === "Expenses" && entryData.sourceId) {
+      const expenseRef = doc(db, "companies", companyId, "expenses", entryData.sourceId);
+      const updatedExpense = {
+        amount: entryData.totalDebit || entryData.totalCredit,
+        expenseDate: entryData.date,
+        description: entryData.description.replace(/^\[.*?\]\s/, ''),
+        updatedAt: new Date().toISOString(),
+      };
+      setDoc(expenseRef, updatedExpense, { merge: true });
+    }
+  };
+
   const handleAddEntry = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -65,7 +79,7 @@ export default function AccountingPage() {
       status: "Verified",
       totalDebit: type === "Debit" ? amount : 0,
       totalCredit: type === "Credit" ? amount : 0,
-      postedByUserId: "user",
+      postedByUserId: "manual_entry",
       createdAt: now,
       updatedAt: now,
     };
@@ -84,6 +98,7 @@ export default function AccountingPage() {
     const type = formData.get("type");
 
     const updatedData = {
+      ...editingEntry,
       date: formData.get("date") as string,
       description: formData.get("description") as string,
       totalDebit: type === "Debit" ? amount : 0,
@@ -92,8 +107,9 @@ export default function AccountingPage() {
     };
 
     updateDocumentNonBlocking(doc(db, "companies", companyId, "journalEntries", editingEntry.id), updatedData);
+    syncBackToSource(updatedData);
     setEditingEntry(null);
-    toast({ title: "Entry Updated", description: "Ledger entry updated successfully." });
+    toast({ title: "Entry Updated", description: "Ledger and original operational record synced." });
   };
 
   const handleDeleteEntry = (id: string) => {
@@ -185,7 +201,7 @@ export default function AccountingPage() {
                 <Table>
                   <TableHeader className="bg-white/5">
                     <TableRow className="border-white/5 hover:bg-transparent">
-                      <TableHead className="w-32 uppercase tracking-widest text-[10px] font-bold">Date</TableHead>
+                      <TableHead className="w-32 uppercase tracking-widest text-[10px] font-bold px-6">Date</TableHead>
                       <TableHead className="uppercase tracking-widest text-[10px] font-bold">Description</TableHead>
                       <TableHead className="text-right uppercase tracking-widest text-[10px] font-bold">Debit (₹)</TableHead>
                       <TableHead className="text-right uppercase tracking-widest text-[10px] font-bold">Credit (₹)</TableHead>
@@ -200,11 +216,12 @@ export default function AccountingPage() {
                     ) : (
                       filteredEntries.map((tx) => (
                         <TableRow key={tx.id} className="border-white/5 hover:bg-white/5 ios-transition group">
-                          <TableCell className="text-muted-foreground font-mono text-xs">{tx.date}</TableCell>
+                          <TableCell className="text-muted-foreground font-mono text-xs px-6">{tx.date}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <span className="font-semibold truncate max-w-[200px]">{tx.description}</span>
                               {tx.status === "Verified" && <CheckCircle2 className="h-3 w-3 text-primary opacity-50 shrink-0" />}
+                              {tx.sourceModule && <Badge variant="outline" className="text-[8px] uppercase tracking-tighter border-white/10 opacity-50">{tx.sourceModule}</Badge>}
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-mono font-medium text-destructive truncate">

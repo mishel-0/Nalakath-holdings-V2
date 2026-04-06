@@ -56,10 +56,11 @@ export function Sidebar() {
   const { data: profile } = useDoc(profileDocRef);
   const isAdmin = profile?.role === "Admin";
   const isDev = profile?.role === "Developer";
+  const isAccountant = profile?.role === "Accountant";
 
   const filteredNavigation = navigation.filter(item => {
-    // Role based filtering
-    if (item.adminOnly && !isAdmin && !isDev) return false;
+    // Role based filtering: Admins, Devs, and Accountants share operational visibility
+    if (item.adminOnly && !isAdmin && !isDev && !isAccountant) return false;
     if (item.devOnly && !isDev) return false;
     
     // Division based filtering for Projects
