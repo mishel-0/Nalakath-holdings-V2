@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Upload, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Upload, Download, MoreHorizontal, Pencil, Trash2, FileSpreadsheet, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -62,7 +62,9 @@ export default function VouchersPage() {
     if (!vouchers) return [];
     return vouchers.filter(v => 
       v.vendorName?.toLowerCase().includes(search.toLowerCase()) || 
-      v.voucherNumber?.toLowerCase().includes(search.toLowerCase())
+      v.voucherNumber?.toLowerCase().includes(search.toLowerCase()) ||
+      v.phaseName?.toLowerCase().includes(search.toLowerCase()) ||
+      v.description?.toLowerCase().includes(search.toLowerCase())
     );
   }, [vouchers, search]);
 
@@ -89,6 +91,8 @@ export default function VouchersPage() {
       amount: Number(formData.get("amount")),
       paymentMethod: formData.get("paymentMethod") as string,
       status: formData.get("status") || "Pending",
+      phaseName: formData.get("phaseName") || "N/A",
+      description: formData.get("description") || "",
       createdAt: now,
       updatedAt: now,
     };
@@ -110,6 +114,8 @@ export default function VouchersPage() {
       amount: Number(formData.get("amount")),
       paymentMethod: formData.get("paymentMethod") as string,
       status: formData.get("status") as string,
+      phaseName: formData.get("phaseName") as string,
+      description: formData.get("description") as string,
       updatedAt: new Date().toISOString(),
     };
 
@@ -121,6 +127,36 @@ export default function VouchersPage() {
   const handleDeleteVoucher = (id: string) => {
     deleteDocumentNonBlocking(doc(db, "companies", companyId, "vouchers", id));
     toast({ variant: "destructive", title: "Voucher Deleted", description: "Record removed." });
+  };
+
+  const handleExportCSV = () => {
+    if (!filteredVouchers.length) return;
+    
+    const headers = ["Voucher #", "Date", "Vendor", "Phase", "Description", "Amount (₹)", "Status", "Method"];
+    const rows = filteredVouchers.map(v => [
+      v.voucherNumber,
+      v.date,
+      v.vendorName,
+      v.phaseName || "N/A",
+      v.description?.replace(/,/g, " "),
+      v.amount,
+      v.status,
+      v.paymentMethod
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Vouchers_${activeDivision.id}_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({ title: "Export Complete", description: "Voucher database downloaded as Excel-ready CSV." });
   };
 
   if (isProfileLoading || (profile && profile.role !== "Admin")) {
@@ -147,10 +183,9 @@ export default function VouchersPage() {
                 <p className="text-muted-foreground truncate">Proof of purchase for {activeDivision.name}.</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4 shrink-0" onClick={() => fileInputRef.current?.click()}>
-                  <Upload className="h-4 w-4" /> Import
+                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4 shrink-0" onClick={handleExportCSV}>
+                  <Download className="h-4 w-4" /> Export Excel
                 </Button>
-                <input type="file" ref={fileInputRef} className="hidden" />
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
                     <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-4 shrink-0">
@@ -181,12 +216,16 @@ export default function VouchersPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="division">Active Division</Label>
-                        <Input disabled value={activeDivision.division} className="bg-white/5 border-white/10 rounded-xl" />
+                        <Label htmlFor="phaseName">Project Phase</Label>
+                        <Input id="phaseName" name="phaseName" placeholder="e.g. Phase 2: Operations" className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="vendorName">Vendor</Label>
+                        <Label htmlFor="vendorName">Entity / Vendor</Label>
                         <Input id="vendorName" name="vendorName" required className="bg-white/5 border-white/10 rounded-xl" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Details</Label>
+                        <Input id="description" name="description" className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
@@ -203,6 +242,7 @@ export default function VouchersPage() {
                               <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
                               <SelectItem value="Cash">Cash</SelectItem>
                               <SelectItem value="Cheque">Cheque</SelectItem>
+                              <SelectItem value="Journal Transfer">Journal Transfer</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -231,7 +271,7 @@ export default function VouchersPage() {
                 <div className="relative w-full md:w-96">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input 
-                    placeholder="Search vouchers..." 
+                    placeholder="Search phases, vendors, vouchers..." 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-9 h-10 rounded-full border-white/10 bg-white/5" 
@@ -243,7 +283,7 @@ export default function VouchersPage() {
                   <TableHeader className="bg-white/5">
                     <TableRow className="border-white/5">
                       <TableHead className="w-24 uppercase tracking-widest text-[9px] font-bold">Voucher #</TableHead>
-                      <TableHead className="uppercase tracking-widest text-[9px] font-bold">Vendor</TableHead>
+                      <TableHead className="uppercase tracking-widest text-[9px] font-bold">Details & Phase</TableHead>
                       <TableHead className="text-right uppercase tracking-widest text-[9px] font-bold">Amount (₹)</TableHead>
                       <TableHead className="text-center uppercase tracking-widest text-[9px] font-bold px-6">Status</TableHead>
                       <TableHead className="w-16"></TableHead>
@@ -258,7 +298,19 @@ export default function VouchersPage() {
                       filteredVouchers.map((v) => (
                         <TableRow key={v.id} className="border-white/5 hover:bg-white/5 ios-transition group">
                           <TableCell className="font-mono text-xs font-bold text-primary truncate max-w-[100px]">{v.voucherNumber}</TableCell>
-                          <TableCell className="font-semibold text-sm truncate max-w-[150px]">{v.vendorName}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-bold text-sm truncate max-w-[200px]">{v.vendorName}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-muted-foreground italic truncate max-w-[150px]">{v.description}</span>
+                                {v.phaseName && (
+                                  <Badge variant="outline" className="text-[8px] uppercase tracking-tighter h-4 border-white/5 bg-white/5">
+                                    <Layers className="h-2 w-2 mr-1" /> {v.phaseName}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
                           <TableCell className="text-right font-mono font-bold text-sm truncate">
                             ₹{v.amount?.toLocaleString('en-IN')}
                           </TableCell>
@@ -324,8 +376,16 @@ export default function VouchersPage() {
                 </div>
               </div>
               <div className="grid gap-2">
+                <Label htmlFor="edit-v-phase">Phase</Label>
+                <Input id="edit-v-phase" name="phaseName" defaultValue={editingVoucher.phaseName} />
+              </div>
+              <div className="grid gap-2">
                 <Label htmlFor="edit-v-vendor">Vendor</Label>
                 <Input id="edit-v-vendor" name="vendorName" defaultValue={editingVoucher.vendorName} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-v-desc">Description</Label>
+                <Input id="edit-v-desc" name="description" defaultValue={editingVoucher.description} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -342,6 +402,7 @@ export default function VouchersPage() {
                       <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
                       <SelectItem value="Cash">Cash</SelectItem>
                       <SelectItem value="Cheque">Cheque</SelectItem>
+                      <SelectItem value="Journal Transfer">Journal Transfer</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
