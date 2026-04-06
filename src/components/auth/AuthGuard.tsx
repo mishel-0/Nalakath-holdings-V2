@@ -20,22 +20,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [user, isUserLoading, router, pathname, mounted]);
 
-  // Handle initial hydration and loading states with hydration-safe pattern
+  // Handle initial hydration and loading states with an identical structure for server and client
   if (!mounted || isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4">
-          {/* We only render the gold-gradient pulse on the client to avoid hydration mismatches */}
-          {mounted ? (
-            <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
-              <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-              <p className="text-primary font-medium animate-pulse tracking-widest uppercase text-[10px]">
-                Syncing Security Protocol...
-              </p>
-            </div>
-          ) : (
-            <div className="w-16 h-16" /> /* Static placeholder for SSR */
-          )}
+        <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
+          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
+          <p className="text-primary font-medium animate-pulse tracking-widest uppercase text-[10px]">
+            Syncing Security Protocol...
+          </p>
         </div>
       </div>
     );
