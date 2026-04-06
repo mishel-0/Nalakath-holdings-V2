@@ -30,6 +30,7 @@ import { collection, query, orderBy, limit } from "firebase/firestore";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useDivision } from "@/context/DivisionContext";
 
 interface ExtraTax {
   id: string;
@@ -40,8 +41,9 @@ interface ExtraTax {
 export default function TaxEnginePage() {
   const db = useFirestore();
   const { toast } = useToast();
+  const { activeDivision } = useDivision();
   const [activeTab, setActiveTab] = useState("calculator");
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   // Calculator State
   const [baseAmount, setBaseAmount] = useState<number>(0);
@@ -51,7 +53,7 @@ export default function TaxEnginePage() {
   const [reverseMode, setReverseMode] = useState(false);
 
   // Firestore Data for Real-Time Sync
-  const recordsQuery = useMemoFirebase(() => query(collection(db, "taxRecords"), orderBy("timestamp", "desc"), limit(10)), [db]);
+  const recordsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "taxRecords"), orderBy("timestamp", "desc"), limit(10)), [db, companyId]);
   const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries")), [db, companyId]);
   const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db, companyId]);
 
@@ -109,8 +111,8 @@ export default function TaxEnginePage() {
       timestamp: new Date().toISOString(),
       type: "Calculated"
     };
-    addDocumentNonBlocking(collection(db, "taxRecords"), record);
-    toast({ title: "Tax Record Saved", description: "Calculation stored in cloud ledger." });
+    addDocumentNonBlocking(collection(db, "companies", companyId, "taxRecords"), record);
+    toast({ title: "Tax Record Saved", description: `Calculation stored for ${activeDivision.name}.` });
   };
 
   return (
@@ -124,13 +126,13 @@ export default function TaxEnginePage() {
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
-                  TAX COMPLIANCE ENGINE
+                  {activeDivision.division} COMPLIANCE
                 </Badge>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase mt-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase mt-2 truncate">
                 GST & Tax Management
               </h1>
-              <p className="text-muted-foreground text-sm">Automated tax processing, reporting, and live analytics.</p>
+              <p className="text-muted-foreground text-sm truncate">Automated processing for {activeDivision.name}.</p>
             </header>
 
             <Tabs defaultValue="calculator" className="w-full" onValueChange={setActiveTab}>
@@ -142,11 +144,11 @@ export default function TaxEnginePage() {
               </TabsList>
 
               <TabsContent value="calculator" className="grid gap-8 lg:grid-cols-5">
-                <Card className="lg:col-span-3 control-center-card border-white/5">
+                <Card className="lg:col-span-3 control-center-card border-white/5 overflow-hidden">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div className="min-w-0">
                       <CardTitle className="text-xl font-bold truncate">{reverseMode ? "Reverse Tax Engine" : "Universal Tax Calculator"}</CardTitle>
-                      <CardDescription className="truncate">Advanced multi-tax computation engine.</CardDescription>
+                      <CardDescription className="truncate">Advanced computation for {activeDivision.name}.</CardDescription>
                     </div>
                     <Button variant="ghost" size="icon" className="rounded-full shrink-0" onClick={() => setReverseMode(!reverseMode)}>
                       <ArrowRightLeft className="h-5 w-5 text-primary" />
@@ -154,7 +156,7 @@ export default function TaxEnginePage() {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
+                      <div className="space-y-2 min-w-0">
                         <Label className="text-[10px] uppercase font-bold text-muted-foreground">{reverseMode ? "Total Amount (₹)" : "Base Amount (₹)"}</Label>
                         <Input 
                           type="number" 
@@ -163,7 +165,7 @@ export default function TaxEnginePage() {
                           className="bg-white/5 border-white/10 rounded-2xl h-14 text-lg font-mono"
                         />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 min-w-0">
                         <Label className="text-[10px] uppercase font-bold text-muted-foreground">GST Rate (%)</Label>
                         <Select value={gstRate.toString()} onValueChange={(v) => setGstRate(Number(v))}>
                           <SelectTrigger className="bg-white/5 border-white/10 rounded-2xl h-14 text-lg font-mono">
@@ -229,7 +231,7 @@ export default function TaxEnginePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="lg:col-span-2 control-center-card border-primary/20 bg-primary/5 min-w-0">
+                <Card className="lg:col-span-2 control-center-card border-primary/20 bg-primary/5 min-w-0 overflow-hidden">
                   <CardHeader>
                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                       <Calculator className="h-5 w-5 text-primary" />
@@ -251,14 +253,14 @@ export default function TaxEnginePage() {
 
                     <Card className="border-white/5 bg-white/5 rounded-[2rem] overflow-hidden">
                       <CardHeader className="py-4 px-6 border-b border-white/5">
-                        <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Recent Calculations</CardTitle>
+                        <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground truncate">History: {activeDivision.division}</CardTitle>
                       </CardHeader>
                       <CardContent className="p-4 space-y-3">
                         {!recentRecords || recentRecords?.length === 0 ? (
-                          <p className="text-xs text-muted-foreground italic text-center py-4">No records saved yet.</p>
+                          <p className="text-xs text-muted-foreground italic text-center py-4">No records for this division.</p>
                         ) : (
                           recentRecords?.map((r) => (
-                            <div key={r.id} className="flex justify-between items-center text-xs px-2 gap-4">
+                            <div key={r.id} className="flex justify-between items-center text-xs px-2 gap-4 overflow-hidden">
                               <span className="font-mono text-muted-foreground shrink-0">{new Date(r.timestamp).toLocaleTimeString()}</span>
                               <span className="font-bold truncate text-right">₹{r.finalAmount.toLocaleString('en-IN')}</span>
                             </div>
@@ -272,15 +274,15 @@ export default function TaxEnginePage() {
 
               <TabsContent value="dashboard" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-4">
-                  <TaxStatCard title="Total Input GST" value={stats.inputGst} trend="up" desc="ITC available for offset" />
-                  <TaxStatCard title="Total Output GST" value={stats.outputGst} trend="up" desc="Liability from sales" />
-                  <TaxStatCard title="Net GST Payable" value={stats.netPayable} trend={stats.netPayable > 0 ? "up" : "down"} desc="Final payment due" highlight />
-                  <TaxStatCard title="Tax Accuracy" value={`${stats.accuracy}%`} trend="none" desc="Calculation health score" />
+                  <TaxStatCard title="Input GST" value={stats.inputGst} trend="up" desc="ITC offset available" />
+                  <TaxStatCard title="Output GST" value={stats.outputGst} trend="up" desc="Liability from sales" />
+                  <TaxStatCard title="Net GST Payable" value={stats.netPayable} trend={stats.netPayable > 0 ? "up" : "down"} desc="Final settlement due" highlight />
+                  <TaxStatCard title="Entity Accuracy" value={`${stats.accuracy}%`} trend="none" desc="Filing readiness score" />
                 </div>
-                <Card className="control-center-card border-white/5 h-[400px] flex items-center justify-center">
-                  <div className="text-center space-y-4">
+                <Card className="control-center-card border-white/5 h-[400px] flex items-center justify-center overflow-hidden">
+                  <div className="text-center space-y-4 px-6">
                     <BarChart3 className="h-12 w-12 text-primary mx-auto opacity-20" />
-                    <p className="text-muted-foreground text-sm font-mono uppercase tracking-widest animate-pulse px-6">Synchronizing Visual Data Stream...</p>
+                    <p className="text-muted-foreground text-sm font-mono uppercase tracking-widest animate-pulse truncate">Visual Stream: {activeDivision.name}</p>
                   </div>
                 </Card>
               </TabsContent>
@@ -289,23 +291,23 @@ export default function TaxEnginePage() {
                 <div className="grid gap-6 md:grid-cols-2">
                   <ReportActionCard 
                     title="GSTR-1 Report" 
-                    desc="Consolidated statement of outward supplies and sales." 
+                    desc={`Consolidated outward supplies for ${activeDivision.name}.`} 
                     icon={FileText} 
                     action="Generate GSTR-1"
                   />
                   <ReportActionCard 
                     title="GSTR-3B Summary" 
-                    desc="Self-declared summary for payment of GST liabilities." 
+                    desc={`Self-declared payment summary for ${activeDivision.division}.`} 
                     icon={TrendingUp} 
                     action="Generate GSTR-3B"
                   />
                 </div>
                 <Card className="control-center-card border-white/5">
                   <CardHeader>
-                    <CardTitle className="text-xl font-bold">Filing History</CardTitle>
+                    <CardTitle className="text-xl font-bold">Division Filing History</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-[200px] flex items-center justify-center italic text-muted-foreground text-sm">
-                    No reports generated for the current fiscal period.
+                  <CardContent className="h-[200px] flex items-center justify-center italic text-muted-foreground text-sm px-6 text-center">
+                    No generated reports for {activeDivision.name} in this period.
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -313,13 +315,13 @@ export default function TaxEnginePage() {
               <TabsContent value="rules" className="space-y-6">
                 <Card className="control-center-card border-white/5">
                   <CardHeader>
-                    <div className="flex justify-between items-start gap-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                       <div className="min-w-0">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
                           <Settings2 className="h-5 w-5 text-primary" />
                           Tax Rule Engine
                         </CardTitle>
-                        <CardDescription className="truncate">Define conditional tax logic for specific transaction types.</CardDescription>
+                        <CardDescription className="truncate">Conditional logic for {activeDivision.name}.</CardDescription>
                       </div>
                       <Button className="rounded-full gold-gradient text-black font-bold h-10 px-6 shrink-0">
                         <Plus className="h-4 w-4 mr-1" /> New Rule
@@ -374,13 +376,13 @@ function ReportActionCard({ title, desc, icon: Icon, action }: any) {
         <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
           <Icon className="h-6 w-6" />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3 className="text-lg font-bold truncate">{title}</h3>
           <p className="text-xs text-muted-foreground truncate">{desc}</p>
         </div>
       </div>
-      <Button className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-primary hover:text-black font-bold text-xs uppercase tracking-widest gap-2">
-        <Download className="h-4 w-4" /> {action}
+      <Button className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-primary hover:text-black font-bold text-xs uppercase tracking-widest gap-2 truncate px-4">
+        <Download className="h-4 w-4 shrink-0" /> {action}
       </Button>
     </Card>
   );

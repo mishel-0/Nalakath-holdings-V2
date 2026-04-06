@@ -31,18 +31,20 @@ import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@
 import { collection, query, orderBy, limit, doc } from "firebase/firestore";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function Dashboard() {
   const db = useFirestore();
   const { user } = useUser();
-  const companyId = "nalakath-holdings-main";
+  const { activeDivision } = useDivision();
+  const companyId = activeDivision.id;
 
-  const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers"), orderBy("createdAt", "desc"), limit(20)), [db]);
-  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db]);
-  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
+  const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers"), orderBy("createdAt", "desc"), limit(20)), [db, companyId]);
+  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db, companyId]);
+  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db, companyId]);
   const recentTxQuery = useMemoFirebase(() => 
     query(collection(db, "companies", companyId, "journalEntries"), orderBy("createdAt", "desc"), limit(5)), 
-  [db]);
+  [db, companyId]);
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -84,9 +86,9 @@ export default function Dashboard() {
 
   if (isProfileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-3xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse" />
+          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
           <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Portfolio...</p>
         </div>
       </div>
@@ -104,27 +106,27 @@ export default function Dashboard() {
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
-                  EXECUTIVE CONSOLE
+                  {activeDivision.division} OVERSEER
                 </Badge>
                 <div className="flex items-center gap-1.5 text-[9px] text-green-500 font-bold uppercase tracking-widest bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
                   <Activity className="h-3 w-3" /> LIVE LEDGER SYNC
                 </div>
               </div>
               <div className="mt-2">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase">
-                  Group Dashboard
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">
+                  {activeDivision.name}
                 </h1>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Strategic financial management for the Group Portfolio.
+                <p className="text-muted-foreground mt-1 text-sm truncate">
+                  Strategic management for the {activeDivision.division} portfolio.
                 </p>
               </div>
             </header>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard title="Total Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
+              <MetricCard title="Entity Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
               <MetricCard title="Operating Profit" value={stats.profit} icon={TrendingUp} trend="up" />
               <MetricCard title="Capital Expenses" value={stats.projectCosts} icon={Briefcase} trend="down" />
-              <MetricCard title="Priority Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
+              <MetricCard title="Division Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
@@ -134,7 +136,7 @@ export default function Dashboard() {
                     <CardTitle className="text-xl font-bold">
                       Fiscal Health Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1 truncate">Real-time mapping of income vs operating costs</p>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">Income vs operating costs for {activeDivision.name}</p>
                   </div>
                   <div className="flex items-center gap-1 text-primary font-bold text-[10px] uppercase tracking-widest cursor-pointer hover:opacity-70 transition-opacity shrink-0">
                     ANALYTICS <ChevronRight className="h-3 w-3" />
@@ -164,35 +166,35 @@ export default function Dashboard() {
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    Division Breakdown
+                    Segment Analysis
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="CONSTRUCTION INFRA" value="35%" color="gold-gradient" />
-                  <DivisionBar name="HOSPITALITY" value="25%" color="bg-zinc-600" />
-                  <DivisionBar name="REAL ESTATE" value="30%" color="bg-accent" />
-                  <DivisionBar name="GROUP HQ" value="10%" color="bg-zinc-400" />
+                  <DivisionBar name="OPERATIONS" value="45%" color="gold-gradient" />
+                  <DivisionBar name="INFRASTRUCTURE" value="30%" color="bg-zinc-600" />
+                  <DivisionBar name="R&D / ASSETS" value="15%" color="bg-accent" />
+                  <DivisionBar name="RESERVES" value="10%" color="bg-zinc-400" />
                 </CardContent>
               </Card>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pb-12">
-              <Card className="lg:col-span-2 control-center-card">
+              <Card className="lg:col-span-2 control-center-card overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <History className="h-5 w-5 text-primary" />
-                    Latest Ledger Activity
+                    Ledger Activity
                   </CardTitle>
                   <Link href="/accounting">
                     <Button variant="ghost" size="sm" className="rounded-full text-[10px] font-bold uppercase tracking-widest text-primary">
-                      Full History
+                      View All
                     </Button>
                   </Link>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {!recentTransactions?.length ? (
-                      <p className="py-10 text-center text-muted-foreground text-sm">No recent transactions recorded.</p>
+                      <p className="py-10 text-center text-muted-foreground text-sm italic">No recent activity logged for this division.</p>
                     ) : (
                       recentTransactions.map((tx) => (
                         <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1.5rem] hover:bg-foreground/5 ios-transition group">
@@ -231,9 +233,9 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <AlertItem title="Audit Readiness" desc="Q2 compliance docs are due for upload." severity="high" />
-                  <AlertItem title="Budget Threshold" desc="Phase 3 has reached 80% buffer." severity="medium" />
-                  <AlertItem title="System Integrity" desc="Auto-reconciliation complete." severity="low" />
+                  <AlertItem title="Audit Readiness" desc={`Q2 compliance for ${activeDivision.name}.`} severity="high" />
+                  <AlertItem title="Budget Threshold" desc="Financial buffer remains optimal." severity="medium" />
+                  <AlertItem title="Sync Status" desc="Data Engine heartbeat is active." severity="low" />
                 </CardContent>
               </Card>
             </div>
@@ -311,7 +313,7 @@ function AlertItem({ title, desc, severity }: any) {
   return (
     <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer min-w-0">
       <div className={cn("mt-1.5 h-2.5 w-2.5 rounded-full shrink-0", colors[severity as keyof typeof colors])} />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-bold leading-none truncate">{title}</p>
         <p className="text-xs text-muted-foreground mt-3 leading-relaxed line-clamp-2">{desc}</p>
       </div>

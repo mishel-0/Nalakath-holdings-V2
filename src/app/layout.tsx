@@ -3,6 +3,7 @@ import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Toaster } from "@/components/ui/toaster";
+import { DivisionProvider } from '@/context/DivisionContext';
 
 export const metadata: Metadata = {
   title: 'NALAKATH HOLDINGS',
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.Node;
 }>) {
   return (
     <html lang="en">
@@ -23,10 +24,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased selection:bg-primary/20">
         <FirebaseClientProvider>
-          <AuthGuard>
-            {children}
-          </AuthGuard>
-          <Toaster />
+          <DivisionProvider>
+            <AuthGuard>
+              {children}
+            </AuthGuard>
+            <Toaster />
+          </DivisionProvider>
         </FirebaseClientProvider>
       </body>
     </html>

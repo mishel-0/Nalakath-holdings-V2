@@ -37,10 +37,12 @@ import {
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import { cn } from "@/lib/utils";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function InsightsPage() {
   const db = useFirestore();
-  const companyId = "nalakath-holdings-main";
+  const { activeDivision } = useDivision();
+  const companyId = activeDivision.id;
   
   const [activeTab, setActiveTab] = useState("strategy");
   const [loading, setLoading] = useState(false);
@@ -49,10 +51,10 @@ export default function InsightsPage() {
   const [cashFlowInsights, setCashFlowInsights] = useState<CashFlowPredictionOutput | null>(null);
   const [anomalyResults, setAnomalyResults] = useState<any[]>([]);
 
-  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt", "desc")), [db]);
-  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db]);
-  const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries"), orderBy("date", "asc")), [db]);
-  const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers"), orderBy("date", "desc")), [db]);
+  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt", "desc")), [db, companyId]);
+  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db, companyId]);
+  const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries"), orderBy("date", "asc")), [db, companyId]);
+  const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers"), orderBy("date", "desc")), [db, companyId]);
 
   const { data: expenses } = useCollection(expensesQuery);
   const { data: projects } = useCollection(projectsQuery);
@@ -96,7 +98,7 @@ export default function InsightsPage() {
       }));
 
     const input: CostOptimizationSuggestionsInput = {
-      companyName: "Nalakath Holdings",
+      companyName: activeDivision.name,
       financialSummary: {
         netProfit: totalRevenue - totalExpenses,
         totalRevenue,
@@ -131,7 +133,8 @@ export default function InsightsPage() {
       currentCashBalance: totalRevenue - totalExpenses,
       projectedTransactions: projected,
       predictionPeriodDays: 30,
-      todayDate: new Date().toISOString()
+      todayDate: new Date().toISOString(),
+      companyContext: `Division: ${activeDivision.division} of ${activeDivision.name}.`
     };
 
     const result = await predictCashFlow(input);
@@ -178,22 +181,22 @@ export default function InsightsPage() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-20 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 min-w-0">
                 <Badge variant="outline" className="w-fit rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
-                  AI CORE ENGINE
+                  AI CORE: {activeDivision.division}
                 </Badge>
                 <div className="mt-2">
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3 uppercase">
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3 uppercase truncate">
                     Financial AI
-                    <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+                    <Sparkles className="h-8 w-8 text-primary animate-pulse shrink-0" />
                   </h1>
-                  <p className="text-muted-foreground text-sm">Automated portfolio intelligence and strategic insights.</p>
+                  <p className="text-muted-foreground text-sm truncate">Automated intelligence for {activeDivision.name}.</p>
                 </div>
               </div>
               <Button 
                 onClick={runAnalysis} 
                 disabled={loading}
-                className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-11 px-8 font-bold"
+                className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-11 px-8 font-bold shrink-0"
               >
                 {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
                 Run Live Analysis
@@ -201,7 +204,7 @@ export default function InsightsPage() {
             </header>
 
             <Tabs defaultValue="strategy" className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10">
+              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10 overflow-x-auto max-w-full">
                 <TabsTrigger value="strategy" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Strategy</TabsTrigger>
                 <TabsTrigger value="prediction" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Forecast</TabsTrigger>
                 <TabsTrigger value="audit" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Audit Monitor</TabsTrigger>
@@ -209,7 +212,7 @@ export default function InsightsPage() {
 
               <TabsContent value="strategy" className="space-y-6">
                 {!strategyInsights && !loading ? (
-                  <EmptyInsight icon={Target} title="Strategy Optimizer" desc="Initialize strategy engine to identify cost savings and process efficiencies." />
+                  <EmptyInsight icon={Target} title="Strategy Optimizer" desc={`Initialize engine to identify cost savings for ${activeDivision.name}.`} />
                 ) : loading && activeTab === "strategy" ? (
                   <LoadingGrid />
                 ) : (
@@ -225,7 +228,7 @@ export default function InsightsPage() {
 
               <TabsContent value="prediction" className="space-y-6">
                 {!cashFlowInsights && !loading ? (
-                  <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc="Forecast liquidity and identify potential shortages based on upcoming commitments." />
+                  <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc={`Forecast liquidity shortages for the ${activeDivision.division} portfolio.`} />
                 ) : loading && activeTab === "prediction" ? (
                   <LoadingGrid />
                 ) : (
@@ -244,13 +247,13 @@ export default function InsightsPage() {
                             title="Shortage Alert" 
                             status={cashFlowInsights.potentialShortageDetected ? "Detected" : "None"} 
                             color={cashFlowInsights.potentialShortageDetected ? "text-destructive" : "text-green-500"} 
-                            desc="Predicted dips below zero cash threshold."
+                            desc="Predicted dips below zero threshold."
                           />
                           <StatusCard 
                             title="Surplus Opportunity" 
                             status={cashFlowInsights.potentialSurplusDetected ? "High" : "Optimal"} 
                             color="text-primary" 
-                            desc="Periods of high liquidity for reinvestment."
+                            desc="Periods of high liquidity."
                           />
                         </CardContent>
                       </Card>
@@ -261,7 +264,7 @@ export default function InsightsPage() {
 
               <TabsContent value="audit" className="space-y-6">
                 {!anomalyResults.length && !loading ? (
-                  <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc="Scan recent expenditures for anomalies, vague descriptions, or suspicious patterns." />
+                  <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc={`Scan recent ${activeDivision.name} expenditures for suspicious patterns.`} />
                 ) : loading && activeTab === "audit" ? (
                   <LoadingGrid />
                 ) : (
@@ -271,8 +274,8 @@ export default function InsightsPage() {
                         "glass border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
                         item.analysis.isAnomaly ? "border-destructive/30 bg-destructive/5" : "border-green-500/10"
                       )}>
-                        <div className="flex items-center gap-4">
-                          <div className={cn("p-3 rounded-xl", item.analysis.isAnomaly ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500")}>
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                          <div className={cn("p-3 rounded-xl shrink-0", item.analysis.isAnomaly ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500")}>
                             {item.analysis.isAnomaly ? <AlertTriangle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
                           </div>
                           <div className="min-w-0">
@@ -284,8 +287,8 @@ export default function InsightsPage() {
                           <p className="text-xs text-muted-foreground leading-relaxed italic">"{item.analysis.reason}"</p>
                         </div>
                         <Badge variant="outline" className={cn(
-                          "rounded-full px-4 shrink-0",
-                          item.analysis.severity === "high" ? "bg-destructive text-destructive" : "text-muted-foreground"
+                          "rounded-full px-4 shrink-0 uppercase text-[9px] font-bold tracking-widest",
+                          item.analysis.severity === "high" ? "bg-destructive text-white border-none" : "text-muted-foreground"
                         )}>
                           Severity: {item.analysis.severity}
                         </Badge>
@@ -352,7 +355,7 @@ function StatusCard({ title, status, color, desc }: any) {
 function EmptyInsight({ icon: Icon, title, desc }: any) {
   return (
     <Card className="glass border-white/5 border-dashed py-20 rounded-[3rem]">
-      <CardContent className="flex flex-col items-center justify-center text-center gap-4">
+      <CardContent className="flex flex-col items-center justify-center text-center gap-4 px-6">
         <div className="p-4 bg-primary/10 rounded-full">
           <Icon className="h-10 w-10 text-primary" />
         </div>

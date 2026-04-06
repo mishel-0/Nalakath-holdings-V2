@@ -20,17 +20,19 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function VouchersPage() {
   const db = useFirestore();
   const { user } = useUser();
+  const { activeDivision } = useDivision();
   const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState<any>(null);
   const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -81,7 +83,7 @@ export default function VouchersPage() {
     const newVoucher = {
       companyId,
       voucherNumber: formData.get("voucherNumber") as string,
-      division: formData.get("division") as string,
+      division: activeDivision.division,
       vendorName: formData.get("vendorName") as string,
       date: formData.get("date") as string,
       amount: Number(formData.get("amount")),
@@ -93,7 +95,7 @@ export default function VouchersPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "vouchers"), newVoucher);
     setIsAddOpen(false);
-    toast({ title: "Voucher Created", description: `Recorded for ${newVoucher.vendorName}` });
+    toast({ title: "Voucher Created", description: `Recorded for ${newVoucher.vendorName} in ${activeDivision.name}.` });
   };
 
   const handleUpdateVoucher = (e: React.FormEvent<HTMLFormElement>) => {
@@ -103,7 +105,6 @@ export default function VouchersPage() {
     const formData = new FormData(e.currentTarget);
     const updatedData = {
       voucherNumber: formData.get("voucherNumber") as string,
-      division: formData.get("division") as string,
       vendorName: formData.get("vendorName") as string,
       date: formData.get("date") as string,
       amount: Number(formData.get("amount")),
@@ -125,7 +126,10 @@ export default function VouchersPage() {
   if (isProfileLoading || (profile && profile.role !== "Admin")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Authorizing...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
+          <p className="text-primary font-mono tracking-widest uppercase text-xs">Authorizing...</p>
+        </div>
       </div>
     );
   }
@@ -139,8 +143,8 @@ export default function VouchersPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase">Payment Vouchers</h1>
-                <p className="text-muted-foreground">Proof of purchase and expenditure across divisions.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Payment Vouchers</h1>
+                <p className="text-muted-foreground truncate">Proof of purchase for {activeDivision.name}.</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-4 shrink-0" onClick={() => fileInputRef.current?.click()}>
@@ -177,17 +181,8 @@ export default function VouchersPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="division">Division</Label>
-                        <Select name="division" defaultValue="Construction">
-                          <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="glass">
-                            <SelectItem value="Construction">Construction</SelectItem>
-                            <SelectItem value="Hospitality">Hospitality</SelectItem>
-                            <SelectItem value="Real Estate">Real Estate</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="division">Active Division</Label>
+                        <Input disabled value={activeDivision.division} className="bg-white/5 border-white/10 rounded-xl" />
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="vendorName">Vendor</Label>
@@ -226,7 +221,7 @@ export default function VouchersPage() {
             </header>
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <StatCard title="Total Committed" value={stats.total} />
+              <StatCard title="Entity Committed" value={stats.total} />
               <StatCard title="Settled Payments" value={stats.paid} color="text-green-500" />
               <StatCard title="Outstanding Dues" value={stats.pending} color="text-primary" />
             </div>
@@ -248,32 +243,26 @@ export default function VouchersPage() {
                   <TableHeader className="bg-white/5">
                     <TableRow className="border-white/5">
                       <TableHead className="w-24 uppercase tracking-widest text-[9px] font-bold">Voucher #</TableHead>
-                      <TableHead className="uppercase tracking-widest text-[9px] font-bold">Division</TableHead>
                       <TableHead className="uppercase tracking-widest text-[9px] font-bold">Vendor</TableHead>
                       <TableHead className="text-right uppercase tracking-widest text-[9px] font-bold">Amount (₹)</TableHead>
-                      <TableHead className="text-center uppercase tracking-widest text-[9px] font-bold">Status</TableHead>
+                      <TableHead className="text-center uppercase tracking-widest text-[9px] font-bold px-6">Status</TableHead>
                       <TableHead className="w-16"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs uppercase tracking-widest">Syncing...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-xs uppercase tracking-widest">SYNCING...</TableCell></TableRow>
                     ) : filteredVouchers.length === 0 ? (
-                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground">No vouchers registered.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground">No vouchers for this division.</TableCell></TableRow>
                     ) : (
                       filteredVouchers.map((v) => (
                         <TableRow key={v.id} className="border-white/5 hover:bg-white/5 ios-transition group">
                           <TableCell className="font-mono text-xs font-bold text-primary truncate max-w-[100px]">{v.voucherNumber}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-tighter opacity-70 border-white/10 px-2 py-0 truncate max-w-[80px]">
-                              {v.division}
-                            </Badge>
-                          </TableCell>
                           <TableCell className="font-semibold text-sm truncate max-w-[150px]">{v.vendorName}</TableCell>
                           <TableCell className="text-right font-mono font-bold text-sm truncate">
                             ₹{v.amount?.toLocaleString('en-IN')}
                           </TableCell>
-                          <TableCell className="text-center shrink-0">
+                          <TableCell className="text-center shrink-0 px-6">
                             <Badge className={cn(
                               "rounded-full text-[9px] uppercase font-bold tracking-widest px-2 whitespace-nowrap",
                               v.status === "Paid" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-primary/10 text-primary border-primary/20"
@@ -333,19 +322,6 @@ export default function VouchersPage() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-v-division">Division</Label>
-                <Select name="division" defaultValue={editingVoucher.division}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="glass">
-                    <SelectItem value="Construction">Construction</SelectItem>
-                    <SelectItem value="Hospitality">Hospitality</SelectItem>
-                    <SelectItem value="Real Estate">Real Estate</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-v-vendor">Vendor</Label>

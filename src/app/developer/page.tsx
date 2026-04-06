@@ -125,7 +125,7 @@ export default function DeveloperDashboard() {
                               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <Zap className="h-5 w-5" />
                               </div>
-                              <div className="min-w-0">
+                              <div className="min-w-0 flex-1">
                                 <p className="text-sm font-bold truncate">{log.entity} <span className="text-muted-foreground font-normal">({log.action})</span></p>
                                 <p className="text-[10px] font-mono text-muted-foreground truncate">{log.entityId}</p>
                               </div>
@@ -337,7 +337,7 @@ function LoadingScreen({ mounted }: { mounted: boolean }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/5 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/5 flex items-center justify-center shadow-lg shadow-primary/5">
           {mounted && <div className="w-8 h-8 rounded-full gold-gradient animate-pulse" />}
         </div>
         <p className="text-primary font-mono text-[10px] uppercase tracking-[0.3em] opacity-50">Initializing Kernel...</p>

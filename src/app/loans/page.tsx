@@ -17,15 +17,17 @@ import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlo
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useDivision } from "@/context/DivisionContext";
 
 export default function LoansPage() {
   const db = useFirestore();
   const { user } = useUser();
+  const { activeDivision } = useDivision();
   const router = useRouter();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingLoan, setEditingLoan] = useState<any>(null);
-  const companyId = "nalakath-holdings-main";
+  const companyId = activeDivision.id;
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -73,7 +75,7 @@ export default function LoansPage() {
 
     addDocumentNonBlocking(collection(db, "companies", companyId, "loans"), newLoan);
     setIsAddOpen(false);
-    toast({ title: "Loan Recorded", description: `Added liability for ${newLoan.lenderName}.` });
+    toast({ title: "Loan Recorded", description: `Added liability for ${newLoan.lenderName} under ${activeDivision.name}.` });
   };
 
   const handleUpdateLoan = (e: React.FormEvent<HTMLFormElement>) => {
@@ -103,7 +105,10 @@ export default function LoansPage() {
   if (isProfileLoading || (profile && profile.role !== "Admin")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-pulse text-primary font-mono tracking-widest uppercase">Checking Permissions...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
+          <p className="text-primary font-mono tracking-widest uppercase text-xs">Authorizing...</p>
+        </div>
       </div>
     );
   }
@@ -117,12 +122,12 @@ export default function LoansPage() {
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline">Loans & Liabilities</h1>
-                <p className="text-muted-foreground">Manage financial obligations and interest tracking.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Loans & Liabilities</h1>
+                <p className="text-muted-foreground truncate">Management for {activeDivision.name}.</p>
               </div>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
-                  <Button className="rounded-full gap-2 bg-primary text-black hover:bg-primary/90">
+                  <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-6">
                     <Plus className="h-4 w-4" /> New Loan
                   </Button>
                 </DialogTrigger>
@@ -160,7 +165,7 @@ export default function LoansPage() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="submit" className="w-full text-black">Record Loan</Button>
+                      <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Record Loan</Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
@@ -169,14 +174,14 @@ export default function LoansPage() {
 
             <div className="grid gap-6 lg:grid-cols-2">
               {isLoading ? (
-                <p className="text-muted-foreground">Loading loans...</p>
+                <p className="text-muted-foreground animate-pulse text-xs font-bold uppercase tracking-widest">FETCHING LIABILITIES...</p>
               ) : loans?.length === 0 ? (
-                <Card className="glass border-white/5 col-span-full py-12 text-center">
-                  <p className="text-muted-foreground">No loans recorded yet.</p>
+                <Card className="glass border-white/5 col-span-full py-12 text-center border-dashed">
+                  <p className="text-muted-foreground">No loans recorded for this division.</p>
                 </Card>
               ) : (
                 loans?.map((loan) => (
-                  <Card key={loan.id} className="glass border-white/5 overflow-hidden relative">
+                  <Card key={loan.id} className="glass border-white/5 overflow-hidden relative group hover:scale-[1.01] ios-transition">
                     <div className="absolute top-4 right-4 z-10">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -199,30 +204,30 @@ export default function LoansPage() {
                         <div className="p-2 bg-primary/10 rounded-xl">
                           <Landmark className="h-5 w-5 text-primary" />
                         </div>
-                        <div>
-                          <CardTitle className="text-lg">{loan.lenderName}</CardTitle>
-                          <p className="text-xs text-muted-foreground">{loan.loanType}</p>
+                        <div className="min-w-0">
+                          <CardTitle className="text-lg truncate max-w-[150px]">{loan.lenderName}</CardTitle>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{loan.loanType}</p>
                         </div>
                       </div>
-                      <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20">{(loan.interestRate * 100).toFixed(1)}% APR</Badge>
+                      <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20 text-[9px] font-bold uppercase tracking-widest">{(loan.interestRate * 100).toFixed(1)}% APR</Badge>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Outstanding Balance</p>
-                          <p className="text-2xl font-bold font-mono">₹{loan.outstandingBalance?.toLocaleString('en-IN')}</p>
+                        <div className="space-y-1 min-w-0">
+                          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Outstanding Balance</p>
+                          <p className="text-2xl font-bold font-mono truncate" title={loan.outstandingBalance?.toLocaleString('en-IN')}>₹{loan.outstandingBalance?.toLocaleString('en-IN')}</p>
                         </div>
-                        <div className="space-y-1 text-right">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Principal</p>
-                          <p className="text-lg font-semibold text-muted-foreground">₹{loan.principalAmount?.toLocaleString('en-IN')}</p>
+                        <div className="space-y-1 text-right min-w-0">
+                          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Principal</p>
+                          <p className="text-lg font-semibold text-muted-foreground truncate">₹{loan.principalAmount?.toLocaleString('en-IN')}</p>
                         </div>
                       </div>
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-xs pt-4 border-t border-white/5">
                         <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Calendar className="h-4 w-4" /> {loan.maturityDate}
+                          <Calendar className="h-3 w-3" /> Maturity: {loan.maturityDate}
                         </div>
-                        <div className="flex items-center gap-1.5 text-green-500 font-medium">
-                          <TrendingUp className="h-4 w-4" /> Flow Optimal
+                        <div className="flex items-center gap-1.5 text-green-500 font-bold uppercase tracking-widest text-[9px]">
+                          <TrendingUp className="h-3 w-3" /> Flow Optimal
                         </div>
                       </div>
                     </CardContent>
@@ -264,7 +269,7 @@ export default function LoansPage() {
                 <Input id="edit-l-balance" name="balance" type="number" defaultValue={editingLoan.outstandingBalance} required />
               </div>
               <DialogFooter>
-                <Button type="submit" className="w-full text-black">Update Loan</Button>
+                <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Loan</Button>
               </DialogFooter>
             </form>
           )}
