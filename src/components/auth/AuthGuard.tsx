@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -20,9 +19,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse flex items-center justify-center shadow-lg shadow-primary/20">
-            <span className="text-black font-black text-3xl">N</span>
-          </div>
+          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
           <p className="text-primary font-medium animate-pulse tracking-widest uppercase text-xs">Syncing Role Data...</p>
         </div>
       </div>
