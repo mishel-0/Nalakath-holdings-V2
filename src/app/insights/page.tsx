@@ -178,22 +178,22 @@ export default function InsightsPage() {
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-20 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-black font-black text-xl">N</span>
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3">
+              <div className="flex flex-col gap-1">
+                <Badge variant="outline" className="w-fit rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
+                  AI CORE ENGINE
+                </Badge>
+                <div className="mt-2">
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3 uppercase">
                     Financial AI
                     <Sparkles className="h-8 w-8 text-primary animate-pulse" />
                   </h1>
-                  <p className="text-muted-foreground">Automated insights and portfolio intelligence.</p>
+                  <p className="text-muted-foreground text-sm">Automated portfolio intelligence and strategic insights.</p>
                 </div>
               </div>
               <Button 
                 onClick={runAnalysis} 
                 disabled={loading}
-                className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-11 px-6 font-bold"
+                className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-11 px-8 font-bold"
               >
                 {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
                 Run Live Analysis
@@ -231,7 +231,7 @@ export default function InsightsPage() {
                 ) : (
                   cashFlowInsights && (
                     <div className="space-y-6 animate-in fade-in duration-500">
-                      <Card className="glass border-primary/20 bg-primary/5 rounded-[2rem]">
+                      <Card className="glass border-primary/20 bg-primary/5 rounded-[2.5rem]">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
                             <TrendingUp className="h-5 w-5 text-primary" />
@@ -239,21 +239,21 @@ export default function InsightsPage() {
                           </CardTitle>
                           <CardDescription>{cashFlowInsights.predictionSummary}</CardDescription>
                         </CardHeader>
+                        <CardContent className="grid gap-6 md:grid-cols-2 pb-8">
+                          <StatusCard 
+                            title="Shortage Alert" 
+                            status={cashFlowInsights.potentialShortageDetected ? "Detected" : "None"} 
+                            color={cashFlowInsights.potentialShortageDetected ? "text-destructive" : "text-green-500"} 
+                            desc="Predicted dips below zero cash threshold."
+                          />
+                          <StatusCard 
+                            title="Surplus Opportunity" 
+                            status={cashFlowInsights.potentialSurplusDetected ? "High" : "Optimal"} 
+                            color="text-primary" 
+                            desc="Periods of high liquidity for reinvestment."
+                          />
+                        </CardContent>
                       </Card>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <StatusCard 
-                          title="Shortage Alert" 
-                          status={cashFlowInsights.potentialShortageDetected ? "Detected" : "None"} 
-                          color={cashFlowInsights.potentialShortageDetected ? "text-destructive" : "text-green-500"} 
-                          desc="Predicted dips below zero cash threshold."
-                        />
-                        <StatusCard 
-                          title="Surplus Opportunity" 
-                          status={cashFlowInsights.potentialSurplusDetected ? "High" : "Optimal"} 
-                          color="text-primary" 
-                          desc="Periods of high liquidity for reinvestment."
-                        />
-                      </div>
                     </div>
                   )
                 )}
@@ -268,23 +268,23 @@ export default function InsightsPage() {
                   <div className="grid gap-4 animate-in fade-in duration-500">
                     {anomalyResults.map((item, idx) => (
                       <Card key={idx} className={cn(
-                        "glass border-white/5 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
+                        "glass border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
                         item.analysis.isAnomaly ? "border-destructive/30 bg-destructive/5" : "border-green-500/10"
                       )}>
                         <div className="flex items-center gap-4">
                           <div className={cn("p-3 rounded-xl", item.analysis.isAnomaly ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500")}>
                             {item.analysis.isAnomaly ? <AlertTriangle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
                           </div>
-                          <div>
-                            <p className="font-bold">{item.description}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">₹{item.amount.toLocaleString()} • {item.expenseCategory}</p>
+                          <div className="min-w-0">
+                            <p className="font-bold truncate">{item.description}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold truncate">₹{item.amount.toLocaleString()} • {item.expenseCategory}</p>
                           </div>
                         </div>
                         <div className="flex-1 md:max-w-md">
                           <p className="text-xs text-muted-foreground leading-relaxed italic">"{item.analysis.reason}"</p>
                         </div>
                         <Badge variant="outline" className={cn(
-                          "rounded-full px-4",
+                          "rounded-full px-4 shrink-0",
                           item.analysis.severity === "high" ? "bg-destructive text-destructive" : "text-muted-foreground"
                         )}>
                           Severity: {item.analysis.severity}
@@ -295,6 +295,10 @@ export default function InsightsPage() {
                 )}
               </TabsContent>
             </Tabs>
+            
+            <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-12">
+              NALAKATH HOLDINGS © 2026 • AI ENGINE V2.4
+            </p>
           </div>
         </main>
       </div>
@@ -305,27 +309,27 @@ export default function InsightsPage() {
 
 function InsightCard({ title, category, desc, impact, steps }: any) {
   return (
-    <Card className="glass border-white/5 flex flex-col hover:scale-[1.02] ios-transition rounded-[2rem]">
+    <Card className="glass border-white/5 flex flex-col hover:scale-[1.02] ios-transition rounded-[2.5rem] min-w-0">
       <CardHeader>
         <Badge variant="outline" className="w-fit mb-2 bg-primary/10 text-primary border-primary/20 text-[9px] tracking-widest uppercase font-bold px-3">
           {category}
         </Badge>
-        <CardTitle className="text-lg leading-tight">{title}</CardTitle>
+        <CardTitle className="text-lg leading-tight truncate">{title}</CardTitle>
         {impact && (
-          <div className="flex items-center gap-1.5 text-green-500 font-bold text-sm mt-1">
+          <div className="flex items-center gap-1.5 text-green-500 font-bold text-sm mt-1 truncate">
             <TrendingDown className="h-4 w-4" />
             {impact.replace('$', '₹')}
           </div>
         )}
       </CardHeader>
       <CardContent className="flex-1 space-y-4">
-        <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">{desc}</p>
         {steps && (
           <div className="space-y-2">
             <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary">Next Steps</p>
             {steps.slice(0, 3).map((s: any, i: number) => (
-              <div key={i} className="flex gap-2 text-[10px] text-muted-foreground italic">
-                <span className="text-primary">•</span> {s}
+              <div key={i} className="flex gap-2 text-[10px] text-muted-foreground italic min-w-0">
+                <span className="text-primary">•</span> <span className="truncate">{s}</span>
               </div>
             ))}
           </div>
@@ -337,10 +341,10 @@ function InsightCard({ title, category, desc, impact, steps }: any) {
 
 function StatusCard({ title, status, color, desc }: any) {
   return (
-    <Card className="glass border-white/5 rounded-[2rem] p-6">
-      <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">{title}</p>
-      <p className={cn("text-2xl font-bold", color)}>{status}</p>
-      <p className="text-xs text-muted-foreground mt-2">{desc}</p>
+    <Card className="glass border-white/5 rounded-[2rem] p-6 min-w-0">
+      <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1 truncate">{title}</p>
+      <p className={cn("text-2xl font-bold truncate", color)}>{status}</p>
+      <p className="text-xs text-muted-foreground mt-2 truncate opacity-60">{desc}</p>
     </Card>
   );
 }
@@ -365,7 +369,7 @@ function LoadingGrid() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {[1, 2, 3].map((i) => (
-        <Card key={i} className="glass border-white/5 animate-pulse h-[300px] rounded-[2rem]" />
+        <Card key={i} className="glass border-white/5 animate-pulse h-[300px] rounded-[2.5rem]" />
       ))}
     </div>
   );
