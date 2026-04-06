@@ -46,11 +46,11 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState("p&l");
   const [gstSubTab, setGstSubTab] = useState("summary");
 
-  const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries"), orderBy("date", "asc")), [db]);
-  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db]);
+  const ledgerQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "journalEntries"), orderBy("date", "asc")), [db, companyId]);
+  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db, companyId]);
 
-  const { data: ledger, isLoading: isLedgerLoading } = useCollection(ledgerQuery);
-  const { data: expenses, isLoading: isExpensesLoading } = useCollection(expensesQuery);
+  const { data: ledger } = useCollection(ledgerQuery);
+  const { data: expenses } = useCollection(expensesQuery);
 
   const stats = useMemo(() => {
     // Classification Engine Logic
@@ -84,6 +84,7 @@ export default function ReportsPage() {
     if (!ledger) return [];
     const monthly: Record<string, any> = {};
     ledger.forEach(tx => {
+      if (!tx.date) return;
       const m = tx.date.substring(0, 7);
       if (!monthly[m]) monthly[m] = { name: m, revenue: 0, expenses: 0 };
       monthly[m].revenue += tx.totalCredit || 0;
@@ -112,17 +113,17 @@ export default function ReportsPage() {
                 <p className="text-muted-foreground text-sm">Certified fiscal reporting and automated GST auditing.</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-6">
+                <Button variant="outline" className="rounded-full gap-2 border-white/10 hover:bg-white/5 h-10 px-6 shrink-0">
                   <Calendar className="h-4 w-4" /> Period
                 </Button>
-                <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-6 shadow-lg shadow-primary/20" onClick={() => handleExport("Full Package")}>
+                <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-6 shadow-lg shadow-primary/20 shrink-0" onClick={() => handleExport("Full Package")}>
                   <Download className="h-4 w-4" /> Export Package
                 </Button>
               </div>
             </header>
 
             <Tabs defaultValue="p&l" className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10">
+              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10 overflow-x-auto overflow-y-hidden max-w-full">
                 <TabsTrigger value="p&l" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Profit & Loss</TabsTrigger>
                 <TabsTrigger value="gst" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">GST Portal</TabsTrigger>
                 <TabsTrigger value="balance" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Balance Sheet</TabsTrigger>
@@ -176,13 +177,13 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="grid gap-8 lg:grid-cols-5">
-                  <Card className="lg:col-span-3 control-center-card">
-                    <CardHeader className="flex flex-row items-center justify-between border-b border-white/5 pb-6">
+                  <Card className="lg:col-span-3 control-center-card min-w-0">
+                    <CardHeader className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/5 pb-6 gap-4">
                       <div>
                         <CardTitle className="text-xl">Filing Engine</CardTitle>
                         <CardDescription>Government-compliant categorization.</CardDescription>
                       </div>
-                      <Tabs value={gstSubTab} onValueChange={setGstSubTab} className="bg-white/5 p-1 rounded-full">
+                      <Tabs value={gstSubTab} onValueChange={setGstSubTab} className="bg-white/5 p-1 rounded-full shrink-0">
                         <TabsList className="bg-transparent h-8 border-none">
                           <TabsTrigger value="summary" className="rounded-full px-4 text-[10px] uppercase font-bold tracking-widest">Summary</TabsTrigger>
                           <TabsTrigger value="gstr1" className="rounded-full px-4 text-[10px] uppercase font-bold tracking-widest">GSTR-1</TabsTrigger>
@@ -193,27 +194,27 @@ export default function ReportsPage() {
                     <CardContent className="pt-6">
                       {gstSubTab === "summary" && (
                         <div className="space-y-6">
-                          <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5">
+                          <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5 overflow-hidden">
                             <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Outward Supplies (Sales)</h4>
                             <div className="space-y-3">
                               <FilingRow label="B2B Registered Sales" value={stats.revenue * 0.7} />
                               <FilingRow label="B2C Unregistered Sales" value={stats.revenue * 0.3} />
                               <FilingRow label="Export Sales" value={0} />
-                              <div className="pt-3 border-t border-white/5 flex justify-between">
-                                <span className="text-xs font-bold">Total Output GST (18%)</span>
-                                <span className="text-sm font-mono font-bold text-primary">₹{stats.outputGst.toLocaleString('en-IN')}</span>
+                              <div className="pt-3 border-t border-white/5 flex justify-between gap-2 overflow-hidden">
+                                <span className="text-xs font-bold shrink-0">Total Output GST (18%)</span>
+                                <span className="text-sm font-mono font-bold text-primary truncate">₹{stats.outputGst.toLocaleString('en-IN')}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5">
+                          <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5 overflow-hidden">
                             <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Inward Supplies (ITC)</h4>
                             <div className="space-y-3">
                               <FilingRow label="ITC on Capital Goods" value={stats.opex * 0.2} />
                               <FilingRow label="ITC on Regular Services" value={stats.opex * 0.8} />
                               <FilingRow label="Ineligible ITC" value={stats.inputGst - stats.itcEligible} isNegative />
-                              <div className="pt-3 border-t border-white/5 flex justify-between">
-                                <span className="text-xs font-bold">Total ITC Claimable</span>
-                                <span className="text-sm font-mono font-bold text-green-500">₹{stats.itcEligible.toLocaleString('en-IN')}</span>
+                              <div className="pt-3 border-t border-white/5 flex justify-between gap-2 overflow-hidden">
+                                <span className="text-xs font-bold shrink-0">Total ITC Claimable</span>
+                                <span className="text-sm font-mono font-bold text-green-500 truncate">₹{stats.itcEligible.toLocaleString('en-IN')}</span>
                               </div>
                             </div>
                           </div>
@@ -223,8 +224,8 @@ export default function ReportsPage() {
                       {gstSubTab === "gstr1" && (
                         <div className="space-y-4">
                           <div className="flex justify-between items-center px-2">
-                            <p className="text-xs text-muted-foreground">Detailed list of B2B transactions for GSTR-1 filing.</p>
-                            <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary" onClick={() => handleExport("GSTR-1 Excel")}>
+                            <p className="text-xs text-muted-foreground truncate pr-2">Detailed list of B2B transactions for GSTR-1 filing.</p>
+                            <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary shrink-0" onClick={() => handleExport("GSTR-1 Excel")}>
                               <FileSpreadsheet className="h-3 w-3 mr-2" /> Download XLS
                             </Button>
                           </div>
@@ -241,10 +242,10 @@ export default function ReportsPage() {
                               <TableBody>
                                 {ledger?.filter(tx => (tx.totalCredit || 0) > 0).slice(0, 5).map((tx, idx) => (
                                   <TableRow key={idx} className="border-white/5 text-[11px]">
-                                    <TableCell className="font-mono text-muted-foreground">32AABCN{idx}234</TableCell>
-                                    <TableCell className="font-medium">INV-{tx.date?.replace(/-/g, '')}-{idx}</TableCell>
-                                    <TableCell className="text-right font-mono">₹{tx.totalCredit?.toLocaleString()}</TableCell>
-                                    <TableCell className="text-right font-mono text-primary">₹{(tx.totalCredit * 0.18).toLocaleString()}</TableCell>
+                                    <TableCell className="font-mono text-muted-foreground truncate max-w-[80px]">32AABCN{idx}234</TableCell>
+                                    <TableCell className="font-medium truncate max-w-[80px]">INV-{tx.date?.replace(/-/g, '')}-{idx}</TableCell>
+                                    <TableCell className="text-right font-mono truncate">₹{tx.totalCredit?.toLocaleString()}</TableCell>
+                                    <TableCell className="text-right font-mono text-primary truncate">₹{(tx.totalCredit * 0.18).toLocaleString()}</TableCell>
                                   </TableRow>
                                 ))}
                               </TableBody>
@@ -256,8 +257,8 @@ export default function ReportsPage() {
                       {gstSubTab === "gstr3b" && (
                         <div className="space-y-6">
                           <div className="flex justify-between items-center px-2">
-                            <p className="text-xs text-muted-foreground">Consolidated self-declaration for GSTR-3B summary.</p>
-                            <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary" onClick={() => handleExport("GSTR-3B Summary")}>
+                            <p className="text-xs text-muted-foreground truncate pr-2">Consolidated self-declaration for GSTR-3B summary.</p>
+                            <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary shrink-0" onClick={() => handleExport("GSTR-3B Summary")}>
                               <FileText className="h-3 w-3 mr-2" /> Download Summary
                             </Button>
                           </div>
@@ -272,7 +273,7 @@ export default function ReportsPage() {
                   </Card>
 
                   <div className="lg:col-span-2 space-y-6">
-                    <Card className="control-center-card border-primary/20 bg-primary/5">
+                    <Card className="control-center-card border-primary/20 bg-primary/5 min-w-0">
                       <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                           <ShieldCheck className="h-5 w-5 text-primary" />
@@ -331,14 +332,14 @@ export default function ReportsPage() {
 
 function ReportSummaryCard({ title, value, trend, highlight }: any) {
   return (
-    <Card className={cn("control-center-card border-white/5", highlight && "ring-1 ring-primary/20")}>
-      <CardContent className="p-0">
-        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-4">{title}</p>
-        <div className="flex items-center justify-between">
-          <p className={cn("text-3xl font-bold font-mono tracking-tighter", highlight ? "text-primary" : "text-foreground")}>
+    <Card className={cn("control-center-card border-white/5 min-w-0", highlight && "ring-1 ring-primary/20")}>
+      <CardContent className="p-0 overflow-hidden">
+        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-4 truncate">{title}</p>
+        <div className="flex items-center justify-between gap-2 overflow-hidden">
+          <p className={cn("text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate", highlight ? "text-primary" : "text-foreground")} title={`₹${Math.abs(value).toLocaleString('en-IN')}`}>
             ₹{Math.abs(value).toLocaleString('en-IN')}
           </p>
-          <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${trend === "up" ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'}`}>
+          <div className={`h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 ${trend === "up" ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'}`}>
             {trend === "up" ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
           </div>
         </div>
@@ -349,21 +350,21 @@ function ReportSummaryCard({ title, value, trend, highlight }: any) {
 
 function GSTMetricCard({ title, value, sub, color = "text-foreground", highlight }: any) {
   return (
-    <Card className={cn("control-center-card border-white/5", highlight && "ring-1 ring-primary/20 bg-primary/5")}>
-      <p className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground mb-4">{title}</p>
-      <p className={cn("text-2xl font-black font-mono tracking-tighter", color)}>
+    <Card className={cn("control-center-card border-white/5 min-w-0", highlight && "ring-1 ring-primary/20 bg-primary/5")}>
+      <p className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground mb-4 truncate">{title}</p>
+      <p className={cn("text-xl md:text-2xl font-black font-mono tracking-tighter truncate", color)} title={value.toLocaleString('en-IN')}>
         ₹{value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
       </p>
-      <p className="text-[9px] text-muted-foreground mt-4 uppercase tracking-widest font-bold opacity-50">{sub}</p>
+      <p className="text-[9px] text-muted-foreground mt-4 uppercase tracking-widest font-bold opacity-50 truncate">{sub}</p>
     </Card>
   );
 }
 
 function FilingRow({ label, value, isNegative }: any) {
   return (
-    <div className="flex justify-between items-center text-xs">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={cn("font-mono font-bold", isNegative ? "text-destructive" : "")}>
+    <div className="flex justify-between items-center text-xs gap-2 overflow-hidden">
+      <span className="text-muted-foreground truncate">{label}</span>
+      <span className={cn("font-mono font-bold shrink-0", isNegative ? "text-destructive" : "")}>
         {isNegative ? '-' : ''}₹{value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
       </span>
     </div>
@@ -373,14 +374,14 @@ function FilingRow({ label, value, isNegative }: any) {
 function GSTR3BBox({ title, value, tax, color = "text-primary", highlight }: any) {
   return (
     <div className={cn(
-      "p-5 rounded-2xl border border-white/5 bg-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
+      "p-5 rounded-2xl border border-white/5 bg-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 min-w-0",
       highlight && "border-primary/20 bg-primary/5"
     )}>
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{title}</p>
-        <p className="text-xs font-semibold">Taxable Value: <span className="font-mono">₹{value.toLocaleString()}</span></p>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 truncate">{title}</p>
+        <p className="text-xs font-semibold truncate">Taxable Value: <span className="font-mono">₹{value.toLocaleString()}</span></p>
       </div>
-      <div className="text-right">
+      <div className="text-right shrink-0">
         <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">GST Amount</p>
         <p className={cn("text-lg font-bold font-mono", color)}>₹{tax.toLocaleString()}</p>
       </div>
@@ -390,18 +391,18 @@ function GSTR3BBox({ title, value, tax, color = "text-primary", highlight }: any
 
 function AuditItem({ icon: Icon, title, status, desc, warning }: any) {
   return (
-    <div className="flex gap-4 group">
+    <div className="flex gap-4 group min-w-0">
       <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", warning ? "bg-orange-500/10 text-orange-500" : "bg-green-500/10 text-green-500")}>
         <Icon className="h-5 w-5" />
       </div>
-      <div>
-        <div className="flex items-center gap-2">
-          <p className="text-xs font-bold uppercase">{title}</p>
-          <Badge variant="outline" className={cn("text-[8px] h-4 rounded-full border-none px-2", warning ? "bg-orange-500/10 text-orange-500" : "bg-green-500/10 text-green-500")}>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <p className="text-xs font-bold uppercase truncate">{title}</p>
+          <Badge variant="outline" className={cn("text-[8px] h-4 rounded-full border-none px-2 shrink-0", warning ? "bg-orange-500/10 text-orange-500" : "bg-green-500/10 text-green-500")}>
             {status}
           </Badge>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{desc}</p>
+        <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">{desc}</p>
       </div>
     </div>
   );
@@ -412,10 +413,10 @@ function ExportButton({ icon: Icon, label, onClick }: any) {
     <Button 
       variant="ghost" 
       onClick={onClick}
-      className="h-20 rounded-2xl border border-white/5 bg-white/5 flex flex-col gap-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+      className="h-20 rounded-2xl border border-white/5 bg-white/5 flex flex-col gap-2 hover:bg-primary/10 hover:text-primary transition-all duration-300 min-w-0 overflow-hidden"
     >
-      <Icon className="h-5 w-5" />
-      <span className="text-[9px] font-bold uppercase tracking-widest">{label}</span>
+      <Icon className="h-5 w-5 shrink-0" />
+      <span className="text-[9px] font-bold uppercase tracking-widest truncate w-full px-1">{label}</span>
     </Button>
   );
 }

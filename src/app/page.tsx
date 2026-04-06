@@ -130,13 +130,13 @@ export default function Dashboard() {
             <div className="grid gap-6 lg:grid-cols-7">
               <Card className="lg:col-span-4 control-center-card overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <CardTitle className="text-xl font-bold">
                       Fiscal Health Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">Real-time mapping of income vs operating costs</p>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">Real-time mapping of income vs operating costs</p>
                   </div>
-                  <div className="flex items-center gap-1 text-primary font-bold text-[10px] uppercase tracking-widest cursor-pointer hover:opacity-70 transition-opacity">
+                  <div className="flex items-center gap-1 text-primary font-bold text-[10px] uppercase tracking-widest cursor-pointer hover:opacity-70 transition-opacity shrink-0">
                     ANALYTICS <ChevronRight className="h-3 w-3" />
                   </div>
                 </CardHeader>
@@ -196,19 +196,19 @@ export default function Dashboard() {
                     ) : (
                       recentTransactions.map((tx) => (
                         <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1.5rem] hover:bg-foreground/5 ios-transition group">
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-4 min-w-0">
                             <div className={cn(
-                              "h-10 w-10 rounded-2xl flex items-center justify-center",
+                              "h-10 w-10 rounded-2xl flex items-center justify-center shrink-0",
                               tx.totalDebit > 0 ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500"
                             )}>
                               {tx.totalDebit > 0 ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                             </div>
-                            <div>
-                              <p className="text-sm font-bold">{tx.description}</p>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold truncate">{tx.description}</p>
                               <p className="text-[10px] text-muted-foreground font-mono">{tx.date}</p>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right shrink-0">
                             <p className={cn(
                               "text-sm font-mono font-bold",
                               tx.totalDebit > 0 ? "text-destructive" : "text-green-500"
@@ -258,14 +258,14 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
     )}>
       <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-foreground rotate-12" />
       
-      <div className="flex flex-col gap-1 relative z-10">
+      <div className="flex flex-col gap-1 relative z-10 min-w-0">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">{title}</p>
         
-        <div className="flex items-center justify-between">
-          <div className="text-3xl font-bold font-mono tracking-tighter">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate" title={processedValue(value)}>
             {processedValue(value)}
           </div>
-          <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20">
+          <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
             <Icon className="h-5 w-5 text-primary" />
           </div>
         </div>
@@ -296,7 +296,7 @@ function DivisionBar({ name, value, color }: any) {
   return (
     <div className="space-y-3">
       <div className="flex justify-between text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground">
-        <span>{name}</span>
+        <span className="truncate pr-2">{name}</span>
         <span className="font-mono">{value}</span>
       </div>
       <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
@@ -310,12 +310,12 @@ function AlertItem({ title, desc, severity }: any) {
   const colors = { high: "bg-destructive", medium: "bg-orange-500", low: "bg-green-500" };
   return (
     <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer">
-      <div className={cn("mt-1.5 h-2.5 w-2.5 rounded-full", colors[severity as keyof typeof colors])} />
-      <div>
-        <p className="text-sm font-bold leading-none">{title}</p>
+      <div className={cn("mt-1.5 h-2.5 w-2.5 rounded-full shrink-0", colors[severity as keyof typeof colors])} />
+      <div className="min-w-0">
+        <p className="text-sm font-bold leading-none truncate">{title}</p>
         <p className="text-xs text-muted-foreground mt-3 leading-relaxed">{desc}</p>
       </div>
-      <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto self-center group-hover:translate-x-1 ios-transition" />
+      <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto self-center shrink-0 group-hover:translate-x-1 ios-transition" />
     </div>
   );
 }
