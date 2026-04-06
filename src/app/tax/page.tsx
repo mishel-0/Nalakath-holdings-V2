@@ -134,7 +134,7 @@ export default function TaxEnginePage() {
             </header>
 
             <Tabs defaultValue="calculator" className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10">
+              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10 overflow-x-auto max-w-full">
                 <TabsTrigger value="calculator" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Calculator</TabsTrigger>
                 <TabsTrigger value="dashboard" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">GST Dashboard</TabsTrigger>
                 <TabsTrigger value="reports" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Filing Reports</TabsTrigger>
@@ -144,11 +144,11 @@ export default function TaxEnginePage() {
               <TabsContent value="calculator" className="grid gap-8 lg:grid-cols-5">
                 <Card className="lg:col-span-3 control-center-card border-white/5">
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl font-bold">{reverseMode ? "Reverse Tax Engine" : "Universal Tax Calculator"}</CardTitle>
-                      <CardDescription>Advanced multi-tax computation engine.</CardDescription>
+                    <div className="min-w-0">
+                      <CardTitle className="text-xl font-bold truncate">{reverseMode ? "Reverse Tax Engine" : "Universal Tax Calculator"}</CardTitle>
+                      <CardDescription className="truncate">Advanced multi-tax computation engine.</CardDescription>
                     </div>
-                    <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setReverseMode(!reverseMode)}>
+                    <Button variant="ghost" size="icon" className="rounded-full shrink-0" onClick={() => setReverseMode(!reverseMode)}>
                       <ArrowRightLeft className="h-5 w-5 text-primary" />
                     </Button>
                   </CardHeader>
@@ -219,10 +219,10 @@ export default function TaxEnginePage() {
                     </div>
 
                     <div className="pt-6 border-t border-white/5 grid grid-cols-2 gap-4">
-                      <Button onClick={handleSaveRecord} className="h-14 rounded-[1.5rem] gold-gradient text-black font-bold gap-2">
+                      <Button onClick={handleSaveRecord} className="h-14 rounded-[1.5rem] gold-gradient text-black font-bold gap-2 truncate">
                         <Save className="h-5 w-5" /> Save Record
                       </Button>
-                      <Button variant="outline" onClick={() => { setBaseAmount(0); setExtraTaxes([]); }} className="h-14 rounded-[1.5rem] border-white/10 hover:bg-white/5">
+                      <Button variant="outline" onClick={() => { setBaseAmount(0); setExtraTaxes([]); }} className="h-14 rounded-[1.5rem] border-white/10 hover:bg-white/5 truncate">
                         <RefreshCw className="h-5 w-5" /> Reset Engine
                       </Button>
                     </div>
@@ -258,9 +258,9 @@ export default function TaxEnginePage() {
                           <p className="text-xs text-muted-foreground italic text-center py-4">No records saved yet.</p>
                         ) : (
                           recentRecords?.map((r) => (
-                            <div key={r.id} className="flex justify-between items-center text-xs px-2">
+                            <div key={r.id} className="flex justify-between items-center text-xs px-2 gap-4">
                               <span className="font-mono text-muted-foreground shrink-0">{new Date(r.timestamp).toLocaleTimeString()}</span>
-                              <span className="font-bold truncate pl-4">₹{r.finalAmount.toLocaleString('en-IN')}</span>
+                              <span className="font-bold truncate text-right">₹{r.finalAmount.toLocaleString('en-IN')}</span>
                             </div>
                           ))
                         )}
@@ -313,15 +313,15 @@ export default function TaxEnginePage() {
               <TabsContent value="rules" className="space-y-6">
                 <Card className="control-center-card border-white/5">
                   <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="min-w-0">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
                           <Settings2 className="h-5 w-5 text-primary" />
                           Tax Rule Engine
                         </CardTitle>
-                        <CardDescription>Define conditional tax logic for specific transaction types.</CardDescription>
+                        <CardDescription className="truncate">Define conditional tax logic for specific transaction types.</CardDescription>
                       </div>
-                      <Button className="rounded-full gold-gradient text-black font-bold h-10 px-6">
+                      <Button className="rounded-full gold-gradient text-black font-bold h-10 px-6 shrink-0">
                         <Plus className="h-4 w-4 mr-1" /> New Rule
                       </Button>
                     </div>
@@ -346,9 +346,9 @@ export default function TaxEnginePage() {
 
 function BreakdownRow({ label, value, color = "text-foreground" }: any) {
   return (
-    <div className="flex justify-between items-center text-sm gap-2">
+    <div className="flex justify-between items-center text-sm gap-4 overflow-hidden">
       <span className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold truncate">{label}</span>
-      <span className={cn("font-mono font-bold shrink-0", color)}>₹{value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+      <span className={cn("font-mono font-bold shrink-0", color)}>₹{value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
     </div>
   );
 }
