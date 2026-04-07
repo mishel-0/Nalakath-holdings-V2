@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -36,7 +35,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useDivision } from "@/context/DivisionContext";
 import { cn } from "@/lib/utils";
 
-// Utility for Amount in Words (Indian Format)
+// Utility for Indian Number Formatting: 82,80,370.00
+function indianNumberFormat(n: number): string {
+  const parts = n.toFixed(2).split(".");
+  let lastThree = parts[0].substring(parts[0].length - 3);
+  const otherNumbers = parts[0].substring(0, parts[0].length - 3);
+  if (otherNumbers !== "") lastThree = "," + lastThree;
+  const res = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree + "." + parts[1];
+  return res;
+}
+
+// Utility for Amount in Words (Indian English)
 function numberToWords(num: number): string {
   const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
   const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -79,7 +88,7 @@ export default function ExpensesPage() {
     return query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt", "desc"));
   }, [db, companyId]);
 
-  const { data: phases, isLoading: isPhasesLoading } = useCollection(phasesQuery);
+  const { data: phases } = useCollection(phasesQuery);
   const { data: expenses, isLoading: isExpensesLoading } = useCollection(expensesQuery);
 
   const filteredExpenses = useMemo(() => {
@@ -104,15 +113,12 @@ export default function ExpensesPage() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const now = new Date().toISOString();
-    
-    const newPhase = {
+    addDocumentNonBlocking(collection(db, "companies", companyId, "phases"), {
       name: formData.get("name") as string,
       createdAt: now,
-    };
-
-    addDocumentNonBlocking(collection(db, "companies", companyId, "phases"), newPhase);
+    });
     setIsPhaseOpen(false);
-    toast({ title: "Phase Created", description: `Initialized ${newPhase.name} for ${activeDivision.name}.` });
+    toast({ title: "Phase Created", description: `Initialized ${formData.get("name")} phase.` });
   };
 
   const handleUpdatePhase = (e: React.FormEvent<HTMLFormElement>) => {
@@ -123,13 +129,13 @@ export default function ExpensesPage() {
       name: formData.get("name") as string,
     });
     setEditingPhase(null);
-    toast({ title: "Phase Updated", description: "Phase name modified successfully." });
+    toast({ title: "Phase Updated", description: "Phase modified successfully." });
   };
 
   const handleDeletePhase = (id: string) => {
     deleteDoc(doc(db, "companies", companyId, "phases", id));
     if (selectedPhaseId === id) setSelectedPhaseId("all");
-    toast({ variant: "destructive", title: "Phase Deleted", description: "Phase removed from timeline." });
+    toast({ variant: "destructive", title: "Phase Deleted", description: "Phase removed." });
   };
 
   const syncToLedger = (expId: string, data: any, isDelete = false) => {
@@ -181,7 +187,7 @@ export default function ExpensesPage() {
     setDoc(doc(db, "companies", companyId, "expenses", expId), newExpense);
     syncToLedger(expId, newExpense);
     setIsAddOpen(false);
-    toast({ title: "Entry Logged", description: "Financial record saved and synced to Ledger." });
+    toast({ title: "Entry Logged", description: "Record saved and synced to Ledger." });
   };
 
   const handleUpdateExpense = (e: React.FormEvent<HTMLFormElement>) => {
@@ -207,42 +213,13 @@ export default function ExpensesPage() {
     setDoc(doc(db, "companies", companyId, "expenses", editingExpense.id), updatedData);
     syncToLedger(editingExpense.id, updatedData);
     setEditingExpense(null);
-    toast({ title: "Entry Updated", description: "Record and Ledger modified successfully." });
+    toast({ title: "Entry Updated", description: "Record modified successfully." });
   };
 
   const handleDeleteExpense = (id: string) => {
     deleteDoc(doc(db, "companies", companyId, "expenses", id));
     syncToLedger(id, null, true);
-    toast({ variant: "destructive", title: "Record Deleted", description: "Entry removed from Expenses and Ledger." });
-  };
-
-  const handleCreateVoucherFromExpense = (exp: any) => {
-    const phaseName = phases?.find(p => p.id === exp.phaseId)?.name || "Unassigned";
-    const now = new Date().toISOString();
-    
-    const newVoucher = {
-      companyId,
-      expenseId: exp.id,
-      voucherNumber: exp.invoiceNumber || `V-${exp.id.substring(0, 6).toUpperCase()}`,
-      division: activeDivision.division,
-      vendorName: exp.clientName || "General Vendor",
-      date: exp.expenseDate,
-      amount: exp.amount,
-      paymentMethod: "Journal Transfer",
-      status: exp.status === "Paid" ? "Paid" : "Pending",
-      phaseName: phaseName,
-      description: exp.description,
-      expenseCategory: exp.expenseType || exp.expenseCategory || "Operational",
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    addDocumentNonBlocking(collection(db, "companies", companyId, "vouchers"), newVoucher);
-    toast({ title: "Voucher Sync Complete", description: `Record pushed to Payment Vouchers for Audit.` });
-  };
-
-  const handlePrint = () => {
-    window.print();
+    toast({ variant: "destructive", title: "Record Deleted", description: "Entry removed." });
   };
 
   const getInvoiceCalculations = (amount: number) => {
@@ -495,9 +472,6 @@ export default function ExpensesPage() {
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="glass rounded-2xl">
-                                    <DropdownMenuItem onClick={() => handleCreateVoucherFromExpense(exp)} className="text-xs font-bold text-green-500 cursor-pointer">
-                                      <Send className="h-3 w-3 mr-2" /> Push to Audit Vouchers
-                                    </DropdownMenuItem>
                                     {exp.expenseType === "Client Invoice" && (
                                       <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
                                         <FileText className="h-3 w-3 mr-2" /> Generate Tax Invoice
@@ -525,136 +499,50 @@ export default function ExpensesPage() {
         </main>
       </div>
 
-      <Dialog open={!!editingPhase} onOpenChange={(open) => !open && setEditingPhase(null)}>
-        <DialogContent className="glass border-white/10 sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle>Edit Phase Details</DialogTitle>
-          </DialogHeader>
-          {editingPhase && (
-            <form onSubmit={handleUpdatePhase} className="space-y-4 py-4">
-              <div className="grid gap-2">
-                <Label>Phase Name</Label>
-                <Input name="name" defaultValue={editingPhase.name} required />
-              </div>
-              <DialogFooter>
-                <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl">Update Phase</Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
-        <DialogContent className="glass border-white/10 sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Modify Entry</DialogTitle>
-          </DialogHeader>
-          {editingExpense && (
-            <form onSubmit={handleUpdateExpense} className="space-y-4 py-4">
-              <div className="grid gap-2">
-                <Label>Phase</Label>
-                <Select name="phaseId" defaultValue={editingExpense.phaseId}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="glass">
-                    {phases?.map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label>Status</Label>
-                  <Select name="status" defaultValue={editingExpense.status}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="glass">
-                      <SelectItem value="Paid">Paid</SelectItem>
-                      <SelectItem value="Unpaid">Unpaid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label>Date</Label>
-                  <Input name="date" type="date" defaultValue={editingExpense.expenseDate} required />
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label>Entity Name</Label>
-                <Input name="clientName" defaultValue={editingExpense.clientName} />
-              </div>
-              <div className="grid gap-2">
-                <Label>Invoice/Reference #</Label>
-                <Input name="invoiceNumber" defaultValue={editingExpense.invoiceNumber} />
-              </div>
-              <div className="grid gap-2">
-                <Label>GSTIN</Label>
-                <Input name="clientGstin" defaultValue={editingExpense.clientGstin} />
-              </div>
-              <div className="grid gap-2">
-                <Label>Description</Label>
-                <Input name="description" defaultValue={editingExpense.description} required />
-              </div>
-              <div className="grid gap-2">
-                <Label>Amount (₹)</Label>
-                <Input name="amount" type="number" step="0.01" defaultValue={editingExpense.amount} required />
-              </div>
-              <DialogFooter>
-                <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Update Record</Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
       {invoiceToPrint && (() => {
         const calcs = getInvoiceCalculations(invoiceToPrint.amount);
         const currentInvoicePhase = phases?.find(p => p.id === invoiceToPrint?.phaseId);
-        const isPhase1 = currentInvoicePhase?.name.toLowerCase().includes("phase 1");
         
         return (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white overflow-y-auto">
-            <Card className="w-full max-w-4xl bg-white text-black overflow-hidden rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300 font-sans border-none">
+            <Card className="w-full max-w-4xl bg-[#FDFBF7] text-[#0C0A07] overflow-hidden rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300 font-sans border-none">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute top-4 right-4 print:hidden h-10 w-10 bg-zinc-100 hover:bg-zinc-200 rounded-full z-[110]" 
+                className="absolute top-4 right-4 print:hidden h-10 w-10 bg-[#0C0A07]/10 hover:bg-[#0C0A07]/20 rounded-full z-[110]" 
                 onClick={() => setInvoiceToPrint(null)}
               >
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* Header - PIXEL PERFECT RECREATION */}
-              <div className="bg-[#0C0A07] p-10 md:p-12 text-white flex justify-between items-start border-b-[2px] border-[#C9A84C] relative overflow-hidden">
+              {/* Header - EXACT REPORTLAB RECREATION */}
+              <div className="bg-[#0C0A07] p-10 md:p-12 text-[#FDFBF7] flex justify-between items-start border-b-[2px] border-[#C9A84C] relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-[#C9A84C]" />
                 <div className="flex gap-8 items-center relative z-10">
-                  <div className="h-24 w-24 bg-white/5 rounded-full flex items-center justify-center border-2 border-[#C9A84C] p-2 shadow-xl">
+                  <div className="h-24 w-24 bg-white/5 rounded-full flex items-center justify-center border-2 border-[#C9A84C] p-2">
                     <div className="h-full w-full bg-[#0C0A07] rounded-full flex items-center justify-center">
                       <span className="text-3xl font-black text-[#C9A84C]">NH</span>
                     </div>
                   </div>
                   <div className="space-y-1">
                     <h1 className="text-4xl font-black tracking-tight text-[#C9A84C] uppercase leading-none">
-                      {isPhase1 ? "UNIVERSAL CONSTRUCTION HUB" : "NALAKATH CONSTRUCTIONS"}
+                      NALAKATH CONSTRUCTIONS
                     </h1>
                     <p className="text-sm font-bold text-zinc-400 italic">Private Limited</p>
-                    <div className="mt-3 h-[0.6px] w-[300px] bg-[#C9A84C] opacity-100" />
+                    <div className="mt-3 h-[0.6px] w-[300px] bg-[#C9A84C]" />
                     <p className="text-[11px] text-[#F0E4B8] font-bold tracking-widest pt-2 uppercase italic">
                       Building Trust. Building Kerala.
                     </p>
                     <p className="text-[10px] text-[#F5EDD6] font-medium leading-relaxed max-w-md mt-2">
                       Nalakath Hub, Ward No. 4, Areecode, Malappuram, Kerala 673639<br />
-                      +91 97444 00100 | info@nalakathindia.com | GSTIN: 32XXXXX1234Z5
+                      +91 97444 00100   |   info@nalakathindia.com   |   GSTIN: 32XXXXXX1234Z5
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Title Band */}
-              <div className="bg-[#C9A84C] px-10 py-3 flex justify-between items-center">
+              <div className="bg-[#C9A84C] px-10 py-3 flex justify-between items-center shadow-md">
                 <h2 className="text-xl font-black text-[#0C0A07] uppercase tracking-widest">TAX INVOICE</h2>
                 <div className="flex gap-4 text-[9px] font-black text-[#0C0A07] uppercase opacity-80">
                   <span>Original for Recipient</span>
@@ -712,7 +600,7 @@ export default function ExpensesPage() {
                   </p>
                 </div>
 
-                {/* Main Table */}
+                {/* Main Table - PIXEL PERFECT COLUMNS */}
                 <div className="overflow-hidden rounded-lg border border-[#CEBB8A]">
                   <table className="w-full text-left">
                     <thead className="bg-[#0C0A07] text-[#C9A84C]">
@@ -737,9 +625,9 @@ export default function ExpensesPage() {
                         <td className="p-4 text-center text-xs font-mono text-[#0C0A07] border-r border-[#F7F2E8]">9954</td>
                         <td className="p-4 text-center text-xs font-black border-r border-[#F7F2E8]">1</td>
                         <td className="p-4 text-center text-[10px] font-black border-r border-[#F7F2E8] uppercase">L.S.</td>
-                        <td className="p-4 text-right text-xs font-mono border-r border-[#F7F2E8]">{invoiceToPrint.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                        <td className="p-4 text-right text-xs font-mono border-r border-[#F7F2E8]">{indianNumberFormat(invoiceToPrint.amount)}</td>
                         <td className="p-4 text-center text-xs font-black border-r border-[#F7F2E8]">18</td>
-                        <td className="p-4 text-right text-xs font-mono font-black">{invoiceToPrint.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                        <td className="p-4 text-right text-xs font-mono font-black">{indianNumberFormat(invoiceToPrint.amount)}</td>
                       </tr>
                       {[2, 3, 4].map(i => (
                         <tr key={i} className={cn("h-10", i % 2 === 0 ? "bg-[#F7F2E8]" : "bg-white")}>
@@ -762,24 +650,24 @@ export default function ExpensesPage() {
                   <div className="w-96 space-y-2">
                     <div className="flex justify-between text-[11px] font-bold px-4">
                       <span className="text-[#6B5C42] uppercase tracking-widest">Subtotal (before GST)</span>
-                      <span className="font-mono text-[#0C0A07]">Rs. {calcs.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <span className="font-mono text-[#0C0A07]">Rs. {indianNumberFormat(calcs.subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-[11px] font-bold px-4">
                       <span className="text-[#6B5C42] uppercase tracking-widest">CGST @ 9%</span>
-                      <span className="font-mono text-[#0C0A07]">Rs. {calcs.cgst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <span className="font-mono text-[#0C0A07]">Rs. {indianNumberFormat(calcs.cgst)}</span>
                     </div>
                     <div className="flex justify-between text-[11px] font-bold px-4">
                       <span className="text-[#6B5C42] uppercase tracking-widest">SGST @ 9%</span>
-                      <span className="font-mono text-[#0C0A07]">Rs. {calcs.sgst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <span className="font-mono text-[#0C0A07]">Rs. {indianNumberFormat(calcs.sgst)}</span>
                     </div>
                     <div className="flex justify-between text-[11px] font-bold px-4 border-b border-[#E0D4B0] pb-3">
                       <span className="text-[#A02818] uppercase tracking-widest">TDS Deductible (Sec. 194C)</span>
-                      <span className="font-mono text-[#A02818]">- Rs. {calcs.tds.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <span className="font-mono text-[#A02818]">- Rs. {indianNumberFormat(calcs.tds)}</span>
                     </div>
                     <div className="bg-[#0C0A07] p-5 rounded-lg text-[#C9A84C] flex justify-between items-center shadow-lg border-l-[8px] border-[#C9A84C]">
                       <div className="space-y-1">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em]">TOTAL AMOUNT PAYABLE</p>
-                        <p className="text-3xl font-black tracking-tighter leading-none text-[#DFC06A]">Rs. {calcs.totalPayable.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                        <p className="text-3xl font-black tracking-tighter leading-none text-[#DFC06A]">Rs. {indianNumberFormat(calcs.totalPayable)}</p>
                       </div>
                     </div>
                   </div>
@@ -801,7 +689,7 @@ export default function ExpensesPage() {
                       <span className="font-bold text-[#6B5C42]">Bank:</span>
                       <span className="font-black text-[#0C0A07]">State Bank of India, Perinthalmanna</span>
                       <span className="font-bold text-[#6B5C42]">Account Name:</span>
-                      <span className="font-black text-[#0C0A07]">{isPhase1 ? "Universal Construction Hub" : "Nalakath Constructions Pvt. Ltd."}</span>
+                      <span className="font-black text-[#0C0A07]">Nalakath Constructions Pvt. Ltd.</span>
                       <span className="font-bold text-[#6B5C42]">Account No.:</span>
                       <span className="font-black text-[#0C0A07] font-mono">32XXXXXXXXX51</span>
                       <span className="font-bold text-[#6B5C42]">IFSC Code:</span>
@@ -841,7 +729,7 @@ export default function ExpensesPage() {
                     <div className="space-y-1.5">
                       <div className="h-[0.8px] w-56 bg-[#CEBB8A] mx-auto" />
                       <p className="text-[11px] font-black text-[#0C0A07] uppercase tracking-widest">Authorised Signatory</p>
-                      <p className="text-[9px] font-bold text-[#6B5C42] uppercase">For {isPhase1 ? "Universal Hub" : "Nalakath Constructions Pvt. Ltd."}</p>
+                      <p className="text-[9px] font-bold text-[#6B5C42] uppercase">For Nalakath Constructions Pvt. Ltd.</p>
                     </div>
                   </div>
                 </footer>
@@ -850,7 +738,7 @@ export default function ExpensesPage() {
               {/* Bottom Strip */}
               <div className="bg-[#0C0A07] py-4 px-10 text-white flex justify-between items-center print:border-t-0 border-t border-white/10">
                 <p className="text-[9px] font-black tracking-[0.2em] text-[#DFC06A]">
-                  {isPhase1 ? "UNIVERSAL HUB" : "NALAKATH CONSTRUCTIONS PVT. LTD."}
+                  NALAKATH CONSTRUCTIONS PVT. LTD.
                 </p>
                 <div className="flex gap-6 text-[8px] font-bold text-[#F5EDD6] uppercase tracking-widest">
                   <span>Areecode, Malappuram</span>
@@ -864,7 +752,7 @@ export default function ExpensesPage() {
                 <Button variant="outline" className="rounded-full px-8 gap-2 border-zinc-300 h-14 font-black uppercase text-[11px] tracking-widest hover:bg-zinc-100" onClick={() => setInvoiceToPrint(null)}>
                   Discard Preview
                 </Button>
-                <Button className="rounded-full px-12 gap-3 h-14 font-black uppercase text-[11px] tracking-widest bg-[#0C0A07] text-[#C9A84C] hover:bg-black shadow-2xl shadow-black/20" onClick={handlePrint}>
+                <Button className="rounded-full px-12 gap-3 h-14 font-black uppercase text-[11px] tracking-widest bg-[#0C0A07] text-[#C9A84C] hover:bg-black shadow-2xl shadow-black/20" onClick={() => window.print()}>
                   <Printer className="h-5 w-5" /> Save PDF / Print
                 </Button>
               </div>
