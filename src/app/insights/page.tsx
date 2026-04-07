@@ -42,10 +42,8 @@ import { cn } from "@/lib/utils";
 import { useDivision } from "@/context/DivisionContext";
 
 const AI_MODELS = [
-  { id: "openai/qwen/qwen-3.6-plus:free", name: "Qwen 3.6 Plus (Balanced)", provider: "OpenRouter" },
-  { id: "openai/google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "OpenRouter" },
-  { id: "openai/deepseek/deepseek-r1", name: "DeepSeek R1 (Reasoning)", provider: "OpenRouter" },
-  { id: "openai/qwen/qwen-2.5-72b-instruct", name: "Qwen 2.5 72B (Powerful)", provider: "OpenRouter" },
+  { id: "googleai/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "Google AI" },
+  { id: "googleai/gemini-1.5-pro", name: "Gemini 1.5 Pro (Reasoning)", provider: "Google AI" },
 ];
 
 export default function InsightsPage() {
@@ -191,7 +189,7 @@ export default function InsightsPage() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-20 md:mb-0">
+        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex flex-col gap-1 min-w-0">
