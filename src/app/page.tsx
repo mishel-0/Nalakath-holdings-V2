@@ -45,7 +45,7 @@ export default function Dashboard() {
   const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db, companyId]);
   const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db, companyId]);
   const recentTxQuery = useMemoFirebase(() => 
-    query(collection(db, "companies", companyId, "journalEntries"), orderBy("createdAt", "desc"), limit(5)), 
+    query(collection(db, "companies", companyId, "journalEntries"), orderBy("createdAt", "desc"), limit(10)), 
   [db, companyId]);
 
   const profileDocRef = useMemoFirebase(() => {
@@ -65,7 +65,6 @@ export default function Dashboard() {
     const projectCosts = projects?.reduce((acc, proj) => acc + (proj.actualCost || 0), 0) || 0;
     const pendingVouchers = vouchers?.filter(v => v.status === "Pending").length || 0;
 
-    // Aggregate cost allocations for HQ
     let allocations = { material: 0, labour: 0, land: 0, profit: 0 };
     if (projects && projects.length > 0) {
       const activeCount = projects.length;
@@ -89,16 +88,21 @@ export default function Dashboard() {
   }, [recentTransactions, expenses, projects, vouchers]);
 
   const chartData = useMemo(() => {
-    return [
-      { name: "Mon", income: stats.revenue * 0.2, cost: stats.projectCosts * 0.1 },
-      { name: "Tue", income: stats.revenue * 0.4, cost: stats.projectCosts * 0.3 },
-      { name: "Wed", income: stats.revenue * 0.3, cost: stats.projectCosts * 0.2 },
-      { name: "Thu", income: stats.revenue * 0.6, cost: stats.projectCosts * 0.5 },
-      { name: "Fri", income: stats.revenue * 0.8, cost: stats.projectCosts * 0.7 },
-      { name: "Sat", income: stats.revenue * 0.9, cost: stats.projectCosts * 0.8 },
-      { name: "Sun", income: stats.revenue, cost: stats.projectCosts }
-    ];
-  }, [stats]);
+    if (!recentTransactions || recentTransactions.length === 0) return [];
+    
+    // Group transactions by date for a real trend
+    const daily: Record<string, { income: number, cost: number }> = {};
+    recentTransactions.forEach(tx => {
+      const d = tx.date;
+      if (!daily[d]) daily[d] = { income: 0, cost: 0 };
+      daily[d].income += tx.totalCredit || 0;
+      daily[d].cost += tx.totalDebit || 0;
+    });
+
+    return Object.entries(daily)
+      .map(([name, vals]) => ({ name, ...vals }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [recentTransactions]);
 
   if (isProfileLoading) {
     return (
@@ -152,29 +156,35 @@ export default function Dashboard() {
                     <CardTitle className="text-xl font-bold">
                       Fiscal Health Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1 truncate">Income vs operating costs for {activeDivision.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">Real-time income vs operating costs</p>
                   </div>
                   <div className="flex items-center gap-1 text-primary font-bold text-[10px] uppercase tracking-widest cursor-pointer hover:opacity-70 transition-opacity shrink-0">
                     ANALYTICS <ChevronRight className="h-3 w-3" />
                   </div>
                 </CardHeader>
                 <CardContent className="h-[300px] pt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                      <defs>
-                        <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="name" stroke="currentColor" fontSize={10} axisLine={false} tickLine={false} opacity={0.3} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
-                        formatter={(v) => `₹${Number(v).toLocaleString('en-IN')}`}
-                      />
-                      <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fill="url(#colorVal)" strokeWidth={3} />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData}>
+                        <defs>
+                          <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="name" stroke="currentColor" fontSize={10} axisLine={false} tickLine={false} opacity={0.3} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
+                          formatter={(v) => `₹${Number(v).toLocaleString('en-IN')}`}
+                        />
+                        <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fill="url(#colorVal)" strokeWidth={3} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground text-xs italic">
+                      Insufficient ledger data for trend mapping.
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
