@@ -65,15 +65,16 @@ export default function Dashboard() {
     const projectCosts = projects?.reduce((acc, proj) => acc + (proj.actualCost || 0), 0) || 0;
     const pendingVouchers = vouchers?.filter(v => v.status === "Pending").length || 0;
 
-    // Aggregate cost allocations for HQ - INITIALIZED TO ZERO
+    // Aggregate cost allocations for HQ
     let allocations = { material: 0, labour: 0, land: 0, profit: 0 };
     if (projects && projects.length > 0) {
-      const avg = (field: string) => projects.reduce((acc, p) => acc + (p[field] || 0), 0) / projects.length;
+      const activeCount = projects.length;
+      const sum = (field: string) => projects.reduce((acc, p) => acc + (p[field] || 0), 0);
       allocations = {
-        material: avg('materialAllocation') || 0,
-        labour: avg('labourAllocation') || 0,
-        land: avg('landAllocation') || 0,
-        profit: avg('profitMarginAllocation') || 0
+        material: Math.round(sum('materialAllocation') / activeCount),
+        labour: Math.round(sum('labourAllocation') / activeCount),
+        land: Math.round(sum('landAllocation') / activeCount),
+        profit: Math.round(sum('profitMarginAllocation') / activeCount)
       };
     }
 
@@ -183,13 +184,22 @@ export default function Dashboard() {
                     <PieChart className="h-5 w-5 text-primary" />
                     Capital Allocation
                   </CardTitle>
-                  <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Aggregated Portfolio Breakdown</p>
+                  <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Aggregated Portfolio Strategy</p>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <DivisionBar name="MATERIAL COST" value={`${stats.allocations.material}%`} color="gold-gradient" />
-                  <DivisionBar name="LABOUR COST" value={`${stats.allocations.labour}%`} color="bg-zinc-600" />
-                  <DivisionBar name="LAND COST" value={`${stats.allocations.land}%`} color="bg-accent" />
-                  <DivisionBar name="PROFIT MARGIN" value={`${stats.allocations.profit}%`} color="bg-zinc-400" />
+                  {stats.activeProjects > 0 ? (
+                    <>
+                      <DivisionBar name="MATERIAL COST" value={`${stats.allocations.material}%`} color="gold-gradient" />
+                      <DivisionBar name="LABOUR COST" value={`${stats.allocations.labour}%`} color="bg-zinc-600" />
+                      <DivisionBar name="LAND COST" value={`${stats.allocations.land}%`} color="bg-accent" />
+                      <DivisionBar name="PROFIT MARGIN" value={`${stats.allocations.profit}%`} color="bg-zinc-400" />
+                    </>
+                  ) : (
+                    <div className="py-10 text-center space-y-2">
+                      <Briefcase className="h-8 w-8 text-muted-foreground/20 mx-auto" />
+                      <p className="text-[10px] uppercase font-bold text-muted-foreground opacity-40">No active projects to analyze</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
