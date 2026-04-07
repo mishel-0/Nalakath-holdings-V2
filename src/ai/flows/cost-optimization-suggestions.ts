@@ -29,20 +29,21 @@ const CostOptimizationSuggestionsInputSchema = z.object({
       budget: z.number().describe('Allocated budget for the project.'),
       actualSpent: z.number().describe('Actual amount spent on the project.'),
       variance: z.number().describe('Difference between actual spent and budget.'),
-      status: z.string().describe('Current status of the project (e.g., "On Track", "Over Budget", "Completed").'),
+      status: z.string().describe('Current status of the project.'),
     })).describe('Overview of spending per project.'),
   }).describe('Detailed analysis of spending patterns.'),
-  recentInsights: z.array(z.string()).optional().describe('Any recent insights or anomalies detected by other systems.'),
+  recentInsights: z.array(z.string()).optional().describe('Any recent insights or anomalies detected.'),
+  model: z.string().optional().describe('The AI model to use for generation via OpenRouter.'),
 });
 export type CostOptimizationSuggestionsInput = z.infer<typeof CostOptimizationSuggestionsInputSchema>;
 
 const CostOptimizationSuggestionsOutputSchema = z.object({
-  overallSummary: z.string().optional().describe('A brief overall summary or introductory remark for the suggestions.'),
+  overallSummary: z.string().optional().describe('A brief overall summary for the suggestions.'),
   suggestions: z.array(z.object({
     title: z.string().describe('A concise title for the suggestion.'),
-    description: z.string().describe('Detailed explanation of the suggestion and how to implement it.'),
+    description: z.string().describe('Detailed explanation of the suggestion.'),
     category: z.enum(['Cost Reduction', 'Efficiency Improvement', 'Process Optimization', 'Negotiation', 'Waste Reduction', 'Strategic Reallocation', 'Technology Adoption']).describe('The category of the suggestion.'),
-    estimatedImpact: z.string().optional().describe('Estimated financial or operational impact of implementing this suggestion (e.g., "Save $5,000/month", "Reduce labor hours by 10%").'),
+    estimatedImpact: z.string().optional().describe('Estimated financial or operational impact.'),
     actionableSteps: z.array(z.string()).optional().describe('Specific, actionable steps to implement the suggestion.'),
   })).describe('A list of actionable cost optimization suggestions.'),
 });
@@ -57,7 +58,7 @@ const costOptimizationSuggestionsPrompt = ai.definePrompt({
   input: { schema: CostOptimizationSuggestionsInputSchema },
   output: { schema: CostOptimizationSuggestionsOutputSchema },
   prompt: `You are a seasoned financial analyst and cost optimization consultant for a multi-division company.
-Your goal is to analyze the provided financial data and spending patterns for {{companyName}} and provide concrete, actionable suggestions to improve profitability and enhance financial health. Focus on identifying inefficiencies, areas of high expenditure, and potential cost-saving opportunities.
+Your goal is to analyze the provided financial data and spending patterns for {{companyName}} and provide concrete, actionable suggestions to improve profitability and enhance financial health.
 
 --- Financial Summary ---
 Net Profit: {{{financialSummary.netProfit}}}
@@ -83,8 +84,7 @@ Project Spending Overview:
 {{/each}}
 {{/if}}
 
-Based on the above data, generate a list of actionable cost optimization suggestions. Each suggestion should include a title, a detailed description, a category (choose from 'Cost Reduction', 'Efficiency Improvement', 'Process Optimization', 'Negotiation', 'Waste Reduction', 'Strategic Reallocation', 'Technology Adoption'), an optional estimated impact, and specific actionable steps.
-Also, provide an overall summary or introductory remark for your suggestions.
+Based on the above data, generate a list of actionable cost optimization suggestions. Each suggestion should include a title, a detailed description, a category, an optional estimated impact, and specific actionable steps.
 `,
 });
 
@@ -95,7 +95,9 @@ const costOptimizationSuggestionsFlow = ai.defineFlow(
     outputSchema: CostOptimizationSuggestionsOutputSchema,
   },
   async (input) => {
-    const { output } = await costOptimizationSuggestionsPrompt(input);
+    const { output } = await costOptimizationSuggestionsPrompt(input, {
+      model: input.model ? (input.model.startsWith('openai/') ? input.model : `openai/${input.model}`) : undefined
+    });
     return output!;
   }
 );

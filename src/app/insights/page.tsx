@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Sparkles, 
   TrendingDown, 
@@ -17,7 +18,8 @@ import {
   RefreshCcw,
   CheckCircle2,
   TrendingUp,
-  ShieldAlert
+  ShieldAlert,
+  Bot
 } from "lucide-react";
 import { 
   costOptimizationSuggestions, 
@@ -39,6 +41,13 @@ import { collection, query, orderBy } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import { useDivision } from "@/context/DivisionContext";
 
+const AI_MODELS = [
+  { id: "openai/qwen/qwen3.6-plus:free", name: "Qwen 3.6 Plus (Balanced)", provider: "OpenRouter" },
+  { id: "openai/google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "OpenRouter" },
+  { id: "openai/deepseek/deepseek-r1", name: "DeepSeek R1 (Reasoning)", provider: "OpenRouter" },
+  { id: "openai/qwen/qwen-2.5-72b-instruct", name: "Qwen 2.5 72B (Powerful)", provider: "OpenRouter" },
+];
+
 export default function InsightsPage() {
   const db = useFirestore();
   const { activeDivision } = useDivision();
@@ -46,6 +55,7 @@ export default function InsightsPage() {
   
   const [activeTab, setActiveTab] = useState("strategy");
   const [loading, setLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(AI_MODELS[0].id);
   
   const [strategyInsights, setStrategyInsights] = useState<CostOptimizationSuggestionsOutput | null>(null);
   const [cashFlowInsights, setCashFlowInsights] = useState<CashFlowPredictionOutput | null>(null);
@@ -114,7 +124,8 @@ export default function InsightsPage() {
           variance: p.budgetAmount - p.actualCost,
           status: p.status
         })) || []
-      }
+      },
+      model: selectedModel
     };
 
     const result = await costOptimizationSuggestions(input);
@@ -134,7 +145,8 @@ export default function InsightsPage() {
       projectedTransactions: projected,
       predictionPeriodDays: 30,
       todayDate: new Date().toISOString(),
-      companyContext: `Division: ${activeDivision.division} of ${activeDivision.name}.`
+      companyContext: `Division: ${activeDivision.division} of ${activeDivision.name}.`,
+      model: selectedModel
     };
 
     const result = await predictCashFlow(input);
@@ -165,7 +177,8 @@ export default function InsightsPage() {
           description: h.description,
           account: "General Ledger",
           category: h.expenseCategory
-        }))
+        })),
+        model: selectedModel
       };
       const result = await detectTransactionAnomaly(input);
       results.push({ ...exp, analysis: result });
@@ -180,7 +193,7 @@ export default function InsightsPage() {
         <Sidebar />
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-20 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
-            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex flex-col gap-1 min-w-0">
                 <Badge variant="outline" className="w-fit rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
                   AI CORE: {activeDivision.division}
@@ -193,14 +206,36 @@ export default function InsightsPage() {
                   <p className="text-muted-foreground text-sm truncate">Automated intelligence for {activeDivision.name}.</p>
                 </div>
               </div>
-              <Button 
-                onClick={runAnalysis} 
-                disabled={loading}
-                className="rounded-full gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-11 px-8 font-bold shrink-0"
-              >
-                {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                Run Live Analysis
-              </Button>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 glass p-2 rounded-3xl border-white/5">
+                <div className="flex items-center gap-2 px-3">
+                  <Bot className="h-4 w-4 text-primary" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Neural Model</span>
+                </div>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="w-full sm:w-[240px] h-10 rounded-2xl bg-white/5 border-white/10 text-xs font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="glass border-white/10 rounded-2xl">
+                    {AI_MODELS.map(model => (
+                      <SelectItem key={model.id} value={model.id} className="text-xs rounded-xl">
+                        <div className="flex flex-col items-start">
+                          <span className="font-bold">{model.name}</span>
+                          <span className="text-[8px] opacity-50 uppercase tracking-tighter">{model.provider}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  onClick={runAnalysis} 
+                  disabled={loading}
+                  className="rounded-2xl gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-10 px-6 font-bold shrink-0"
+                >
+                  {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                  Execute Analysis
+                </Button>
+              </div>
             </header>
 
             <Tabs defaultValue="strategy" className="w-full" onValueChange={setActiveTab}>
