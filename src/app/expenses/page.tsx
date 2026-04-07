@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -25,10 +24,6 @@ import {
   Layers,
   FolderPlus,
   Send,
-  Building2,
-  Phone,
-  Mail,
-  MapPin
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -36,7 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query, orderBy, doc, setDoc, deleteDoc } from "firebase/firestore";
-import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useDivision } from "@/context/DivisionContext";
@@ -74,6 +69,7 @@ export default function ExpensesPage() {
   const [invoiceToPrint, setInvoiceToPrint] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedPhaseId, setSelectedPhaseId] = useState("all");
+  const [search, setSearch] = useState("");
   const companyId = activeDivision.id;
 
   const phasesQuery = useMemoFirebase(() => {
@@ -96,8 +92,14 @@ export default function ExpensesPage() {
     if (activeTab !== "all") {
       filtered = filtered.filter(e => e.expenseType === activeTab);
     }
+    if (search) {
+      filtered = filtered.filter(e => 
+        e.description?.toLowerCase().includes(search.toLowerCase()) || 
+        e.clientName?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
     return filtered;
-  }, [expenses, selectedPhaseId, activeTab]);
+  }, [expenses, selectedPhaseId, activeTab, search]);
 
   const handleAddPhase = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -126,7 +128,7 @@ export default function ExpensesPage() {
   };
 
   const handleDeletePhase = (id: string) => {
-    deleteDocumentNonBlocking(doc(db, "companies", companyId, "phases", id));
+    deleteDoc(doc(db, "companies", companyId, "phases", id));
     if (selectedPhaseId === id) setSelectedPhaseId("all");
     toast({ variant: "destructive", title: "Phase Deleted", description: "Phase removed from timeline." });
   };
@@ -244,12 +246,11 @@ export default function ExpensesPage() {
     window.print();
   };
 
-  // Professional Invoice Data (Based on reference model)
   const getInvoiceCalculations = (amount: number) => {
     const subtotal = amount;
     const cgst = subtotal * 0.09;
     const sgst = subtotal * 0.09;
-    const tds = subtotal * 0.02; // TDS Deductible (Sec. 194C) is usually 2% for contractors
+    const tds = subtotal * 0.02; 
     const totalPayable = subtotal + cgst + sgst - tds;
     return { subtotal, cgst, sgst, tds, totalPayable };
   };
@@ -441,7 +442,12 @@ export default function ExpensesPage() {
                   <CardHeader className="border-b border-white/5 bg-white/5 px-6 py-4 flex flex-row items-center justify-between">
                     <div className="relative w-full md:w-96">
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input placeholder="Search records..." className="pl-9 h-10 rounded-full border-white/10 bg-white/5" />
+                      <Input 
+                        placeholder="Search records..." 
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-9 h-10 rounded-full border-white/10 bg-white/5" 
+                      />
                     </div>
                   </CardHeader>
                   <CardContent className="p-0">
@@ -622,7 +628,6 @@ export default function ExpensesPage() {
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* CORPORATE HEADER - CHARCOAL & GOLD */}
               <div className="bg-[#1a1a1a] p-10 md:p-12 text-white flex justify-between items-start border-b-[8px] border-[#b8860b]">
                 <div className="flex gap-8 items-center">
                   <div className="h-24 w-24 bg-white/5 rounded-full flex items-center justify-center border-4 border-[#b8860b] p-2 shadow-xl">
@@ -647,7 +652,6 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
-              {/* TAX INVOICE BAR */}
               <div className="bg-[#d4af37] px-10 py-3 flex justify-between items-center border-b border-[#b8860b]">
                 <h2 className="text-2xl font-black text-black uppercase tracking-widest">TAX INVOICE</h2>
                 <div className="flex gap-4 text-[10px] font-black text-black uppercase opacity-80">
@@ -657,7 +661,6 @@ export default function ExpensesPage() {
               </div>
 
               <div className="p-10 md:p-12 space-y-10">
-                {/* INFO BLOCKS */}
                 <div className="grid grid-cols-2 gap-12">
                   <div className="space-y-4">
                     <div className="rounded-lg overflow-hidden border border-zinc-200 shadow-sm">
@@ -699,7 +702,6 @@ export default function ExpensesPage() {
                   </div>
                 </div>
 
-                {/* PROJECT BAR */}
                 <div className="bg-[#1a1a1a] rounded-lg px-6 py-2.5 flex gap-4 items-center border-l-[6px] border-[#ffd700]">
                   <span className="text-[#ffd700] text-[10px] font-black tracking-widest uppercase shrink-0">PROJECT:</span>
                   <p className="text-xs font-bold text-white uppercase tracking-wide truncate">
@@ -707,7 +709,6 @@ export default function ExpensesPage() {
                   </p>
                 </div>
 
-                {/* ITEMS TABLE */}
                 <div className="overflow-hidden rounded-lg border border-zinc-300">
                   <table className="w-full text-left">
                     <thead className="bg-[#1a1a1a] text-white">
@@ -736,7 +737,6 @@ export default function ExpensesPage() {
                         <td className="p-4 text-center text-xs font-black border-r border-zinc-100">18</td>
                         <td className="p-4 text-right text-xs font-mono font-black">{invoiceToPrint.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                       </tr>
-                      {/* Blank rows for visual spacing */}
                       {[2, 3].map(i => (
                         <tr key={i} className="bg-zinc-50/30 h-10">
                           <td className="p-4 border-r border-zinc-100"></td>
@@ -753,7 +753,6 @@ export default function ExpensesPage() {
                   </table>
                 </div>
 
-                {/* TOTALS & BREAKDOWN */}
                 <div className="flex justify-end mt-6">
                   <div className="w-96 space-y-2">
                     <div className="flex justify-between text-[11px] font-bold px-4">
@@ -781,13 +780,11 @@ export default function ExpensesPage() {
                   </div>
                 </div>
 
-                {/* AMOUNT IN WORDS BAR */}
                 <div className="bg-[#d4af37]/30 px-6 py-2.5 rounded-lg border border-[#d4af37]/50 flex items-center gap-4">
                   <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Amount In Words:</span>
                   <p className="text-xs font-black text-black uppercase italic">{numberToWords(calcs.totalPayable)}</p>
                 </div>
 
-                {/* BOTTOM GRIDS */}
                 <div className="grid grid-cols-2 gap-12 pt-4">
                   <div className="rounded-lg overflow-hidden border border-zinc-200 shadow-sm">
                     <div className="bg-[#d4af37] px-4 py-1.5">
@@ -842,7 +839,6 @@ export default function ExpensesPage() {
                 </footer>
               </div>
 
-              {/* FOOTER STRIP */}
               <div className="bg-[#1a1a1a] py-4 px-10 text-white flex justify-between items-center print:border-t-0 border-t border-white/10">
                 <p className="text-[9px] font-black tracking-[0.2em] text-[#ffd700]">
                   {isPhase1 ? "UNIVERSAL HUB" : "NALAKATH CONSTRUCTIONS PVT. LTD."}
@@ -855,7 +851,6 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
-              {/* ACTION PANEL */}
               <div className="print:hidden flex gap-4 justify-end p-8 border-t border-zinc-100 bg-zinc-50 mt-10">
                 <Button variant="outline" className="rounded-full px-8 gap-2 border-zinc-300 h-14 font-black uppercase text-[11px] tracking-widest hover:bg-zinc-100" onClick={() => setInvoiceToPrint(null)}>
                   Discard Preview
@@ -871,18 +866,5 @@ export default function ExpensesPage() {
 
       <BottomNav />
     </div>
-  );
-}
-
-function SummaryCard({ title, value, color }: any) {
-  return (
-    <Card className="glass border-white/5 py-4 min-w-0">
-      <CardContent className="p-6 flex flex-col gap-1 overflow-hidden">
-        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground truncate">{title}</p>
-        <p className={`text-xl md:text-2xl font-bold font-mono truncate ${color}`} title={Math.abs(value).toLocaleString('en-IN')}>
-          ₹{Math.abs(value).toLocaleString('en-IN')}
-        </p>
-      </CardContent>
-    </Card>
   );
 }
