@@ -627,7 +627,7 @@ export default function ExpensesPage() {
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* Header - EXACT RECREATION OF PYTHON REPORTLAB HEADER */}
+              {/* Header - PIXEL PERFECT RECREATION */}
               <div className="bg-[#0C0A07] p-10 md:p-12 text-white flex justify-between items-start border-b-[2px] border-[#C9A84C] relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-[#C9A84C]" />
                 <div className="flex gap-8 items-center relative z-10">

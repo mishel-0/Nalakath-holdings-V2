@@ -64,10 +64,10 @@ export default function Dashboard() {
     const projectCosts = projects?.reduce((acc, proj) => acc + (proj.actualCost || 0), 0) || 0;
     const pendingVouchers = vouchers?.filter(v => v.status === "Pending").length || 0;
 
-    let allocations = { material: 0, labour: 0, land: 0, profit: 0 };
+    let allocations = { material: 40, labour: 30, land: 20, profit: 10 };
     if (projects && projects.length > 0) {
       const activeCount = projects.length;
-      const sum = (field: string) => projects.reduce((acc, p) => acc + (p[field] || 0), 0);
+      const sum = (field: string) => projects.reduce((acc, p) => acc + (Number(p[field]) || 0), 0);
       allocations = {
         material: Math.round(sum('materialAllocation') / activeCount),
         labour: Math.round(sum('labourAllocation') / activeCount),
