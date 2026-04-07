@@ -244,14 +244,14 @@ export default function ExpensesPage() {
     window.print();
   };
 
-  // Professional Invoice Data
+  // Professional Invoice Data (Based on reference model)
   const getInvoiceCalculations = (amount: number) => {
-    const taxableValue = amount;
-    const cgst = taxableValue * 0.09;
-    const sgst = taxableValue * 0.09;
-    const tds = taxableValue * 0.02;
-    const totalPayable = taxableValue + cgst + sgst - tds;
-    return { taxableValue, cgst, sgst, tds, totalPayable };
+    const subtotal = amount;
+    const cgst = subtotal * 0.09;
+    const sgst = subtotal * 0.09;
+    const tds = subtotal * 0.02; // TDS Deductible (Sec. 194C) is usually 2% for contractors
+    const totalPayable = subtotal + cgst + sgst - tds;
+    return { subtotal, cgst, sgst, tds, totalPayable };
   };
 
   return (
@@ -622,7 +622,7 @@ export default function ExpensesPage() {
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* CORPORATE HEADER - BLACK & GOLD */}
+              {/* CORPORATE HEADER - CHARCOAL & GOLD */}
               <div className="bg-[#1a1a1a] p-10 md:p-12 text-white flex justify-between items-start border-b-[8px] border-[#b8860b]">
                 <div className="flex gap-8 items-center">
                   <div className="h-24 w-24 bg-white/5 rounded-full flex items-center justify-center border-4 border-[#b8860b] p-2 shadow-xl">
@@ -758,7 +758,7 @@ export default function ExpensesPage() {
                   <div className="w-96 space-y-2">
                     <div className="flex justify-between text-[11px] font-bold px-4">
                       <span className="text-zinc-500 uppercase tracking-widest">Subtotal (before GST)</span>
-                      <span className="font-mono text-black">Rs. {calcs.taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <span className="font-mono text-black">Rs. {calcs.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
                     <div className="flex justify-between text-[11px] font-bold px-4">
                       <span className="text-zinc-500 uppercase tracking-widest">CGST @ 9%</span>
