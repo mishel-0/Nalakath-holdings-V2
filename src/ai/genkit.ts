@@ -1,5 +1,6 @@
+
 import { genkit } from 'genkit';
-import { openAI } from 'genkitx-openai';
+import { openai } from 'genkitx-openai';
 
 /**
  * Genkit instance configured for high-performance financial reasoning.
@@ -7,7 +8,7 @@ import { openAI } from 'genkitx-openai';
  */
 export const ai = genkit({
   plugins: [
-    openAI({
+    openai({
       apiKey: process.env.OPENROUTER_API_KEY || '',
       baseURL: 'https://openrouter.ai/api/v1',
     }),

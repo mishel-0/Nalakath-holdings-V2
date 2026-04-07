@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -42,9 +43,9 @@ import { cn } from "@/lib/utils";
 import { useDivision } from "@/context/DivisionContext";
 
 const AI_MODELS = [
-  { id: "googleai/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "Google AI" },
-  { id: "googleai/gemini-1.5-pro", name: "Gemini 1.5 Pro (Deep Reasoning)", provider: "Google AI" },
-  { id: "googleai/gemini-1.5-flash", name: "Gemini 1.5 Flash (Balanced)", provider: "Google AI" },
+  { id: "openai/google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "Google via OpenRouter" },
+  { id: "openai/deepseek/deepseek-r1", name: "DeepSeek R1 (Reasoning)", provider: "DeepSeek via OpenRouter" },
+  { id: "openai/anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet (Balanced)", provider: "Anthropic via OpenRouter" },
 ];
 
 export default function InsightsPage() {
@@ -195,14 +196,14 @@ export default function InsightsPage() {
             <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex flex-col gap-1 min-w-0">
                 <Badge variant="outline" className="w-fit rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
-                  AI CORE: {activeDivision.division}
+                  OPENROUTER AI CORE
                 </Badge>
                 <div className="mt-2">
                   <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3 uppercase truncate">
                     Financial AI
                     <Sparkles className="h-8 w-8 text-primary animate-pulse shrink-0" />
                   </h1>
-                  <p className="text-muted-foreground text-sm truncate">Automated intelligence for {activeDivision.name}.</p>
+                  <p className="text-muted-foreground text-sm truncate">Strategic intelligence for {activeDivision.name}.</p>
                 </div>
               </div>
 

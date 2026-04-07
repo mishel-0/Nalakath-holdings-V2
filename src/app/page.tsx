@@ -19,7 +19,6 @@ import {
   ChevronRight,
   Activity,
   History,
-  Sparkles,
   PieChart
 } from "lucide-react";
 import {
@@ -90,7 +89,6 @@ export default function Dashboard() {
   const chartData = useMemo(() => {
     if (!recentTransactions || recentTransactions.length === 0) return [];
     
-    // Group transactions by date for a real trend
     const daily: Record<string, { income: number, cost: number }> = {};
     recentTransactions.forEach(tx => {
       const d = tx.date;
@@ -317,7 +315,6 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
           )}>
             {trend === "up" ? "GAINING" : trend === "down" ? "VARIANCE" : "STABLE"} 
           </Badge>
-          <span className="text-[9px] text-muted-foreground font-bold tracking-widest uppercase opacity-40 truncate">VS PREV</span>
         </div>
       </div>
     </Card>
