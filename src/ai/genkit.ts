@@ -1,12 +1,15 @@
 import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import { openAI } from 'genkitx-openai';
 
 /**
- * Genkit instance configured to use the official Google AI plugin.
- * This provides stable access to high-performance Gemini models.
+ * Genkit instance configured for OpenRouter integration.
+ * Uses the OpenAI plugin pointing to OpenRouter's high-performance endpoint.
  */
 export const ai = genkit({
   plugins: [
-    googleAI(),
+    openAI({
+      apiKey: process.env.OPENROUTER_API_KEY || '',
+      baseURL: 'https://openrouter.ai/api/v1',
+    }),
   ],
 });
