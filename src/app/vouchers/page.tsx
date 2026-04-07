@@ -42,7 +42,6 @@ export default function VouchersPage() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
 
   useEffect(() => {
-    // Elevating access for Accountants to view vouchers for audit reflection
     if (!isProfileLoading && profile && profile.role !== "Admin" && profile.role !== "Accountant") {
       toast({
         variant: "destructive",

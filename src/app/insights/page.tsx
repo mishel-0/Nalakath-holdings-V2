@@ -42,7 +42,7 @@ import { cn } from "@/lib/utils";
 import { useDivision } from "@/context/DivisionContext";
 
 const AI_MODELS = [
-  { id: "openai/qwen/qwen3.6-plus:free", name: "Qwen 3.6 Plus (Balanced)", provider: "OpenRouter" },
+  { id: "openai/qwen/qwen-3.6-plus:free", name: "Qwen 3.6 Plus (Balanced)", provider: "OpenRouter" },
   { id: "openai/google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "OpenRouter" },
   { id: "openai/deepseek/deepseek-r1", name: "DeepSeek R1 (Reasoning)", provider: "OpenRouter" },
   { id: "openai/qwen/qwen-2.5-72b-instruct", name: "Qwen 2.5 72B (Powerful)", provider: "OpenRouter" },
