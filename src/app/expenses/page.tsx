@@ -60,7 +60,7 @@ function numberToWords(num: number): string {
     return str;
   };
 
-  return "Rupees " + inWords(Math.floor(num)) + " Only";
+  return "RUPEES " + inWords(Math.floor(num)).toUpperCase() + "ONLY";
 }
 
 export default function ExpensesPage() {
@@ -291,7 +291,7 @@ export default function ExpensesPage() {
 
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
-                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90 shadow-lg shadow-primary/20 px-6 h-11 shrink-0">
+                    <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-11 px-6 shadow-lg shadow-primary/20 shrink-0">
                       <Plus className="h-4 w-4" /> New Entry
                     </Button>
                   </DialogTrigger>
@@ -351,7 +351,7 @@ export default function ExpensesPage() {
 
                       <div className="grid gap-2">
                         <Label>Description</Label>
-                        <Input name="description" required placeholder="Description of work or purchase" />
+                        <Input name="description" required placeholder="Description of work" />
                       </div>
 
                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-4">
@@ -367,7 +367,7 @@ export default function ExpensesPage() {
                           </div>
                         </div>
                         <div className="grid gap-2">
-                          <Label className="text-[10px]">GSTIN (for Client Invoices)</Label>
+                          <Label className="text-[10px]">GSTIN</Label>
                           <Input name="clientGstin" placeholder="GST Registration No." />
                         </div>
                       </div>
@@ -375,11 +375,11 @@ export default function ExpensesPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                           <Label>Amount (₹)</Label>
-                          <Input name="amount" type="number" step="0.01" required className="font-mono" />
+                          <Input name="amount" type="number" step="0.01" required />
                         </div>
                         <div className="grid gap-2">
                           <Label>Category</Label>
-                          <Input name="category" placeholder="Infrastructure, etc." required />
+                          <Input name="category" placeholder="Operational, etc." required />
                         </div>
                       </div>
 
@@ -443,9 +443,6 @@ export default function ExpensesPage() {
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input placeholder="Search records..." className="pl-9 h-10 rounded-full border-white/10 bg-white/5" />
                     </div>
-                    <Badge variant="outline" className="hidden md:flex bg-primary/5 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-widest px-3">
-                      {filteredExpenses.length} Entries in {selectedPhaseId === 'all' ? 'All Phases' : phases?.find(p => p.id === selectedPhaseId)?.name}
-                    </Badge>
                   </CardHeader>
                   <CardContent className="p-0">
                     <Table>
@@ -453,7 +450,6 @@ export default function ExpensesPage() {
                         <TableRow className="border-white/5">
                           <TableHead className="uppercase tracking-widest text-[9px] font-bold px-6">Date</TableHead>
                           <TableHead className="uppercase tracking-widest text-[9px] font-bold">Entity / Description</TableHead>
-                          <TableHead className="uppercase tracking-widest text-[9px] font-bold">Phase</TableHead>
                           <TableHead className="uppercase tracking-widest text-[9px] font-bold">Status</TableHead>
                           <TableHead className="text-right uppercase tracking-widest text-[9px] font-bold px-6">Amount (₹)</TableHead>
                           <TableHead className="w-16"></TableHead>
@@ -461,64 +457,58 @@ export default function ExpensesPage() {
                       </TableHeader>
                       <TableBody>
                         {isExpensesLoading ? (
-                          <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-[10px] tracking-widest uppercase">Syncing Kernel...</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-[10px] tracking-widest uppercase">Syncing...</TableCell></TableRow>
                         ) : filteredExpenses.length === 0 ? (
-                          <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground italic text-sm">No records found for this criteria.</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground italic text-sm">No records found.</TableCell></TableRow>
                         ) : (
-                          filteredExpenses.map((exp) => {
-                            const phaseName = phases?.find(p => p.id === exp.phaseId)?.name || "Unassigned";
-                            return (
-                              <TableRow key={exp.id} className="border-white/5 hover:bg-white/5 ios-transition group">
-                                <TableCell className="text-muted-foreground font-mono text-xs px-6">{exp.expenseDate}</TableCell>
-                                <TableCell className="py-4">
-                                  <div className="flex flex-col gap-0.5">
-                                    <span className="font-bold text-sm truncate max-w-[200px]">{exp.clientName || "General Entry"}</span>
-                                    <span className="text-[10px] text-muted-foreground italic truncate max-w-[180px]">{exp.description}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge variant="outline" className="text-[8px] uppercase border-white/10 text-muted-foreground">{phaseName}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge className={cn(
-                                    "rounded-full text-[8px] uppercase font-bold tracking-widest px-2.5 py-0.5 flex items-center gap-1 w-fit",
-                                    exp.status === "Paid" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-orange-500/10 text-orange-500 border-orange-500/20"
-                                  )} variant="outline">
-                                    {exp.status === "Paid" ? <CheckCircle2 className="h-2.5 w-2.5" /> : <Clock className="h-2.5 w-2.5" />}
-                                    {exp.status || "Unpaid"}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-right font-mono font-bold text-sm px-6 truncate">
-                                  ₹{exp.amount?.toLocaleString('en-IN')}
-                                </TableCell>
-                                <TableCell>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="glass rounded-2xl">
-                                      <DropdownMenuItem onClick={() => handleCreateVoucherFromExpense(exp)} className="text-xs font-bold text-green-500 cursor-pointer">
-                                        <Send className="h-3 w-3 mr-2" /> Push to Audit Vouchers
+                          filteredExpenses.map((exp) => (
+                            <TableRow key={exp.id} className="border-white/5 hover:bg-white/5 ios-transition group">
+                              <TableCell className="text-muted-foreground font-mono text-xs px-6">{exp.expenseDate}</TableCell>
+                              <TableCell className="py-4">
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="font-bold text-sm truncate max-w-[250px]">{exp.clientName || "General Entry"}</span>
+                                  <span className="text-[10px] text-muted-foreground italic truncate max-w-[200px]">{exp.description}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={cn(
+                                  "rounded-full text-[8px] uppercase font-bold tracking-widest px-2.5 py-0.5 flex items-center gap-1 w-fit",
+                                  exp.status === "Paid" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-orange-500/10 text-orange-500 border-orange-500/20"
+                                )} variant="outline">
+                                  {exp.status === "Paid" ? <CheckCircle2 className="h-2.5 w-2.5" /> : <Clock className="h-2.5 w-2.5" />}
+                                  {exp.status || "Unpaid"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right font-mono font-bold text-sm px-6">
+                                ₹{exp.amount?.toLocaleString('en-IN')}
+                              </TableCell>
+                              <TableCell>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="glass rounded-2xl">
+                                    <DropdownMenuItem onClick={() => handleCreateVoucherFromExpense(exp)} className="text-xs font-bold text-green-500 cursor-pointer">
+                                      <Send className="h-3 w-3 mr-2" /> Push to Audit Vouchers
+                                    </DropdownMenuItem>
+                                    {exp.expenseType === "Client Invoice" && (
+                                      <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
+                                        <FileText className="h-3 w-3 mr-2" /> Generate Tax Invoice
                                       </DropdownMenuItem>
-                                      {exp.expenseType === "Client Invoice" && (
-                                        <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
-                                          <FileText className="h-3 w-3 mr-2" /> Generate Tax Invoice
-                                        </DropdownMenuItem>
-                                      )}
-                                      <DropdownMenuItem onClick={() => setEditingExpense(exp)} className="text-xs cursor-pointer">
-                                        <Pencil className="h-3 w-3 mr-2" /> Modify Entry
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => handleDeleteExpense(exp.id)} className="text-xs text-destructive cursor-pointer">
-                                        <Trash2 className="h-3 w-3 mr-2" /> Purge Record
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })
+                                    )}
+                                    <DropdownMenuItem onClick={() => setEditingExpense(exp)} className="text-xs cursor-pointer">
+                                      <Pencil className="h-3 w-3 mr-2" /> Modify Entry
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleDeleteExpense(exp.id)} className="text-xs text-destructive cursor-pointer">
+                                      <Trash2 className="h-3 w-3 mr-2" /> Purge Record
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          ))
                         )}
                       </TableBody>
                     </Table>
@@ -746,7 +736,7 @@ export default function ExpensesPage() {
                         <td className="p-4 text-center text-xs font-black border-r border-zinc-100">18</td>
                         <td className="p-4 text-right text-xs font-mono font-black">{invoiceToPrint.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                       </tr>
-                      {/* Blank rows for visual spacing like the original */}
+                      {/* Blank rows for visual spacing */}
                       {[2, 3].map(i => (
                         <tr key={i} className="bg-zinc-50/30 h-10">
                           <td className="p-4 border-r border-zinc-100"></td>
