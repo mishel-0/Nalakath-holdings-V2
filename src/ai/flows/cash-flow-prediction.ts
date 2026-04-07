@@ -23,7 +23,7 @@ const CashFlowPredictionInputSchema = z.object({
   predictionPeriodDays: z.number().min(7).max(365).default(28).describe('The number of days into the future to predict cash flow from today.'),
   todayDate: z.string().datetime().describe('The current date in ISO 8601 format to establish the starting point for predictions.'),
   companyContext: z.string().optional().describe('Optional context about the company or division.'),
-  model: z.string().optional().describe('The AI model to use for generation via OpenRouter.'),
+  model: z.string().optional().describe('The AI model to use for generation.'),
 });
 export type CashFlowPredictionInput = z.infer<typeof CashFlowPredictionInputSchema>;
 
@@ -66,7 +66,7 @@ const cashFlowPredictionFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input, {
-      model: input.model ? (input.model.startsWith('openai/') ? input.model : `openai/${input.model}`) : undefined
+      model: input.model || undefined
     });
     return output!;
   }
