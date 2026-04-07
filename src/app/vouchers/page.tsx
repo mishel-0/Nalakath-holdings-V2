@@ -137,40 +137,39 @@ export default function VouchersPage() {
       return;
     }
     
-    // STRICT COLUMN HEADERS FOR FISCAL ACCURACY
+    // Header definition for CSV
     const headers = [
       "DATE",
       "VOUCHER_ID",
       "DIVISION",
       "PROJECT_PHASE",
       "ENTITY_VENDOR",
-      "DESCRIPTION",
       "CATEGORY",
+      "DESCRIPTION",
       "AMOUNT_INR",
       "STATUS",
       "METHOD"
     ];
 
-    // MAPPING DATA WITH DOUBLE-QUOTING ESCAPING
+    // Map rows and escape quotes correctly for CSV
     const rows = filteredVouchers.map(v => [
       v.date || '',
       v.voucherNumber || '',
       activeDivision.division || '',
       v.phaseName || 'N/A',
       (v.vendorName || '').replace(/"/g, '""'),
-      (v.description || '').replace(/"/g, '""'),
       v.expenseCategory || 'General',
+      (v.description || '').replace(/"/g, '""'),
       v.amount || 0,
       v.status || 'Pending',
       v.paymentMethod || 'N/A'
     ]);
 
-    // Force Excel to use Comma separator and include UTF-8 BOM
-    const csvContent = 
-      "sep=,\n" + 
-      headers.join(",") + "\n" + 
+    // Build CSV content with BOM for Excel compatibility
+    const csvContent = headers.join(",") + "\n" + 
       rows.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
     
+    // Add UTF-8 BOM to ensure Excel opens it correctly with multiple columns
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -309,6 +308,7 @@ export default function VouchersPage() {
                     <TableRow className="border-white/5 hover:bg-transparent">
                       <TableHead className="w-24 uppercase tracking-[0.2em] text-[9px] font-bold px-6">ID</TableHead>
                       <TableHead className="uppercase tracking-[0.2em] text-[9px] font-bold">Voucher Details</TableHead>
+                      <TableHead className="uppercase tracking-[0.2em] text-[9px] font-bold">Category</TableHead>
                       <TableHead className="text-right uppercase tracking-[0.2em] text-[9px] font-bold">Amount (₹)</TableHead>
                       <TableHead className="text-center uppercase tracking-[0.2em] text-[9px] font-bold px-6">Status</TableHead>
                       <TableHead className="w-16"></TableHead>
@@ -316,9 +316,9 @@ export default function VouchersPage() {
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-[10px] tracking-widest uppercase">Syncing Ledger...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground animate-pulse font-mono text-[10px] tracking-widest uppercase">Syncing Ledger...</TableCell></TableRow>
                     ) : filteredVouchers.length === 0 ? (
-                      <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground italic text-sm">No vouchers recorded for this division.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={6} className="text-center py-20 text-muted-foreground italic text-sm">No vouchers recorded for this division.</TableCell></TableRow>
                     ) : (
                       filteredVouchers.map((v) => (
                         <TableRow key={v.id} className="border-white/5 hover:bg-white/5 ios-transition group">
@@ -335,6 +335,11 @@ export default function VouchersPage() {
                                 )}
                               </div>
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="bg-white/5 text-[9px] uppercase tracking-widest font-bold">
+                              {v.expenseCategory || "General"}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-right font-mono font-bold text-sm truncate max-w-[150px]">
                             ₹{v.amount?.toLocaleString('en-IN')}

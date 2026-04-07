@@ -1,16 +1,15 @@
 import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import { openAI } from 'genkitx-openai';
 
 /**
- * Genkit instance configured to use Google AI as the primary provider.
- * This ensures maximum stability and compatibility with the Next.js App Router environment.
+ * Genkit instance configured to use OpenRouter via the OpenAI plugin.
+ * This provides access to high-performance reasoning models like DeepSeek and Gemini.
  */
 export const ai = genkit({
   plugins: [
-    googleAI({
-      apiKey: process.env.GOOGLE_GENAI_API_KEY || '',
+    openAI({
+      apiKey: process.env.OPENROUTER_API_KEY || '',
+      baseURL: 'https://openrouter.ai/api/v1',
     }),
   ],
-  // Default high-performance model for financial reasoning.
-  model: 'googleai/gemini-2.0-flash-001',
 });
