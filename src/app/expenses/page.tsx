@@ -622,77 +622,87 @@ export default function ExpensesPage() {
         
         return (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white overflow-y-auto">
-            <Card className="w-full max-w-4xl bg-white text-black overflow-hidden rounded-[1rem] print:rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300 font-sans">
+            <Card className="w-full max-w-4xl bg-white text-black overflow-hidden rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300 font-sans border-none">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute top-4 right-4 print:hidden h-10 w-10 bg-zinc-100 hover:bg-zinc-200 rounded-full z-50" 
+                className="absolute top-4 right-4 print:hidden h-10 w-10 bg-zinc-100 hover:bg-zinc-200 rounded-full z-[110]" 
                 onClick={() => setInvoiceToPrint(null)}
               >
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* HEADER SECTION - BLACK & GOLD */}
-              <div className="bg-[#1a1a1a] p-8 md:p-12 text-white flex justify-between items-start border-b-[6px] border-[#b8860b]">
-                <div className="flex gap-6 items-center">
-                  <div className="h-20 w-20 bg-white rounded-xl flex items-center justify-center p-2 shadow-inner">
-                    <Building2 className="h-14 w-14 text-black" />
+              {/* CORPORATE HEADER - BLACK & GOLD */}
+              <div className="bg-[#1a1a1a] p-10 md:p-12 text-white flex justify-between items-start border-b-[8px] border-[#b8860b]">
+                <div className="flex gap-8 items-center">
+                  <div className="h-24 w-24 bg-white/5 rounded-full flex items-center justify-center border-4 border-[#b8860b] p-2 shadow-xl">
+                    <div className="h-full w-full bg-[#1a1a1a] rounded-full flex items-center justify-center">
+                      <span className="text-3xl font-black text-[#ffd700]">NH</span>
+                    </div>
                   </div>
                   <div className="space-y-1">
-                    <h1 className="text-3xl font-black tracking-tight text-[#ffd700] uppercase leading-none">
+                    <h1 className="text-4xl font-black tracking-tight text-[#ffd700] uppercase leading-none">
                       {isPhase1 ? "UNIVERSAL CONSTRUCTION HUB" : "NALAKATH CONSTRUCTIONS"}
                     </h1>
-                    <p className="text-sm font-bold text-zinc-400">Private Limited</p>
-                    <div className="mt-2 h-px w-full bg-zinc-700" />
-                    <p className="text-[10px] text-zinc-400 font-medium tracking-wide leading-relaxed pt-1">
-                      Building Trust. Building Kerala.<br />
+                    <p className="text-sm font-bold text-zinc-400 italic">Private Limited</p>
+                    <div className="mt-3 h-[2px] w-full bg-gradient-to-r from-[#ffd700] to-transparent opacity-50" />
+                    <p className="text-[11px] text-zinc-300 font-bold tracking-widest pt-2 uppercase">
+                      Building Trust. Building Kerala.
+                    </p>
+                    <p className="text-[10px] text-zinc-400 font-medium leading-relaxed max-w-md">
                       Nalakath Hub, Ward No. 4, Areecode, Malappuram, Kerala 673639<br />
                       +91 97444 00100 | info@nalakathindia.com | GSTIN: 32XXXXX1234Z5
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge className="bg-[#b8860b] text-white rounded-full px-4 py-1 text-[10px] font-black tracking-widest uppercase">
-                    ORIGINAL FOR RECIPIENT
-                  </Badge>
-                </div>
               </div>
 
               {/* TAX INVOICE BAR */}
-              <div className="bg-[#ffd700]/90 px-8 py-3 flex justify-between items-center border-b border-[#b8860b]">
-                <h2 className="text-xl font-black text-black uppercase tracking-widest">TAX INVOICE</h2>
-                <span className="text-[10px] font-bold text-black uppercase opacity-60">Subject to Malappuram Jurisdiction</span>
+              <div className="bg-[#d4af37] px-10 py-3 flex justify-between items-center border-b border-[#b8860b]">
+                <h2 className="text-2xl font-black text-black uppercase tracking-widest">TAX INVOICE</h2>
+                <div className="flex gap-4 text-[10px] font-black text-black uppercase opacity-80">
+                  <span>Original for Recipient</span>
+                  <span className="border-l border-black/20 pl-4">Subject to Malappuram Jurisdiction</span>
+                </div>
               </div>
 
-              <div className="p-8 md:p-12 space-y-10">
+              <div className="p-10 md:p-12 space-y-10">
                 {/* INFO BLOCKS */}
                 <div className="grid grid-cols-2 gap-12">
                   <div className="space-y-4">
-                    <div className="bg-zinc-100 rounded-lg p-4 border border-zinc-200">
-                      <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 border-b border-zinc-200 pb-2">INVOICE DETAILS</h3>
-                      <div className="grid grid-cols-2 gap-y-2 text-xs">
-                        <span className="font-bold text-zinc-500">Invoice Number:</span>
-                        <span className="font-bold text-black">{invoiceToPrint.invoiceNumber || 'NC-2025-' + invoiceToPrint.id.substring(0,4).toUpperCase()}</span>
-                        <span className="font-bold text-zinc-500">Invoice Date:</span>
-                        <span className="font-bold text-black">{invoiceToPrint.expenseDate}</span>
-                        <span className="font-bold text-zinc-500">Due Date:</span>
-                        <span className="font-bold text-black">{invoiceToPrint.expenseDate}</span>
-                        <span className="font-bold text-zinc-500">Payment Terms:</span>
-                        <span className="font-bold text-black">Net 30 Days</span>
+                    <div className="rounded-lg overflow-hidden border border-zinc-200 shadow-sm">
+                      <div className="bg-[#d4af37] px-4 py-1.5">
+                        <h3 className="text-[10px] font-black text-black uppercase tracking-widest">INVOICE DETAILS</h3>
+                      </div>
+                      <div className="p-4 grid grid-cols-2 gap-y-2 text-xs bg-zinc-50/50">
+                        <span className="font-bold text-zinc-500 uppercase">Invoice Number:</span>
+                        <span className="font-black text-black">{invoiceToPrint.invoiceNumber || 'NC-2025-0042'}</span>
+                        <span className="font-bold text-zinc-500 uppercase">Invoice Date:</span>
+                        <span className="font-black text-black">{invoiceToPrint.expenseDate}</span>
+                        <span className="font-bold text-zinc-500 uppercase">Due Date:</span>
+                        <span className="font-black text-black">{invoiceToPrint.expenseDate}</span>
+                        <span className="font-bold text-zinc-500 uppercase">Project Ref:</span>
+                        <span className="font-black text-black">PROJ-2025-011</span>
+                        <span className="font-bold text-zinc-500 uppercase">Payment Terms:</span>
+                        <span className="font-black text-black">Net 30 Days</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="bg-zinc-100 rounded-lg p-4 border border-zinc-200">
-                      <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 border-b border-zinc-200 pb-2">BILL TO</h3>
-                      <div className="space-y-1">
-                        <p className="text-lg font-black text-black uppercase leading-tight">
+                    <div className="rounded-lg overflow-hidden border border-zinc-200 shadow-sm h-full">
+                      <div className="bg-[#d4af37] px-4 py-1.5">
+                        <h3 className="text-[10px] font-black text-black uppercase tracking-widest">BILL TO</h3>
+                      </div>
+                      <div className="p-4 bg-zinc-50/50 h-full">
+                        <p className="text-lg font-black text-black uppercase leading-tight mb-1">
                           {invoiceToPrint.clientName || "Oval Palace Resort"}
                         </p>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase leading-relaxed">
+                          Attn: Project Manager / Accounts Dept<br />
                           Infrastructure & Portfolio Development Unit<br />
-                          {invoiceToPrint.clientGstin ? `GSTIN: ${invoiceToPrint.clientGstin}` : "Unregistered / Internal Transfer"}
+                          {invoiceToPrint.clientGstin ? `GSTIN: ${invoiceToPrint.clientGstin}` : "Unregistered / Internal Transfer"}<br />
+                          PO Ref: KSCB/PO/2025/0089
                         </p>
                       </div>
                     </div>
@@ -700,52 +710,53 @@ export default function ExpensesPage() {
                 </div>
 
                 {/* PROJECT BAR */}
-                <div className="bg-[#1a1a1a] rounded-lg px-6 py-3 flex gap-4 items-center">
-                  <Badge className="bg-[#b8860b] text-white text-[9px] font-black tracking-widest uppercase">PROJECT</Badge>
+                <div className="bg-[#1a1a1a] rounded-lg px-6 py-2.5 flex gap-4 items-center border-l-[6px] border-[#ffd700]">
+                  <span className="text-[#ffd700] text-[10px] font-black tracking-widest uppercase shrink-0">PROJECT:</span>
                   <p className="text-xs font-bold text-white uppercase tracking-wide truncate">
                     {currentInvoicePhase?.name || 'N/A'}: {invoiceToPrint.description}
                   </p>
-                  {!isPhase1 && (
-                    <Badge variant="outline" className="ml-auto text-[8px] border-white/20 text-[#ffd700] uppercase font-bold px-2 py-0.5">
-                      INCL. SUPPLIER & LABOUR COSTS
-                    </Badge>
-                  )}
                 </div>
 
                 {/* ITEMS TABLE */}
-                <div className="overflow-hidden rounded-lg border border-zinc-200">
+                <div className="overflow-hidden rounded-lg border border-zinc-300">
                   <table className="w-full text-left">
                     <thead className="bg-[#1a1a1a] text-white">
                       <tr>
-                        <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest w-12">#</th>
-                        <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest">Description of Work / Materials</th>
-                        <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-center">HSN/SAC</th>
-                        <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-center">Qty</th>
-                        <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-center">Rate (₹)</th>
-                        <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-right">Amount (₹)</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest w-12 border-r border-white/10">#</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10">Description of Work / Materials</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">HSN/SAC</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">Qty</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">Unit</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">Rate (Rs.)</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">GST %</th>
+                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-right">Amount (Rs.)</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-zinc-200">
                       <tr className="bg-white">
-                        <td className="p-4 text-xs font-bold text-zinc-400">1</td>
-                        <td className="p-4">
+                        <td className="p-4 text-xs font-black text-zinc-400 border-r border-zinc-100">1</td>
+                        <td className="p-4 border-r border-zinc-100">
                           <p className="text-xs font-black text-black uppercase">{invoiceToPrint.description}</p>
-                          <p className="text-[9px] text-zinc-400 font-bold uppercase mt-1">Operational Module: {invoiceToPrint.expenseCategory}</p>
+                          <p className="text-[9px] text-zinc-400 font-bold uppercase mt-1">Ref: {invoiceToPrint.expenseCategory} Operations</p>
                         </td>
-                        <td className="p-4 text-center text-xs font-mono text-zinc-500">9954</td>
-                        <td className="p-4 text-center text-xs font-bold">1</td>
-                        <td className="p-4 text-center text-xs font-mono">₹{invoiceToPrint.amount.toLocaleString()}</td>
-                        <td className="p-4 text-right text-xs font-mono font-black">₹{invoiceToPrint.amount.toLocaleString()}</td>
+                        <td className="p-4 text-center text-xs font-mono text-zinc-500 border-r border-zinc-100">9954</td>
+                        <td className="p-4 text-center text-xs font-black border-r border-zinc-100">1</td>
+                        <td className="p-4 text-center text-[10px] font-black border-r border-zinc-100 uppercase">L.S.</td>
+                        <td className="p-4 text-center text-xs font-mono border-r border-zinc-100">{invoiceToPrint.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                        <td className="p-4 text-center text-xs font-black border-r border-zinc-100">18</td>
+                        <td className="p-4 text-right text-xs font-mono font-black">{invoiceToPrint.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                       </tr>
-                      {/* Placeholders for visual consistency */}
-                      {[2].map(i => (
-                        <tr key={i} className="bg-zinc-50/50">
-                          <td className="p-4 text-xs font-bold text-zinc-300">{i}</td>
-                          <td className="p-4 text-[10px] text-zinc-300 italic">No additional line items</td>
-                          <td className="p-4"></td>
-                          <td className="p-4"></td>
-                          <td className="p-4"></td>
-                          <td className="p-4 text-right text-xs font-mono text-zinc-300">-</td>
+                      {/* Blank rows for visual spacing like the original */}
+                      {[2, 3].map(i => (
+                        <tr key={i} className="bg-zinc-50/30 h-10">
+                          <td className="p-4 border-r border-zinc-100"></td>
+                          <td className="p-4 border-r border-zinc-100"></td>
+                          <td className="p-4 border-r border-zinc-100"></td>
+                          <td className="p-4 border-r border-zinc-100"></td>
+                          <td className="p-4 border-r border-zinc-100"></td>
+                          <td className="p-4 border-r border-zinc-100"></td>
+                          <td className="p-4 border-r border-zinc-100"></td>
+                          <td className="p-4 text-right"></td>
                         </tr>
                       ))}
                     </tbody>
@@ -753,104 +764,114 @@ export default function ExpensesPage() {
                 </div>
 
                 {/* TOTALS & BREAKDOWN */}
-                <div className="flex justify-between items-start gap-10">
-                  <div className="flex-1">
-                    <div className="bg-zinc-50 p-4 rounded-lg border border-dashed border-zinc-200">
-                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Amount In Words</p>
-                      <p className="text-xs font-black text-black uppercase italic">{numberToWords(calcs.totalPayable)}</p>
+                <div className="flex justify-end mt-6">
+                  <div className="w-96 space-y-2">
+                    <div className="flex justify-between text-[11px] font-bold px-4">
+                      <span className="text-zinc-500 uppercase tracking-widest">Subtotal (before GST)</span>
+                      <span className="font-mono text-black">Rs. {calcs.taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-6 mt-8">
-                      <div className="bg-zinc-50 p-4 rounded-lg border border-zinc-200">
-                        <h4 className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3 border-b border-zinc-200 pb-2">BANK DETAILS</h4>
-                        <div className="space-y-1 text-[10px] font-bold">
-                          <div className="flex justify-between">
-                            <span className="text-zinc-400">Bank:</span>
-                            <span className="text-black">State Bank of India</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-zinc-400">A/C Name:</span>
-                            <span className="text-black">{isPhase1 ? "Universal Hub" : "Nalakath Constructions Pvt Ltd"}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-zinc-400">A/C No:</span>
-                            <span className="text-black">32XXXXXXXXX51</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-zinc-400">IFSC:</span>
-                            <span className="text-black">SBIN0001234</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-zinc-50 p-4 rounded-lg border border-zinc-200">
-                        <h4 className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3 border-b border-zinc-200 pb-2">TERMS</h4>
-                        <ul className="text-[9px] text-zinc-500 font-bold space-y-1 list-disc pl-3">
-                          <li>Payment due within 30 days.</li>
-                          <li>Materials as per approved specs.</li>
-                          <li>Computer generated document.</li>
-                        </ul>
-                      </div>
+                    <div className="flex justify-between text-[11px] font-bold px-4">
+                      <span className="text-zinc-500 uppercase tracking-widest">CGST @ 9%</span>
+                      <span className="font-mono text-black">Rs. {calcs.cgst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
-                  </div>
-
-                  <div className="w-80 space-y-3">
-                    <div className="flex justify-between text-xs font-bold px-2">
-                      <span className="text-zinc-500">Subtotal (before GST)</span>
-                      <span className="font-mono">₹{calcs.taxableValue.toLocaleString()}</span>
+                    <div className="flex justify-between text-[11px] font-bold px-4">
+                      <span className="text-zinc-500 uppercase tracking-widest">SGST @ 9%</span>
+                      <span className="font-mono text-black">Rs. {calcs.sgst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="flex justify-between text-xs font-bold px-2">
-                      <span className="text-zinc-500">CGST @ 9%</span>
-                      <span className="font-mono">₹{calcs.cgst.toLocaleString()}</span>
+                    <div className="flex justify-between text-[11px] font-bold px-4 border-b border-zinc-100 pb-3">
+                      <span className="text-[#b8860b] uppercase tracking-widest">TDS Deductible (Sec. 194C)</span>
+                      <span className="font-mono text-[#b8860b]">- Rs. {calcs.tds.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="flex justify-between text-xs font-bold px-2">
-                      <span className="text-zinc-500">SGST @ 9%</span>
-                      <span className="font-mono">₹{calcs.sgst.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-xs font-bold px-2 border-b border-zinc-100 pb-3">
-                      <span className="text-red-500">TDS Deductible (Sec. 194C)</span>
-                      <span className="font-mono text-red-500">- ₹{calcs.tds.toLocaleString()}</span>
-                    </div>
-                    <div className="bg-[#1a1a1a] p-5 rounded-xl text-white flex justify-between items-center shadow-xl">
+                    <div className="bg-[#1a1a1a] p-5 rounded-lg text-white flex justify-between items-center shadow-lg border-l-[8px] border-[#ffd700]">
                       <div className="space-y-1">
-                        <p className="text-[9px] font-black text-[#ffd700] uppercase tracking-[0.2em]">TOTAL PAYABLE</p>
-                        <p className="text-3xl font-black tracking-tighter leading-none">₹{calcs.totalPayable.toLocaleString('en-IN')}</p>
+                        <p className="text-[10px] font-black text-[#ffd700] uppercase tracking-[0.2em]">TOTAL AMOUNT PAYABLE</p>
+                        <p className="text-3xl font-black tracking-tighter leading-none">Rs. {calcs.totalPayable.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <footer className="pt-16 flex justify-between items-end border-t border-zinc-100">
+                {/* AMOUNT IN WORDS BAR */}
+                <div className="bg-[#d4af37]/30 px-6 py-2.5 rounded-lg border border-[#d4af37]/50 flex items-center gap-4">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Amount In Words:</span>
+                  <p className="text-xs font-black text-black uppercase italic">{numberToWords(calcs.totalPayable)}</p>
+                </div>
+
+                {/* BOTTOM GRIDS */}
+                <div className="grid grid-cols-2 gap-12 pt-4">
+                  <div className="rounded-lg overflow-hidden border border-zinc-200 shadow-sm">
+                    <div className="bg-[#d4af37] px-4 py-1.5">
+                      <h3 className="text-[10px] font-black text-black uppercase tracking-widest">BANK DETAILS</h3>
+                    </div>
+                    <div className="p-4 grid grid-cols-2 gap-y-2 text-[11px] bg-zinc-50/50">
+                      <span className="font-bold text-zinc-500">Bank:</span>
+                      <span className="font-black text-black">State Bank of India, Perinthalmanna</span>
+                      <span className="font-bold text-zinc-500">Account Name:</span>
+                      <span className="font-black text-black">{isPhase1 ? "Universal Construction Hub" : "Nalakath Constructions Pvt. Ltd."}</span>
+                      <span className="font-bold text-zinc-500">Account No.:</span>
+                      <span className="font-black text-black font-mono">32XXXXXXXXX51</span>
+                      <span className="font-bold text-zinc-500">IFSC Code:</span>
+                      <span className="font-black text-black font-mono">SBIN0001234</span>
+                      <span className="font-bold text-zinc-500">Account Type:</span>
+                      <span className="font-black text-black uppercase">Current Account</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg overflow-hidden border border-zinc-200 shadow-sm">
+                    <div className="bg-[#d4af37] px-4 py-1.5">
+                      <h3 className="text-[10px] font-black text-black uppercase tracking-widest">TERMS & CONDITIONS</h3>
+                    </div>
+                    <div className="p-4 bg-zinc-50/50 h-full">
+                      <ul className="text-[10px] text-zinc-600 font-bold space-y-1.5 list-decimal pl-4">
+                        <li>Payment due within 30 days of invoice date.</li>
+                        <li>Interest @ 18% p.a. charged on overdue amounts.</li>
+                        <li>Materials supplied per approved BOQ specifications.</li>
+                        <li>Disputes subject to Malappuram jurisdiction only.</li>
+                        <li>This is a computer-generated invoice.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <footer className="pt-16 flex justify-between items-end">
                   <div className="max-w-xs">
-                    <p className="text-[9px] leading-relaxed text-zinc-400 font-bold italic">
+                    <p className="text-[10px] leading-relaxed text-zinc-400 font-bold italic border-t border-zinc-100 pt-4">
                       We declare that this invoice shows the actual price of the goods/services described and that all particulars are true and correct to the best of our knowledge.
                     </p>
                   </div>
-                  <div className="text-center space-y-4">
-                    <div className="h-16 w-16 border border-[#b8860b]/30 rounded-full flex items-center justify-center mx-auto opacity-30">
-                      <p className="text-[8px] font-black text-[#b8860b] rotate-12">VERIFIED</p>
+                  <div className="text-center space-y-6">
+                    <div className="h-20 w-20 border-[3px] border-[#b8860b]/40 rounded-full flex items-center justify-center mx-auto opacity-40 -rotate-12">
+                      <p className="text-[9px] font-black text-[#b8860b] uppercase text-center leading-none">Verified<br/>Audit<br/>2026</p>
                     </div>
-                    <div className="space-y-1">
-                      <div className="h-px w-48 bg-zinc-200 mx-auto" />
-                      <p className="text-[10px] font-black text-black uppercase tracking-widest">Authorised Signatory</p>
-                      <p className="text-[8px] font-bold text-zinc-400 uppercase">For {isPhase1 ? "Universal Hub" : "Nalakath Constructions Pvt. Ltd."}</p>
+                    <div className="space-y-1.5">
+                      <div className="h-px w-56 bg-zinc-300 mx-auto" />
+                      <p className="text-[11px] font-black text-black uppercase tracking-widest">Authorised Signatory</p>
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase">For {isPhase1 ? "Universal Hub" : "Nalakath Constructions Pvt. Ltd."}</p>
                     </div>
                   </div>
                 </footer>
               </div>
 
-              {/* STICKY FOOTER STRIP */}
-              <div className="bg-[#1a1a1a] p-4 text-center print:hidden">
-                <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.5em]">
-                  Nalakath Group of Companies | Malappuram, Kerala | Page 1 of 1
+              {/* FOOTER STRIP */}
+              <div className="bg-[#1a1a1a] py-4 px-10 text-white flex justify-between items-center print:border-t-0 border-t border-white/10">
+                <p className="text-[9px] font-black tracking-[0.2em] text-[#ffd700]">
+                  {isPhase1 ? "UNIVERSAL HUB" : "NALAKATH CONSTRUCTIONS PVT. LTD."}
                 </p>
+                <div className="flex gap-6 text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                  <span>Areecode, Malappuram</span>
+                  <span>+91 97444 00100</span>
+                  <span>nalakathindia.com</span>
+                  <span className="text-[#ffd700]">Page 1 of 1</span>
+                </div>
               </div>
 
-              <div className="print:hidden flex gap-4 justify-end p-8 border-t border-zinc-100 bg-zinc-50">
-                <Button variant="outline" className="rounded-full px-8 gap-2 border-zinc-300 h-12 font-black uppercase text-[10px] tracking-widest" onClick={() => setInvoiceToPrint(null)}>
+              {/* ACTION PANEL */}
+              <div className="print:hidden flex gap-4 justify-end p-8 border-t border-zinc-100 bg-zinc-50 mt-10">
+                <Button variant="outline" className="rounded-full px-8 gap-2 border-zinc-300 h-14 font-black uppercase text-[11px] tracking-widest hover:bg-zinc-100" onClick={() => setInvoiceToPrint(null)}>
                   Discard Preview
                 </Button>
-                <Button className="rounded-full px-10 gap-2 h-12 font-black uppercase text-[10px] tracking-widest bg-black text-[#ffd700] hover:bg-zinc-900 shadow-xl" onClick={handlePrint}>
-                  <Printer className="h-4 w-4" /> Save PDF / Print
+                <Button className="rounded-full px-12 gap-3 h-14 font-black uppercase text-[11px] tracking-widest bg-[#1a1a1a] text-[#ffd700] hover:bg-black shadow-2xl shadow-black/20" onClick={handlePrint}>
+                  <Printer className="h-5 w-5" /> Save PDF / Print
                 </Button>
               </div>
             </Card>
