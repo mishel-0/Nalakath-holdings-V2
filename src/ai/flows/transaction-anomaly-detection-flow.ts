@@ -22,7 +22,7 @@ const TransactionSchema = z.object({
 const DetectTransactionAnomalyInputSchema = z.object({
   currentTransaction: TransactionSchema.describe('The transaction to be analyzed for anomalies.'),
   historicalTransactions: z.array(TransactionSchema).describe('Recent historical transactions for context.').optional(),
-  model: z.string().optional().describe('The AI model to use for generation via OpenRouter.'),
+  model: z.string().optional().describe('The AI model to use for generation.'),
 });
 export type DetectTransactionAnomalyInput = z.infer<typeof DetectTransactionAnomalyInputSchema>;
 
@@ -72,7 +72,7 @@ const transactionAnomalyDetectionFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input, {
-      model: input.model ? (input.model.startsWith('openai/') ? input.model : `openai/${input.model}`) : undefined
+      model: input.model || undefined
     });
     return output!;
   }

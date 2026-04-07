@@ -33,7 +33,7 @@ const CostOptimizationSuggestionsInputSchema = z.object({
     })).describe('Overview of spending per project.'),
   }).describe('Detailed analysis of spending patterns.'),
   recentInsights: z.array(z.string()).optional().describe('Any recent insights or anomalies detected.'),
-  model: z.string().optional().describe('The AI model to use for generation via OpenRouter.'),
+  model: z.string().optional().describe('The AI model to use for generation.'),
 });
 export type CostOptimizationSuggestionsInput = z.infer<typeof CostOptimizationSuggestionsInputSchema>;
 
@@ -96,7 +96,7 @@ const costOptimizationSuggestionsFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await costOptimizationSuggestionsPrompt(input, {
-      model: input.model ? (input.model.startsWith('openai/') ? input.model : `openai/${input.model}`) : undefined
+      model: input.model || undefined
     });
     return output!;
   }
