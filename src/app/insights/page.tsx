@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -43,9 +42,9 @@ import { cn } from "@/lib/utils";
 import { useDivision } from "@/context/DivisionContext";
 
 const AI_MODELS = [
-  { id: "openai/google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "OpenRouter" },
-  { id: "openai/deepseek/deepseek-r1", name: "DeepSeek R1 (Reasoning)", provider: "OpenRouter" },
-  { id: "openai/anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet (Balanced)", provider: "OpenRouter" },
+  { id: "googleai/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast)", provider: "Google AI" },
+  { id: "googleai/gemini-1.5-pro", name: "Gemini 1.5 Pro (Deep Reasoning)", provider: "Google AI" },
+  { id: "googleai/gemini-1.5-flash", name: "Gemini 1.5 Flash (Balanced)", provider: "Google AI" },
 ];
 
 export default function InsightsPage() {

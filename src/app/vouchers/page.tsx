@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -165,9 +164,9 @@ export default function VouchersPage() {
       v.paymentMethod || 'N/A'
     ]);
 
-    // Build CSV content with BOM for Excel compatibility
-    const csvContent = headers.join(",") + "\n" + 
-      rows.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+    // Build CSV content with BOM and sep= declaration for perfect Excel columns
+    const csvContent = "sep=,\n" + headers.join(",") + "\n" + 
+      rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
     
     // Add UTF-8 BOM to ensure Excel opens it correctly with multiple columns
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
