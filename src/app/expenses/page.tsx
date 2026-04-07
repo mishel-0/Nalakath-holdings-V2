@@ -640,7 +640,7 @@ export default function ExpensesPage() {
                   </div>
                   <div className="space-y-1">
                     <h1 className="text-3xl font-black tracking-tight text-[#ffd700] uppercase leading-none">
-                      NALAKATH CONSTRUCTIONS
+                      {isPhase1 ? "UNIVERSAL CONSTRUCTION HUB" : "NALAKATH CONSTRUCTIONS"}
                     </h1>
                     <p className="text-sm font-bold text-zinc-400">Private Limited</p>
                     <div className="mt-2 h-px w-full bg-zinc-700" />
@@ -688,7 +688,7 @@ export default function ExpensesPage() {
                       <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 border-b border-zinc-200 pb-2">BILL TO</h3>
                       <div className="space-y-1">
                         <p className="text-lg font-black text-black uppercase leading-tight">
-                          {isPhase1 ? (invoiceToPrint.clientName || "Oval Palace Resort") : "OVAL PALACE RESORT"}
+                          {invoiceToPrint.clientName || "Oval Palace Resort"}
                         </p>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase leading-relaxed">
                           Infrastructure & Portfolio Development Unit<br />
@@ -705,6 +705,11 @@ export default function ExpensesPage() {
                   <p className="text-xs font-bold text-white uppercase tracking-wide truncate">
                     {currentInvoicePhase?.name || 'N/A'}: {invoiceToPrint.description}
                   </p>
+                  {!isPhase1 && (
+                    <Badge variant="outline" className="ml-auto text-[8px] border-white/20 text-[#ffd700] uppercase font-bold px-2 py-0.5">
+                      INCL. SUPPLIER & LABOUR COSTS
+                    </Badge>
+                  )}
                 </div>
 
                 {/* ITEMS TABLE */}
@@ -732,7 +737,7 @@ export default function ExpensesPage() {
                         <td className="p-4 text-center text-xs font-mono">₹{invoiceToPrint.amount.toLocaleString()}</td>
                         <td className="p-4 text-right text-xs font-mono font-black">₹{invoiceToPrint.amount.toLocaleString()}</td>
                       </tr>
-                      {/* Placeholders for visual consistency with the high-fidelity model */}
+                      {/* Placeholders for visual consistency */}
                       {[2].map(i => (
                         <tr key={i} className="bg-zinc-50/50">
                           <td className="p-4 text-xs font-bold text-zinc-300">{i}</td>
@@ -765,7 +770,7 @@ export default function ExpensesPage() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-zinc-400">A/C Name:</span>
-                            <span className="text-black">Nalakath Constructions Pvt Ltd</span>
+                            <span className="text-black">{isPhase1 ? "Universal Hub" : "Nalakath Constructions Pvt Ltd"}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-zinc-400">A/C No:</span>
@@ -827,7 +832,7 @@ export default function ExpensesPage() {
                     <div className="space-y-1">
                       <div className="h-px w-48 bg-zinc-200 mx-auto" />
                       <p className="text-[10px] font-black text-black uppercase tracking-widest">Authorised Signatory</p>
-                      <p className="text-[8px] font-bold text-zinc-400 uppercase">For Nalakath Constructions Pvt. Ltd.</p>
+                      <p className="text-[8px] font-bold text-zinc-400 uppercase">For {isPhase1 ? "Universal Hub" : "Nalakath Constructions Pvt. Ltd."}</p>
                     </div>
                   </div>
                 </footer>
@@ -836,7 +841,7 @@ export default function ExpensesPage() {
               {/* STICKY FOOTER STRIP */}
               <div className="bg-[#1a1a1a] p-4 text-center print:hidden">
                 <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.5em]">
-                  Nalakath Constructions Pvt. Ltd. | Malappuram, Kerala | Page 1 of 1
+                  Nalakath Group of Companies | Malappuram, Kerala | Page 1 of 1
                 </p>
               </div>
 
