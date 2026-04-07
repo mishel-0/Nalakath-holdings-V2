@@ -60,7 +60,7 @@ export default function AccountingPage() {
         description: entryData.description.replace(/^\[.*?\]\s/, ''),
         updatedAt: new Date().toISOString(),
       };
-      setDoc(expenseRef, updatedExpense, { merge: true });
+      updateDocumentNonBlocking(expenseRef, updatedExpense);
     }
   };
 
