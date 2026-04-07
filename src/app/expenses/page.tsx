@@ -510,13 +510,13 @@ export default function ExpensesPage() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute top-4 right-4 print:hidden h-10 w-10 bg-[#0C0A07]/10 hover:bg-[#0C0A07]/20 rounded-full z-[110]" 
+                className="absolute top-4 right-4 print:hidden h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-full z-[110]" 
                 onClick={() => setInvoiceToPrint(null)}
               >
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* Header - EXACT REPORTLAB RECREATION */}
+              {/* Header - Corporate Identity */}
               <div className="bg-[#0C0A07] p-10 md:p-12 text-[#FDFBF7] flex justify-between items-start border-b-[2px] border-[#C9A84C] relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-[#C9A84C]" />
                 <div className="flex gap-8 items-center relative z-10">
@@ -601,9 +601,9 @@ export default function ExpensesPage() {
                   </p>
                 </div>
 
-                {/* Main Table - PIXEL PERFECT COLUMNS */}
+                {/* Main Table */}
                 <div className="overflow-hidden rounded-lg border border-[#CEBB8A]">
-                  <table className="w-full text-left">
+                  <table className="w-full text-left border-collapse">
                     <thead className="bg-[#0C0A07] text-[#C9A84C]">
                       <tr>
                         <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest w-12 border-r border-white/10 text-center">#</th>
