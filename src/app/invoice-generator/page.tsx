@@ -1,21 +1,19 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { FileText, Printer, X, Plus, Trash2, Building2, Landmark, User, CreditCard } from "lucide-react";
+import { FileText, Printer, X, Plus, Trash2, Building2, User, CreditCard } from "lucide-react";
 import { useDivision } from "@/context/DivisionContext";
 import { cn } from "@/lib/utils";
 
-// --- UTILITIES (Ported from Python Model) ---
+// --- UTILITIES (Ported from Professional Python Model) ---
 
 function indianNumberFormat(n: number): string {
   const parts = n.toFixed(2).split(".");
@@ -265,7 +263,7 @@ export default function InvoiceGeneratorPage() {
               <X className="h-5 w-5" />
             </Button>
             
-            {/* Header - EXACT PYTHON REPLICA */}
+            {/* Header - EXACT PYTHON MODEL REPLICA */}
             <div className="bg-[#0C0A07] p-10 md:p-12 text-[#FDFBF7] flex justify-between items-start border-b-[2px] border-[#C9A84C] relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-[#C9A84C]" />
               <div className="flex gap-8 items-center relative z-10">
