@@ -10,7 +10,8 @@ import {
   BarChart3, 
   Sparkles,
   ListTree,
-  Percent
+  Percent,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -20,10 +21,10 @@ import { useDivision } from "@/context/DivisionContext";
 const mobileNav = [
   { name: "Home", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true, projectsOnly: true },
+  { name: "Invoice", href: "/invoice-generator", icon: FileText, adminOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
   { name: "Tax", href: "/tax", icon: Percent },
   { name: "Reports", href: "/reports", icon: BarChart3 },
-  { name: "AI", href: "/insights", icon: Sparkles },
 ];
 
 export function BottomNav() {
