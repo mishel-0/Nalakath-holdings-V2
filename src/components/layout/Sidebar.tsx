@@ -18,7 +18,8 @@ import {
   History,
   RefreshCcw,
   Terminal,
-  Percent
+  Percent,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -33,6 +34,7 @@ const navigation = [
   { name: "Chart of Accounts", href: "/accounts", icon: ListTree },
   { name: "Payment Vouchers", href: "/vouchers", icon: ReceiptText, adminOnly: true },
   { name: "Expenses", href: "/expenses", icon: Calculator },
+  { name: "Invoice Generator", href: "/invoice-generator", icon: FileText, adminOnly: true },
   { name: "Assets", href: "/assets", icon: Layers, adminOnly: true },
   { name: "Loans", href: "/loans", icon: Landmark, adminOnly: true },
   { name: "Reports", href: "/reports", icon: BarChart3 },
@@ -59,13 +61,9 @@ export function Sidebar() {
   const isAccountant = profile?.role === "Accountant";
 
   const filteredNavigation = navigation.filter(item => {
-    // Role based filtering: Admins, Devs, and Accountants share operational visibility
     if (item.adminOnly && !isAdmin && !isDev && !isAccountant) return false;
     if (item.devOnly && !isDev) return false;
-    
-    // Division based filtering for Projects
     if (item.projectsOnly && activeDivision.id !== "nalakath-holdings-main") return false;
-    
     return true;
   });
 
@@ -74,7 +72,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col gap-4 p-4">
         <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1 pt-4">
           {filteredNavigation.map((item) => {
-            const isActive = pathname.startsWith(item.href) && (item.href !== '/' || pathname === '/');
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}

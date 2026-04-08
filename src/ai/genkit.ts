@@ -1,16 +1,15 @@
 
 import { genkit } from 'genkit';
-import { openAI } from 'genkitx-openai';
+import { googleAI } from '@genkit-ai/google-genai';
 
 /**
  * Genkit instance configured for Nalakath Holdings high-performance reasoning.
- * Uses the OpenAI plugin pointing to OpenRouter's API.
+ * Uses the Google AI plugin for native speed and stability.
  */
 export const ai = genkit({
   plugins: [
-    openAI({
-      apiKey: process.env.OPENROUTER_API_KEY || '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',
-      baseURL: 'https://openrouter.ai/api/v1',
+    googleAI({
+      apiKey: process.env.GOOGLE_GENAI_API_KEY,
     }),
   ],
 });
