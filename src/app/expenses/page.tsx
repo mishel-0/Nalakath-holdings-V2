@@ -34,7 +34,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useDivision } from "@/context/DivisionContext";
 import { cn } from "@/lib/utils";
 
-// Executive Color Palette from Python Script
+// EXECUTIVE COLORS FROM PYTHON MODEL
 const DARK = "#0C0A07";
 const GOLD = "#C9A84C";
 const GOLD3 = "#F0E4B8";
@@ -42,7 +42,6 @@ const STRIPE = "#F7F2E8";
 const MID = "#6B5C42";
 const BORDER = "#CEBB8A";
 
-// Utility for Indian Number Formatting: 82,80,370.00
 function indianNumberFormat(n: number): string {
   const parts = n.toFixed(2).split(".");
   let lastThree = parts[0].substring(parts[0].length - 3);
@@ -52,7 +51,6 @@ function indianNumberFormat(n: number): string {
   return res;
 }
 
-// Utility for Amount in Words (Indian English)
 function numberToWords(num: number): string {
   const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
   const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -516,30 +514,29 @@ export default function ExpensesPage() {
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* Executive Charcoal Header from Python Script */}
+              {/* HEADER - STRICT PYTHON MODEL */}
               <div style={{ backgroundColor: DARK }} className="h-[108px] w-full relative flex items-center px-10">
                 <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-1" />
                 <div style={{ backgroundColor: GOLD }} className="absolute bottom-0 left-0 w-full h-0.5" />
                 
-                {/* Simulated Logo + Branding */}
                 <div className="flex items-center gap-6">
                   <div style={{ borderColor: GOLD }} className="h-16 w-16 rounded-full border-2 flex items-center justify-center text-white font-black text-xl">NH</div>
                   <div>
                     <h1 style={{ color: GOLD }} className="text-2xl font-black tracking-tight uppercase">NALAKATH CONSTRUCTIONS PVT. LTD.</h1>
                     <p style={{ color: GOLD3 }} className="text-[10px] italic font-medium opacity-80">Building Trust. Building Kerala.</p>
-                    <p className="text-[8px] text-white/60 mt-1 uppercase tracking-widest font-bold">Areecode, Malappuram, Kerala | GSTIN: 32XXXXXX1234Z5</p>
+                    <p className="text-[8px] text-white/60 mt-1 uppercase tracking-widest font-bold">Nalakath Hub, Areecode, Malappuram | GSTIN: 32XXXXXX1234Z5</p>
                   </div>
                 </div>
               </div>
 
-              {/* Title Band */}
+              {/* TITLE BAND */}
               <div style={{ backgroundColor: GOLD }} className="h-8 w-full flex items-center justify-between px-10">
                 <span className="text-sm font-black uppercase text-black">Tax Invoice</span>
                 <span className="text-[9px] font-bold text-black/70 uppercase">Original for Recipient | CGST + SGST | Malappuram Jurisdiction</span>
               </div>
 
               <div className="p-10 space-y-8">
-                {/* Meta Boxes */}
+                {/* Meta Grid */}
                 <div className="grid grid-cols-2 gap-10">
                   <div style={{ backgroundColor: '#FDFBF7', borderColor: BORDER }} className="border rounded-xl p-6 relative overflow-hidden">
                     <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
@@ -563,13 +560,13 @@ export default function ExpensesPage() {
                   </div>
                 </div>
 
-                {/* Project Band */}
-                <div style={{ backgroundColor: '#181410' }} className="rounded-lg h-8 flex items-center px-4 gap-3">
-                  <span style={{ color: '#DFC06A' }} className="text-[9px] font-black uppercase">Project:</span>
+                {/* PROJECT BAND */}
+                <div style={{ backgroundColor: "#181410" }} className="rounded-lg h-8 flex items-center px-4 gap-3">
+                  <span style={{ color: "#DFC06A" }} className="text-[9px] font-black uppercase">Project:</span>
                   <span className="text-[10px] text-white/80 font-medium uppercase truncate">{invoiceToPrint.description}</span>
                 </div>
 
-                {/* Data Table */}
+                {/* TABLE */}
                 <div style={{ borderColor: BORDER }} className="border rounded-lg overflow-hidden">
                   <table className="w-full text-left border-collapse">
                     <thead style={{ backgroundColor: DARK }}>
@@ -600,7 +597,7 @@ export default function ExpensesPage() {
                   </table>
                 </div>
 
-                {/* Totals Section */}
+                {/* TOTALS */}
                 <div className="flex justify-end pt-4">
                   <div className="w-[320px] space-y-2">
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>Subtotal (before GST)</span><span className="font-mono text-black">Rs. {indianNumberFormat(calcs.subtotal)}</span></div>
@@ -617,13 +614,13 @@ export default function ExpensesPage() {
                   </div>
                 </div>
 
-                {/* Legal Block */}
+                {/* AMOUNT IN WORDS */}
                 <div style={{ backgroundColor: GOLD3, borderColor: BORDER }} className="border rounded-lg p-4 flex items-center gap-6">
                   <span className="text-[9px] font-black text-[#6B5C42] uppercase tracking-[0.1em] shrink-0">Amount in Words:</span>
                   <p className="text-[10px] font-black italic text-black leading-relaxed uppercase">{numberToWords(calcs.totalPayable)}</p>
                 </div>
 
-                {/* Bottom Panels */}
+                {/* BANK PANELS */}
                 <div className="grid grid-cols-2 gap-10">
                   <div style={{ borderColor: BORDER, backgroundColor: '#FDFBF7' }} className="border rounded-xl p-6 relative overflow-hidden">
                     <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
@@ -636,7 +633,7 @@ export default function ExpensesPage() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-end relative">
+                  <div className="flex flex-col items-center justify-end">
                     <div className="text-center space-y-1">
                       <div className="h-[1px] w-48 bg-black mx-auto mb-2" />
                       <p className="text-[10px] font-black text-black uppercase tracking-[0.1em]">Authorised Signatory</p>
@@ -646,7 +643,12 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
-              {/* Print Actions */}
+              {/* FOOTER */}
+              <div style={{ backgroundColor: DARK }} className="h-10 w-full flex items-center justify-center border-t border-white/5">
+                <p style={{ color: GOLD3 }} className="text-[8px] font-medium uppercase tracking-[0.3em]">Nalakath Constructions Pvt. Ltd. • Building Trust. Building Kerala.</p>
+              </div>
+
+              {/* PRINT ACTIONS */}
               <div className="print:hidden flex gap-4 justify-center mt-6 pt-6 border-t border-zinc-100">
                 <Button variant="outline" className="rounded-full px-8 h-12 font-bold uppercase text-[10px] tracking-widest" onClick={() => setInvoiceToPrint(null)}>Discard Preview</Button>
                 <Button className="rounded-full px-12 h-12 font-bold uppercase text-[10px] tracking-widest gold-gradient text-black shadow-xl" onClick={() => window.print()}><Printer className="h-4 w-4 mr-2" /> Export to PDF</Button>
