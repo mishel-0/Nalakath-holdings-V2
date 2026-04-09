@@ -13,7 +13,7 @@ import { FileText, Printer, X, Plus, Trash2, Building2, User, CreditCard } from 
 import { useDivision } from "@/context/DivisionContext";
 import { cn } from "@/lib/utils";
 
-// EXECUTIVE COLORS FROM REPORTLAB SCRIPT
+// EXECUTIVE COLORS FROM PYTHON SCRIPT
 const DARK = "#0C0A07";
 const GOLD = "#C9A84C";
 const GOLD3 = "#F0E4B8";
@@ -21,7 +21,6 @@ const CREAM = "#F5EDD6";
 const LIGHT = "#FDFBF7";
 const MID = "#6B5C42";
 const BORDER = "#CEBB8A";
-const RED = "#A02818";
 const STRIPE = "#F7F2E8";
 
 function indianNumberFormat(n: number): string {
@@ -257,13 +256,12 @@ export default function InvoiceGeneratorPage() {
                 <X className="h-5 w-5" />
               </Button>
               
-              {/* REPORTLAB SOLID CHARCOAL HEADER */}
+              {/* HEADER - STRICT PYTHON MODEL */}
               <div style={{ backgroundColor: DARK }} className="h-[108px] w-full relative flex items-center px-10">
                 <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-1" />
                 <div style={{ backgroundColor: GOLD }} className="absolute bottom-0 left-0 w-full h-0.5" />
                 
                 <div className="flex items-center gap-6">
-                  {/* Circular NH Logo Seal */}
                   <div style={{ borderColor: GOLD }} className="h-16 w-16 rounded-full border-2 flex items-center justify-center text-white font-black text-xl">NH</div>
                   <div>
                     <h1 style={{ color: GOLD }} className="text-2xl font-black tracking-tight uppercase">NALAKATH CONSTRUCTIONS PVT. LTD.</h1>
@@ -273,7 +271,7 @@ export default function InvoiceGeneratorPage() {
                 </div>
               </div>
 
-              {/* GOLD TITLE BAND */}
+              {/* TITLE BAND */}
               <div style={{ backgroundColor: GOLD }} className="h-8 w-full flex items-center justify-between px-10">
                 <span className="text-sm font-black uppercase text-black">Tax Invoice</span>
                 <span className="text-[9px] font-bold text-black/70 uppercase">Original for Recipient | CGST + SGST | {invoiceToPrint.jur} Jurisdiction</span>
@@ -306,13 +304,13 @@ export default function InvoiceGeneratorPage() {
                   </div>
                 </div>
 
-                {/* DARK PROJECT BAND */}
+                {/* PROJECT BAND */}
                 <div style={{ backgroundColor: "#181410" }} className="rounded-lg h-8 flex items-center px-4 gap-3">
                   <span style={{ color: "#DFC06A" }} className="text-[9px] font-black uppercase">Project:</span>
                   <span className="text-[10px] text-white/80 font-medium uppercase truncate">{invoiceToPrint.proj_desc || invoiceToPrint.inv_no}</span>
                 </div>
 
-                {/* HIGH-FIDELITY TABLE */}
+                {/* TABLE */}
                 <div style={{ borderColor: BORDER }} className="border rounded-lg overflow-hidden">
                   <table className="w-full text-left border-collapse">
                     <thead style={{ backgroundColor: DARK }}>
@@ -342,7 +340,7 @@ export default function InvoiceGeneratorPage() {
                   </table>
                 </div>
 
-                {/* CALCULATION TOTALS */}
+                {/* TOTALS */}
                 <div className="flex justify-end pt-4">
                   <div className="w-[320px] space-y-2">
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>Subtotal (before GST)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.subtotal)}</span></div>
@@ -353,7 +351,6 @@ export default function InvoiceGeneratorPage() {
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>SGST (9%)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.sgst)}</span></div>
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818] border-b border-black/5 pb-2"><span>TDS Deductible (Sec. 194C)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.tds_amt)}</span></div>
                     
-                    {/* SOLID BLACK TOTAL PILL */}
                     <div style={{ backgroundColor: DARK }} className="relative mt-4 rounded-lg p-4 flex justify-between items-center shadow-xl">
                       <div className="space-y-0.5">
                         <p style={{ color: GOLD }} className="text-[8px] font-black uppercase tracking-[0.2em]">Total Amount Payable</p>
@@ -363,7 +360,7 @@ export default function InvoiceGeneratorPage() {
                   </div>
                 </div>
 
-                {/* AMOUNT IN WORDS GOLD BAR */}
+                {/* AMOUNT IN WORDS */}
                 <div style={{ backgroundColor: GOLD3, borderColor: BORDER }} className="border rounded-lg p-4 flex items-center gap-6">
                   <span className="text-[9px] font-black text-[#6B5C42] uppercase tracking-[0.1em] shrink-0">Amount in Words:</span>
                   <p className="text-[10px] font-black italic text-black leading-relaxed uppercase">{numberToWords(totals.final)}</p>
@@ -390,6 +387,11 @@ export default function InvoiceGeneratorPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* FOOTER */}
+              <div style={{ backgroundColor: DARK }} className="h-10 w-full flex items-center justify-center border-t border-white/5">
+                <p style={{ color: GOLD3 }} className="text-[8px] font-medium uppercase tracking-[0.3em]">Nalakath Constructions Pvt. Ltd. • Building Trust. Building Kerala.</p>
               </div>
 
               {/* PRINT ACTIONS */}
