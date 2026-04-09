@@ -13,11 +13,16 @@ import { FileText, Printer, X, Plus, Trash2, Building2, User, CreditCard } from 
 import { useDivision } from "@/context/DivisionContext";
 import { cn } from "@/lib/utils";
 
+// EXECUTIVE COLORS FROM REPORTLAB SCRIPT
 const DARK = "#0C0A07";
 const GOLD = "#C9A84C";
 const GOLD3 = "#F0E4B8";
-const BORDER = "#CEBB8A";
+const CREAM = "#F5EDD6";
+const LIGHT = "#FDFBF7";
 const MID = "#6B5C42";
+const BORDER = "#CEBB8A";
+const RED = "#A02818";
+const STRIPE = "#F7F2E8";
 
 function indianNumberFormat(n: number): string {
   const parts = n.toFixed(2).split(".");
@@ -70,14 +75,18 @@ export default function InvoiceGeneratorPage() {
     const d = {
       inv_no: formData.get("inv_no"),
       inv_date: formData.get("inv_date"),
-      payment_terms: formData.get("terms") || "Net 30 Days",
-      project_ref: formData.get("proj_ref"),
-      project_desc: formData.get("proj_desc"),
+      terms: formData.get("terms") || "Net 30 Days",
+      proj_ref: formData.get("proj_ref"),
+      proj_desc: formData.get("proj_desc"),
       b_name: formData.get("b_name"),
       b_attn: formData.get("b_attn"),
       b_gstin: formData.get("b_gstin"),
-      tds_percent: Number(formData.get("tds")) || 2.0,
-      discount_percent: Number(formData.get("disc")) || 0.0,
+      b_addr1: formData.get("b_addr1"),
+      b_city: formData.get("b_city"),
+      b_pin: formData.get("b_pin"),
+      tds: Number(formData.get("tds")) || 2.0,
+      disc: Number(formData.get("disc")) || 0.0,
+      jur: formData.get("jur") || "Malappuram",
       items: items
     };
 
@@ -87,22 +96,16 @@ export default function InvoiceGeneratorPage() {
   const totals = useMemo(() => {
     if (!invoiceToPrint) return null;
     const subtotal = invoiceToPrint.items.reduce((acc: number, i: any) => acc + (i.qty * i.rate), 0);
-    const disc_amt = (subtotal * invoiceToPrint.discount_percent) / 100;
-    const taxable = subtotal - disc_amt;
+    const disc_amt = (subtotal * invoiceToPrint.disc) / 100;
+    const net = subtotal - disc_amt;
     
-    let cgst = 0, sgst = 0;
-    invoiceToPrint.items.forEach((i: any) => {
-      const line_taxable = (i.qty * i.rate * (1 - invoiceToPrint.discount_percent / 100));
-      const line_gst = (line_taxable * i.gst) / 100;
-      cgst += line_gst / 2;
-      sgst += line_gst / 2;
-    });
-
-    const tds_amt = (taxable * invoiceToPrint.tds_percent) / 100;
+    const cgst = net * 0.09;
+    const sgst = net * 0.09;
     const total_gst = cgst + sgst;
-    const final = taxable + total_gst - tds_amt;
+    const tds_amt = (net * invoiceToPrint.tds) / 100;
+    const final = net + total_gst - tds_amt;
 
-    return { subtotal, disc_amt, taxable, cgst, sgst, tds_amt, total_gst, final };
+    return { subtotal, disc_amt, net, cgst, sgst, tds_amt, total_gst, final };
   }, [invoiceToPrint]);
 
   return (
@@ -116,7 +119,7 @@ export default function InvoiceGeneratorPage() {
               <Badge variant="outline" className="w-fit rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
                 EXECUTIVE FISCAL HUB
               </Badge>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase mt-2">Tax Invoice Hub</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase mt-2">Tax Invoice Generator</h1>
               <p className="text-muted-foreground text-sm">Professional billing engine for {activeDivision.name}.</p>
             </header>
 
@@ -125,7 +128,7 @@ export default function InvoiceGeneratorPage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 border-b border-white/5 pb-4">
                     <FileText className="h-5 w-5 text-primary" />
-                    <h3 className="text-sm font-black uppercase tracking-widest">Invoice Metadata</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest">1 / 4 — Invoice Metadata</h3>
                   </div>
                   <div className="grid md:grid-cols-3 gap-6">
                     <div className="space-y-2">
@@ -146,7 +149,7 @@ export default function InvoiceGeneratorPage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 border-b border-white/5 pb-4">
                     <User className="h-5 w-5 text-primary" />
-                    <h3 className="text-sm font-black uppercase tracking-widest">Bill To</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest">2 / 4 — Bill To (Client)</h3>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -154,8 +157,22 @@ export default function InvoiceGeneratorPage() {
                       <Input name="b_name" required className="bg-white/5 border-white/10 h-12 rounded-2xl" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-bold text-muted-foreground">GSTIN / ID</Label>
+                      <Label className="text-[10px] uppercase font-bold text-muted-foreground">GSTIN</Label>
                       <Input name="b_gstin" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-bold text-muted-foreground">Address</Label>
+                      <Input name="b_addr1" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-muted-foreground">City</Label>
+                        <Input name="b_city" defaultValue="Areecode" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-muted-foreground">PIN</Label>
+                        <Input name="b_pin" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -164,10 +181,10 @@ export default function InvoiceGeneratorPage() {
                   <div className="flex items-center justify-between border-b border-white/5 pb-4">
                     <div className="flex items-center gap-3">
                       <Building2 className="h-5 w-5 text-primary" />
-                      <h3 className="text-sm font-black uppercase tracking-widest">Line Items</h3>
+                      <h3 className="text-sm font-black uppercase tracking-widest">3 / 4 — Line Items</h3>
                     </div>
                     <Button type="button" onClick={addItem} variant="ghost" className="text-[10px] uppercase font-bold tracking-widest">
-                      <Plus className="h-3 w-3 mr-2" /> Add Service
+                      <Plus className="h-3 w-3 mr-2" /> Add Item
                     </Button>
                   </div>
                   <div className="space-y-4">
@@ -175,7 +192,7 @@ export default function InvoiceGeneratorPage() {
                       <div key={item.id} className="grid md:grid-cols-12 gap-4 items-end bg-white/5 p-4 rounded-2xl">
                         <div className="md:col-span-1 text-center font-black opacity-30">{idx + 1}</div>
                         <div className="md:col-span-4 space-y-1">
-                          <Label className="text-[8px] uppercase font-bold">Description</Label>
+                          <Label className="text-[8px] uppercase font-bold">Work Description</Label>
                           <Input value={item.description} onChange={(e) => { const n = [...items]; n[idx].description = e.target.value; setItems(n); }} required className="bg-white/5 border-white/10 rounded-xl h-10" />
                         </div>
                         <div className="md:col-span-2 space-y-1">
@@ -205,7 +222,7 @@ export default function InvoiceGeneratorPage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 border-b border-white/5 pb-4">
                     <CreditCard className="h-5 w-5 text-primary" />
-                    <h3 className="text-sm font-black uppercase tracking-widest">Adjustments</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest">4 / 4 — Adjustments</h3>
                   </div>
                   <div className="grid md:grid-cols-4 gap-6">
                     <div className="space-y-2">
@@ -215,6 +232,10 @@ export default function InvoiceGeneratorPage() {
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold">Discount %</Label>
                       <Input name="disc" type="number" step="0.1" defaultValue="0.0" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-bold">Jurisdiction</Label>
+                      <Input name="jur" defaultValue="Malappuram" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
                     </div>
                   </div>
                 </div>
@@ -236,59 +257,67 @@ export default function InvoiceGeneratorPage() {
                 <X className="h-5 w-5" />
               </Button>
               
+              {/* REPORTLAB SOLID CHARCOAL HEADER */}
               <div style={{ backgroundColor: DARK }} className="h-[108px] w-full relative flex items-center px-10">
                 <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-1" />
                 <div style={{ backgroundColor: GOLD }} className="absolute bottom-0 left-0 w-full h-0.5" />
                 
                 <div className="flex items-center gap-6">
+                  {/* Circular NH Logo Seal */}
                   <div style={{ borderColor: GOLD }} className="h-16 w-16 rounded-full border-2 flex items-center justify-center text-white font-black text-xl">NH</div>
                   <div>
                     <h1 style={{ color: GOLD }} className="text-2xl font-black tracking-tight uppercase">NALAKATH CONSTRUCTIONS PVT. LTD.</h1>
                     <p style={{ color: GOLD3 }} className="text-[10px] italic font-medium opacity-80">Building Trust. Building Kerala.</p>
-                    <p className="text-[8px] text-white/60 mt-1 uppercase tracking-widest font-bold">Areecode, Malappuram, Kerala | GSTIN: 32XXXXXX1234Z5</p>
+                    <p className="text-[8px] text-white/60 mt-1 uppercase tracking-widest font-bold">Nalakath Hub, Areecode, Malappuram | GSTIN: 32XXXXXX1234Z5</p>
                   </div>
                 </div>
               </div>
 
+              {/* GOLD TITLE BAND */}
               <div style={{ backgroundColor: GOLD }} className="h-8 w-full flex items-center justify-between px-10">
                 <span className="text-sm font-black uppercase text-black">Tax Invoice</span>
-                <span className="text-[9px] font-bold text-black/70 uppercase">Original for Recipient | CGST + SGST | Malappuram Jurisdiction</span>
+                <span className="text-[9px] font-bold text-black/70 uppercase">Original for Recipient | CGST + SGST | {invoiceToPrint.jur} Jurisdiction</span>
               </div>
 
               <div className="p-10 space-y-8">
+                {/* Meta Grid */}
                 <div className="grid grid-cols-2 gap-10">
-                  <div style={{ backgroundColor: '#FDFBF7', borderColor: BORDER }} className="border rounded-xl p-6 relative overflow-hidden">
+                  <div style={{ backgroundColor: LIGHT, borderColor: BORDER }} className="border rounded-xl p-6 relative overflow-hidden">
                     <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
                       <span className="text-[9px] font-black text-black uppercase">Invoice Details</span>
                     </div>
                     <div className="mt-6 space-y-2">
                       <div className="flex justify-between text-xs"><span style={{ color: MID }} className="font-bold uppercase tracking-widest text-[9px]">Invoice Number:</span><span className="font-black">{invoiceToPrint.inv_no}</span></div>
                       <div className="flex justify-between text-xs"><span style={{ color: MID }} className="font-bold uppercase tracking-widest text-[9px]">Invoice Date:</span><span className="font-black">{new Date(invoiceToPrint.inv_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
-                      <div className="flex justify-between text-xs"><span style={{ color: MID }} className="font-bold uppercase tracking-widest text-[9px]">Payment Terms:</span><span className="font-black">{invoiceToPrint.payment_terms}</span></div>
+                      <div className="flex justify-between text-xs"><span style={{ color: MID }} className="font-bold uppercase tracking-widest text-[9px]">Payment Terms:</span><span className="font-black">{invoiceToPrint.terms}</span></div>
                     </div>
                   </div>
 
-                  <div style={{ backgroundColor: '#FDFBF7', borderColor: BORDER }} className="border rounded-xl p-6 relative overflow-hidden">
+                  <div style={{ backgroundColor: LIGHT, borderColor: BORDER }} className="border rounded-xl p-6 relative overflow-hidden">
                     <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
                       <span className="text-[9px] font-black text-black uppercase">Bill To</span>
                     </div>
                     <div className="mt-6">
                       <p className="text-sm font-black uppercase text-black mb-1">{invoiceToPrint.b_name}</p>
-                      <p style={{ color: MID }} className="text-[10px] font-bold uppercase leading-relaxed">{invoiceToPrint.b_gstin || "NO ADDRESS RECORDED"}</p>
+                      <p style={{ color: MID }} className="text-[10px] font-bold uppercase leading-relaxed">{invoiceToPrint.b_addr1 || "NO ADDRESS RECORDED"}</p>
+                      <p style={{ color: MID }} className="text-[10px] font-bold uppercase">{invoiceToPrint.b_city} {invoiceToPrint.b_pin}</p>
+                      <p style={{ color: MID }} className="text-[10px] font-black mt-1">GSTIN: {invoiceToPrint.b_gstin || "N/A"}</p>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: '#181410' }} className="rounded-lg h-8 flex items-center px-4 gap-3">
-                  <span style={{ color: '#DFC06A' }} className="text-[9px] font-black uppercase">Project:</span>
-                  <span className="text-[10px] text-white/80 font-medium uppercase truncate">{invoiceToPrint.project_desc || invoiceToPrint.inv_no}</span>
+                {/* DARK PROJECT BAND */}
+                <div style={{ backgroundColor: "#181410" }} className="rounded-lg h-8 flex items-center px-4 gap-3">
+                  <span style={{ color: "#DFC06A" }} className="text-[9px] font-black uppercase">Project:</span>
+                  <span className="text-[10px] text-white/80 font-medium uppercase truncate">{invoiceToPrint.proj_desc || invoiceToPrint.inv_no}</span>
                 </div>
 
+                {/* HIGH-FIDELITY TABLE */}
                 <div style={{ borderColor: BORDER }} className="border rounded-lg overflow-hidden">
                   <table className="w-full text-left border-collapse">
                     <thead style={{ backgroundColor: DARK }}>
                       <tr>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10">#</th>
+                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10 w-10">#</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10">Work Description</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">HSN/SAC</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">Qty</th>
@@ -299,7 +328,7 @@ export default function InvoiceGeneratorPage() {
                     </thead>
                     <tbody className="text-[11px] font-medium">
                       {invoiceToPrint.items.map((item: any, idx: number) => (
-                        <tr key={idx} className="border-b border-[#E0D4B0] last:border-0">
+                        <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? "white" : STRIPE }} className="border-b border-[#E0D4B0] last:border-0">
                           <td className="p-4 text-center border-r border-[#DDD0A8]">{idx + 1}</td>
                           <td className="p-4 uppercase border-r border-[#DDD0A8]">{item.description}</td>
                           <td className="p-4 text-center border-r border-[#DDD0A8] text-muted-foreground">{item.hsn}</td>
@@ -313,13 +342,18 @@ export default function InvoiceGeneratorPage() {
                   </table>
                 </div>
 
+                {/* CALCULATION TOTALS */}
                 <div className="flex justify-end pt-4">
                   <div className="w-[320px] space-y-2">
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>Subtotal (before GST)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.subtotal)}</span></div>
+                    {totals.disc_amt > 0 && (
+                      <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818]"><span>Discount ({invoiceToPrint.disc}%)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.disc_amt)}</span></div>
+                    )}
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>CGST (9%)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.cgst)}</span></div>
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>SGST (9%)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.sgst)}</span></div>
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818] border-b border-black/5 pb-2"><span>TDS (Sec. 194C)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.tds_amt)}</span></div>
+                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818] border-b border-black/5 pb-2"><span>TDS Deductible (Sec. 194C)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.tds_amt)}</span></div>
                     
+                    {/* SOLID BLACK TOTAL PILL */}
                     <div style={{ backgroundColor: DARK }} className="relative mt-4 rounded-lg p-4 flex justify-between items-center shadow-xl">
                       <div className="space-y-0.5">
                         <p style={{ color: GOLD }} className="text-[8px] font-black uppercase tracking-[0.2em]">Total Amount Payable</p>
@@ -329,18 +363,20 @@ export default function InvoiceGeneratorPage() {
                   </div>
                 </div>
 
+                {/* AMOUNT IN WORDS GOLD BAR */}
                 <div style={{ backgroundColor: GOLD3, borderColor: BORDER }} className="border rounded-lg p-4 flex items-center gap-6">
                   <span className="text-[9px] font-black text-[#6B5C42] uppercase tracking-[0.1em] shrink-0">Amount in Words:</span>
                   <p className="text-[10px] font-black italic text-black leading-relaxed uppercase">{numberToWords(totals.final)}</p>
                 </div>
 
+                {/* BOTTOM PANELS */}
                 <div className="grid grid-cols-2 gap-10">
-                  <div style={{ borderColor: BORDER, backgroundColor: '#FDFBF7' }} className="border rounded-xl p-6 relative overflow-hidden text-[10px]">
+                  <div style={{ borderColor: BORDER, backgroundColor: LIGHT }} className="border rounded-xl p-6 relative overflow-hidden text-[10px]">
                     <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
                       <span className="text-[9px] font-black text-black uppercase">Bank Details</span>
                     </div>
                     <div className="mt-6 space-y-1.5">
-                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Bank:</span><span className="font-black text-black uppercase">State Bank of India</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Bank:</span><span className="font-black text-black">STATE BANK OF INDIA</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Account No.:</span><span className="font-black text-black font-mono">32XXXXXXXXXX51</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">IFSC Code:</span><span className="font-black text-black font-mono">SBIN0001234</span></div>
                     </div>
@@ -356,6 +392,7 @@ export default function InvoiceGeneratorPage() {
                 </div>
               </div>
 
+              {/* PRINT ACTIONS */}
               <div className="print:hidden flex gap-4 justify-center mt-6 pt-6 border-t border-zinc-100">
                 <Button variant="outline" className="rounded-full px-8 h-12 font-bold uppercase text-[10px] tracking-widest" onClick={() => setInvoiceToPrint(null)}>Discard Preview</Button>
                 <Button className="rounded-full px-12 h-12 font-bold uppercase text-[10px] tracking-widest gold-gradient text-black shadow-xl" onClick={() => window.print()}><Printer className="h-4 w-4 mr-2" /> Export to PDF</Button>
