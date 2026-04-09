@@ -3,7 +3,7 @@ import { openAI } from 'genkitx-openai';
 
 /**
  * Genkit instance configured for Nalakath Holdings high-performance reasoning.
- * Uses the OpenAI plugin pointing to OpenRouter's high-performance endpoint.
+ * Correctly uses the openAI plugin pointing to OpenRouter.
  */
 export const ai = genkit({
   plugins: [
