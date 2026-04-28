@@ -520,7 +520,7 @@ export default function InvoiceGeneratorPage() {
                 <p style={{ color: GOLD3 }} className="text-[7px] font-medium uppercase tracking-[0.1em]">
                   Nalakath Constructions Pvt. Ltd. • Nalakath Hub, Areecode, Malappuram • +91 97444 00100 • nalakathindia.com
                 </p>
-                <p style={{ color: GOLD2 }} className="text-[7px] font-bold uppercase tracking-widest">Page 1 of 1</p>
+                <p style={{ color: GOLD3 }} className="text-[7px] font-bold uppercase tracking-widest">Page 1 of 1</p>
               </div>
 
               {/* PRINT ACTIONS */}

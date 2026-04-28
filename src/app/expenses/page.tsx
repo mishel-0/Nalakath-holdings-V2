@@ -39,34 +39,7 @@ const STRIPE = "#F7F2E8";
 const MID = "#6B5C42";
 const BORDER = "#CEBB8A";
 
-function indianNumberFormat(n: number): string {
-  const parts = n.toFixed(2).split(".");
-  let lastThree = parts[0].substring(parts[0].length - 3);
-  const otherNumbers = parts[0].substring(0, parts[0].length - 3);
-  if (otherNumbers !== "") lastThree = "," + lastThree;
-  const res = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree + "." + parts[1];
-  return res;
-}
 
-function numberToWords(num: number): string {
-  const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-
-  const inWords = (n: any): string => {
-    if ((n = n.toString()).length > 9) return 'overflow';
-    const n_array = ('000000000' + n).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-    if (!n_array) return '';
-    let str = '';
-    str += (Number(n_array[1]) != 0) ? (a[Number(n_array[1])] || b[Number(n_array[1][0])] + ' ' + a[Number(n_array[1][1])]) + 'Crore ' : '';
-    str += (Number(n_array[2]) != 0) ? (a[Number(n_array[2])] || b[Number(n_array[2][0])] + ' ' + a[Number(n_array[2][1])]) + 'Lakh ' : '';
-    str += (Number(n_array[3]) != 0) ? (a[Number(n_array[3])] || b[Number(n_array[3][0])] + ' ' + a[Number(n_array[3][1])]) + 'Thousand ' : '';
-    str += (Number(n_array[4]) != 0) ? (a[Number(n_array[4])] || b[Number(n_array[4][0])] + ' ' + a[Number(n_array[4][1])]) + 'Hundred ' : '';
-    str += (Number(n_array[5]) != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n_array[5])] || b[Number(n_array[5][0])] + ' ' + a[Number(n_array[5][1])]) : '';
-    return str;
-  };
-
-  return "RUPEES " + inWords(Math.floor(num)).toUpperCase() + "ONLY";
-}
 
 export default function ExpensesPage() {
   const db = useFirestore();
@@ -76,7 +49,6 @@ export default function ExpensesPage() {
   const [isPhaseOpen, setIsPhaseOpen] = useState(false);
   const [editingPhase, setEditingPhase] = useState<any>(null);
   const [editingExpense, setEditingExpense] = useState<any>(null);
-  const [invoiceToPrint, setInvoiceToPrint] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedPhaseId, setSelectedPhaseId] = useState("all");
   const [search, setSearch] = useState("");
@@ -224,14 +196,7 @@ export default function ExpensesPage() {
     toast({ variant: "destructive", title: "Record Deleted", description: "Entry removed." });
   };
 
-  const getInvoiceCalculations = (amount: number) => {
-    const subtotal = amount;
-    const cgst = subtotal * 0.09;
-    const sgst = subtotal * 0.09;
-    const tds = subtotal * 0.02; 
-    const totalPayable = subtotal + cgst + sgst - tds;
-    return { subtotal, cgst, sgst, tds, totalPayable };
-  };
+
 
   return (
     <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
@@ -471,8 +436,10 @@ export default function ExpensesPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="glass rounded-2xl">
                                 {exp.expenseType === "Client Invoice" && (
-                                  <DropdownMenuItem onClick={() => setInvoiceToPrint(exp)} className="text-xs font-bold text-primary cursor-pointer">
-                                    <FileText className="h-3 w-3 mr-2" /> Generate Tax Invoice
+                                  <DropdownMenuItem asChild className="text-xs font-bold text-primary cursor-pointer">
+                                    <Link href="/invoice-generator">
+                                      <FileText className="h-3 w-3 mr-2" /> Open Invoice Engine
+                                    </Link>
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuItem onClick={() => setEditingExpense(exp)} className="text-xs cursor-pointer">
@@ -495,159 +462,7 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      {invoiceToPrint && (() => {
-        const calcs = getInvoiceCalculations(invoiceToPrint.amount);
-        
-        return (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white overflow-y-auto">
-            <Card className="w-full max-w-4xl bg-white text-[#0C0A07] overflow-hidden rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300 font-sans border-none pb-10">
-              <Button variant="ghost" size="icon" className="absolute top-4 right-4 print:hidden h-10 w-10 bg-black/10 hover:bg-black/20 text-black rounded-full z-[110]" onClick={() => setInvoiceToPrint(null)}>
-                <X className="h-5 w-5" />
-              </Button>
-              
-              {/* HEADER - STRICT PYTHON MODEL */}
-              <div style={{ backgroundColor: DARK }} className="h-[108px] w-full relative flex items-center px-10">
-                <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-1" />
-                <div style={{ backgroundColor: GOLD }} className="absolute bottom-0 left-0 w-full h-0.5" />
-                
-                <div className="flex items-center gap-6">
-                  <div style={{ borderColor: GOLD }} className="h-16 w-16 rounded-full border-2 flex items-center justify-center text-white font-black text-xl">NH</div>
-                  <div>
-                    <h1 style={{ color: GOLD }} className="text-2xl font-black tracking-tight uppercase">NALAKATH CONSTRUCTIONS PVT. LTD.</h1>
-                    <p style={{ color: GOLD3 }} className="text-[10px] italic font-medium opacity-80">Building Trust. Building Kerala.</p>
-                    <p className="text-[8px] text-white/60 mt-1 uppercase tracking-widest font-bold">Nalakath Hub, Areecode, Malappuram | GSTIN: 32XXXXXX1234Z5</p>
-                  </div>
-                </div>
-              </div>
 
-              {/* TITLE BAND */}
-              <div style={{ backgroundColor: GOLD }} className="h-8 w-full flex items-center justify-between px-10">
-                <span className="text-sm font-black uppercase text-black">Tax Invoice</span>
-                <span className="text-[9px] font-bold text-black/70 uppercase">Original for Recipient | CGST + SGST | Malappuram Jurisdiction</span>
-              </div>
-
-              <div className="p-10 space-y-8">
-                {/* Meta Grid */}
-                <div className="grid grid-cols-2 gap-10">
-                  <div style={{ backgroundColor: '#FDFBF7', borderColor: BORDER }} className="border rounded-xl p-6 relative overflow-hidden">
-                    <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
-                      <span className="text-[9px] font-black text-black uppercase">Invoice Details</span>
-                    </div>
-                    <div className="mt-6 space-y-2">
-                      <div className="flex justify-between text-xs"><span style={{ color: MID }} className="font-bold uppercase tracking-widest text-[9px]">Invoice Number:</span><span className="font-black">{invoiceToPrint.invoiceNumber || 'NC-2026-001'}</span></div>
-                      <div className="flex justify-between text-xs"><span style={{ color: MID }} className="font-bold uppercase tracking-widest text-[9px]">Invoice Date:</span><span className="font-black">{new Date(invoiceToPrint.expenseDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
-                      <div className="flex justify-between text-xs"><span style={{ color: MID }} className="font-bold uppercase tracking-widest text-[9px]">Payment Terms:</span><span className="font-black">Net 30 Days</span></div>
-                    </div>
-                  </div>
-
-                  <div style={{ backgroundColor: '#FDFBF7', borderColor: BORDER }} className="border rounded-xl p-6 relative overflow-hidden">
-                    <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
-                      <span className="text-[9px] font-black text-black uppercase">Bill To</span>
-                    </div>
-                    <div className="mt-6">
-                      <p className="text-sm font-black uppercase text-black mb-1">{invoiceToPrint.clientName}</p>
-                      <p style={{ color: MID }} className="text-[10px] font-bold uppercase leading-relaxed">{invoiceToPrint.clientGstin || "NO ADDRESS RECORDED"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* PROJECT BAND */}
-                <div style={{ backgroundColor: "#181410" }} className="rounded-lg h-8 flex items-center px-4 gap-3">
-                  <span style={{ color: "#DFC06A" }} className="text-[9px] font-black uppercase">Project:</span>
-                  <span className="text-[10px] text-white/80 font-medium uppercase truncate">{invoiceToPrint.description}</span>
-                </div>
-
-                {/* TABLE */}
-                <div style={{ borderColor: BORDER }} className="border rounded-lg overflow-hidden">
-                  <table className="w-full text-left border-collapse">
-                    <thead style={{ backgroundColor: DARK }}>
-                      <tr>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10">#</th>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10">Work Description</th>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">HSN/SAC</th>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">Qty</th>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-right border-r border-white/10">Rate (Rs.)</th>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">GST %</th>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-right">Amount (Rs.)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-[11px] font-medium">
-                      <tr className="border-b border-[#E0D4B0]">
-                        <td className="p-4 text-center border-r border-[#DDD0A8]">1</td>
-                        <td className="p-4 uppercase border-r border-[#DDD0A8]">{invoiceToPrint.description}</td>
-                        <td className="p-4 text-center border-r border-[#DDD0A8] text-muted-foreground">9954</td>
-                        <td className="p-4 text-center border-r border-[#DDD0A8]">
-                          <p className="font-black text-sm">1.00</p>
-                          <p className="text-[8px] font-bold text-muted-foreground">UNIT</p>
-                        </td>
-                        <td className="p-4 text-right border-r border-[#DDD0A8] font-mono">{indianNumberFormat(invoiceToPrint.amount)}</td>
-                        <td className="p-4 text-center border-r border-[#DDD0A8]">18.0</td>
-                        <td className="p-4 text-right font-black font-mono">{indianNumberFormat(invoiceToPrint.amount)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* TOTALS */}
-                <div className="flex justify-end pt-4">
-                  <div className="w-[320px] space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>Subtotal (before GST)</span><span className="font-mono text-black">Rs. {indianNumberFormat(calcs.subtotal)}</span></div>
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>CGST (9%)</span><span className="font-mono text-black">Rs. {indianNumberFormat(calcs.cgst)}</span></div>
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>SGST (9%)</span><span className="font-mono text-black">Rs. {indianNumberFormat(calcs.sgst)}</span></div>
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818] border-b border-black/5 pb-2"><span>TDS (Sec. 194C)</span><span className="font-mono">- Rs. {indianNumberFormat(calcs.tds)}</span></div>
-                    
-                    <div style={{ backgroundColor: DARK }} className="relative mt-4 rounded-lg p-4 flex justify-between items-center shadow-xl">
-                      <div className="space-y-0.5">
-                        <p style={{ color: GOLD }} className="text-[8px] font-black uppercase tracking-[0.2em]">Total Amount Payable</p>
-                        <p style={{ color: GOLD }} className="text-2xl font-black tracking-tight">Rs. {indianNumberFormat(calcs.totalPayable)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* AMOUNT IN WORDS */}
-                <div style={{ backgroundColor: GOLD3, borderColor: BORDER }} className="border rounded-lg p-4 flex items-center gap-6">
-                  <span className="text-[9px] font-black text-[#6B5C42] uppercase tracking-[0.1em] shrink-0">Amount in Words:</span>
-                  <p className="text-[10px] font-black italic text-black leading-relaxed uppercase">{numberToWords(calcs.totalPayable)}</p>
-                </div>
-
-                {/* BANK PANELS */}
-                <div className="grid grid-cols-2 gap-10">
-                  <div style={{ borderColor: BORDER, backgroundColor: '#FDFBF7' }} className="border rounded-xl p-6 relative overflow-hidden">
-                    <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
-                      <span className="text-[9px] font-black text-black uppercase">Bank Details</span>
-                    </div>
-                    <div className="mt-6 space-y-1.5 text-[10px]">
-                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Bank:</span><span className="font-black text-black">STATE BANK OF INDIA</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Account No.:</span><span className="font-black text-black font-mono">32XXXXXXXXXX51</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">IFSC Code:</span><span className="font-black text-black font-mono">SBIN0001234</span></div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col items-center justify-end">
-                    <div className="text-center space-y-1">
-                      <div className="h-[1px] w-48 bg-black mx-auto mb-2" />
-                      <p className="text-[10px] font-black text-black uppercase tracking-[0.1em]">Authorised Signatory</p>
-                      <p className="text-[8px] font-bold text-muted-foreground uppercase">For Nalakath Constructions Pvt. Ltd.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* FOOTER */}
-              <div style={{ backgroundColor: DARK }} className="h-10 w-full flex items-center justify-center border-t border-white/5">
-                <p style={{ color: GOLD3 }} className="text-[8px] font-medium uppercase tracking-[0.3em]">Nalakath Constructions Pvt. Ltd. • Building Trust. Building Kerala.</p>
-              </div>
-
-              {/* PRINT ACTIONS */}
-              <div className="print:hidden flex gap-4 justify-center mt-6 pt-6 border-t border-zinc-100">
-                <Button variant="outline" className="rounded-full px-8 h-12 font-bold uppercase text-[10px] tracking-widest" onClick={() => setInvoiceToPrint(null)}>Discard Preview</Button>
-                <Button className="rounded-full px-12 h-12 font-bold uppercase text-[10px] tracking-widest gold-gradient text-black shadow-xl" onClick={() => window.print()}><Printer className="h-4 w-4 mr-2" /> Export to PDF</Button>
-              </div>
-            </Card>
-          </div>
-        );
-      })()}
     </main>
   );
 }
