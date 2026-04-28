@@ -54,7 +54,6 @@ export default function LogsPage() {
   }
 
   return (
-  return (
     <>
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">

@@ -70,7 +70,6 @@ export default function DeveloperDashboard() {
   }
 
   return (
-  return (
     <>
         <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
