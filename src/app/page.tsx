@@ -207,7 +207,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {!recentTransactions?.length ? (
+                    {!recentTransactions || recentTransactions.length === 0 ? (
                       <p className="py-10 text-center text-muted-foreground text-sm italic">No recent activity logged for this division.</p>
                     ) : (
                       recentTransactions.map((tx) => (

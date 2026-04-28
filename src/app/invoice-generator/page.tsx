@@ -106,10 +106,14 @@ export default function InvoiceGeneratorPage() {
   };
 
   const totals = useMemo(() => {
-    if (!invoiceToPrint) return null;
+    if (!invoiceToPrint || !invoiceToPrint.items) return null;
     
-    const subtotal = invoiceToPrint.items.reduce((acc: number, i: any) => acc + (i.qty * i.rate), 0);
-    const disc_amt = Math.round((subtotal * invoiceToPrint.disc / 100) * 100) / 100;
+    const disc_rate = Number(invoiceToPrint.disc || 0) / 100;
+    const tds_rate = Number(invoiceToPrint.tds || 0) / 100;
+    const extra_amt = Number(invoiceToPrint.extra || 0);
+
+    const subtotal = invoiceToPrint.items.reduce((acc: number, i: any) => acc + (Number(i.qty || 0) * Number(i.rate || 0)), 0);
+    const disc_amt = Math.round((subtotal * disc_rate) * 100) / 100;
     const net = subtotal - disc_amt;
 
     let cgst = 0;
@@ -117,8 +121,8 @@ export default function InvoiceGeneratorPage() {
     let igst = 0;
 
     invoiceToPrint.items.forEach((item: any) => {
-      const base = Math.round((item.qty * item.rate * (1 - invoiceToPrint.disc / 100)) * 100) / 100;
-      const g = Math.round((base * item.gst / 100) * 100) / 100;
+      const base = Math.round((Number(item.qty || 0) * Number(item.rate || 0) * (1 - disc_rate)) * 100) / 100;
+      const g = Math.round((base * Number(item.gst || 0) / 100) * 100) / 100;
       
       if (invoiceToPrint.is_cgst) {
         cgst += Math.round((g / 2) * 100) / 100;
@@ -133,8 +137,8 @@ export default function InvoiceGeneratorPage() {
     igst = Math.round(igst * 100) / 100;
     const total_gst = cgst + sgst + igst;
     
-    const pre_tds = net + total_gst + invoiceToPrint.extra;
-    const tds_amt = Math.round((net * invoiceToPrint.tds / 100) * 100) / 100;
+    const pre_tds = net + total_gst + extra_amt;
+    const tds_amt = Math.round((net * tds_rate) * 100) / 100;
     const final = Math.round((pre_tds - tds_amt) * 100) / 100;
 
     return { subtotal, disc_amt, net, cgst, sgst, igst, total_gst, tds_amt, final };
