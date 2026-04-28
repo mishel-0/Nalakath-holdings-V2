@@ -1,9 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -102,142 +99,132 @@ export default function LoansPage() {
     toast({ variant: "destructive", title: "Loan Deleted", description: "Liability removed from records." });
   };
 
-  if (isProfileLoading || (profile && profile.role !== "Admin")) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-          <p className="text-primary font-mono tracking-widest uppercase text-xs">Authorizing...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-20 md:mb-0">
-          <div className="flex flex-col gap-8 max-w-7xl mx-auto">
-            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Loans & Liabilities</h1>
-                <p className="text-muted-foreground truncate">Management for {activeDivision.name}.</p>
-              </div>
-              <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogTrigger asChild>
-                  <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-6">
-                    <Plus className="h-4 w-4" /> New Loan
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="glass border-white/10 sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Record New Loan</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddLoan} className="space-y-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="lender">Lender Name</Label>
-                      <Input id="lender" name="lender" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="type">Loan Type</Label>
-                      <Input id="type" name="type" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="amount">Principal (₹)</Label>
-                        <Input id="amount" name="amount" type="number" required />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="rate">Interest Rate (%)</Label>
-                        <Input id="rate" name="rate" type="number" step="0.01" required />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="issueDate">Issue Date</Label>
-                        <Input id="issueDate" name="issueDate" type="date" required />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="maturityDate">Maturity Date</Label>
-                        <Input id="maturityDate" name="maturityDate" type="date" required />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Record Loan</Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </header>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              {isLoading ? (
-                <p className="text-muted-foreground animate-pulse text-xs font-bold uppercase tracking-widest">FETCHING LIABILITIES...</p>
-              ) : loans?.length === 0 ? (
-                <Card className="glass border-white/5 col-span-full py-12 text-center border-dashed">
-                  <p className="text-muted-foreground">No loans recorded for this division.</p>
-                </Card>
-              ) : (
-                loans?.map((loan) => (
-                  <Card key={loan.id} className="glass border-white/5 overflow-hidden relative group hover:scale-[1.01] ios-transition">
-                    <div className="absolute top-4 right-4 z-10">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/10">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="glass">
-                          <DropdownMenuItem onClick={() => setEditingLoan(loan)} className="text-xs cursor-pointer">
-                            <Pencil className="h-3 w-3 mr-2" /> Edit Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteLoan(loan.id)} className="text-xs text-destructive cursor-pointer">
-                            <Trash2 className="h-3 w-3 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <CardHeader className="flex flex-row items-center justify-between pr-12">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-xl">
-                          <Landmark className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="min-w-0">
-                          <CardTitle className="text-lg truncate max-w-[150px]">{loan.lenderName}</CardTitle>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{loan.loanType}</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20 text-[9px] font-bold uppercase tracking-widest">{(loan.interestRate * 100).toFixed(1)}% APR</Badge>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1 min-w-0">
-                          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Outstanding Balance</p>
-                          <p className="text-2xl font-bold font-mono truncate" title={loan.outstandingBalance?.toLocaleString('en-IN')}>₹{loan.outstandingBalance?.toLocaleString('en-IN')}</p>
-                        </div>
-                        <div className="space-y-1 text-right min-w-0">
-                          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Principal</p>
-                          <p className="text-lg font-semibold text-muted-foreground truncate">₹{loan.principalAmount?.toLocaleString('en-IN')}</p>
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-xs pt-4 border-t border-white/5">
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Calendar className="h-3 w-3" /> Maturity: {loan.maturityDate}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-green-500 font-bold uppercase tracking-widest text-[9px]">
-                          <TrendingUp className="h-3 w-3" /> Flow Optimal
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
+    <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
+      {isProfileLoading ? (
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+          <div className="w-12 h-12 rounded-full gold-gradient animate-pulse" />
+          <p className="text-primary font-mono text-[10px] uppercase tracking-widest opacity-50">Calculating Liability Exposure...</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Loans & Liabilities</h1>
+              <p className="text-muted-foreground truncate">Management for {activeDivision.name}.</p>
             </div>
+            <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+              <DialogTrigger asChild>
+                <Button className="rounded-full gap-2 gold-gradient text-black font-bold h-10 px-6">
+                  <Plus className="h-4 w-4" /> New Loan
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Record New Loan</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleAddLoan} className="space-y-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="lender">Lender Name</Label>
+                    <Input id="lender" name="lender" required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="type">Loan Type</Label>
+                    <Input id="type" name="type" required />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="amount">Principal (₹)</Label>
+                      <Input id="amount" name="amount" type="number" required />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="rate">Interest Rate (%)</Label>
+                      <Input id="rate" name="rate" type="number" step="0.01" required />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="issueDate">Issue Date</Label>
+                      <Input id="issueDate" name="issueDate" type="date" required />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="maturityDate">Maturity Date</Label>
+                      <Input id="maturityDate" name="maturityDate" type="date" required />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Record Loan</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </header>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            {isLoading ? (
+              <p className="text-muted-foreground animate-pulse text-xs font-bold uppercase tracking-widest">FETCHING LIABILITIES...</p>
+            ) : loans?.length === 0 ? (
+              <Card className="glass border-white/5 col-span-full py-12 text-center border-dashed">
+                <p className="text-muted-foreground">No loans recorded for this division.</p>
+              </Card>
+            ) : (
+              loans?.map((loan) => (
+                <Card key={loan.id} className="gold-glass control-center-card overflow-hidden relative group hover:scale-[1.01] ios-transition border-primary/20">
+                  <div className="absolute top-4 right-4 z-10">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/10">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="glass">
+                        <DropdownMenuItem onClick={() => setEditingLoan(loan)} className="text-xs cursor-pointer">
+                          <Pencil className="h-3 w-3 mr-2" /> Edit Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteLoan(loan.id)} className="text-xs text-destructive cursor-pointer">
+                          <Trash2 className="h-3 w-3 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <CardHeader className="flex flex-row items-center justify-between pr-12">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-xl">
+                        <Landmark className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <CardTitle className="text-lg truncate max-w-[150px]">{loan.lenderName}</CardTitle>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{loan.loanType}</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20 text-[9px] font-bold uppercase tracking-widest">{(loan.interestRate * 100).toFixed(1)}% APR</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1 min-w-0">
+                        <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Outstanding Balance</p>
+                        <p className="text-2xl font-bold font-mono truncate" title={loan.outstandingBalance?.toLocaleString('en-IN')}>₹{loan.outstandingBalance?.toLocaleString('en-IN')}</p>
+                      </div>
+                      <div className="space-y-1 text-right min-w-0">
+                        <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Principal</p>
+                        <p className="text-lg font-semibold text-muted-foreground truncate">₹{loan.principalAmount?.toLocaleString('en-IN')}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs pt-4 border-t border-white/5">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Calendar className="h-3 w-3" /> Maturity: {loan.maturityDate}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-green-500 font-bold uppercase tracking-widest text-[9px]">
+                        <TrendingUp className="h-3 w-3" /> Flow Optimal
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
-        </main>
-      </div>
+        </div>
+      )}
 
       <Dialog open={!!editingLoan} onOpenChange={(open) => !open && setEditingLoan(null)}>
         <DialogContent className="glass border-white/10 sm:max-w-[425px]">
@@ -275,7 +262,6 @@ export default function LoansPage() {
           )}
         </DialogContent>
       </Dialog>
-      <BottomNav />
-    </div>
+    </main>
   );
 }

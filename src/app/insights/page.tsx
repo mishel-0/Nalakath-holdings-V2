@@ -1,10 +1,6 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -187,161 +183,161 @@ export default function InsightsPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
-          <div className="flex flex-col gap-8 max-w-7xl mx-auto">
-            <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="flex flex-col gap-1 min-w-0">
-                <Badge variant="outline" className="w-fit rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
-                  OPENROUTER AI CORE
-                </Badge>
-                <div className="mt-2">
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3 uppercase truncate">
-                    Financial AI
-                    <Sparkles className="h-8 w-8 text-primary animate-pulse shrink-0" />
-                  </h1>
-                  <p className="text-muted-foreground text-sm truncate">Strategic intelligence for {activeDivision.name}.</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 glass p-2 rounded-3xl border-white/5">
-                <div className="flex items-center gap-2 px-3">
-                  <Bot className="h-4 w-4 text-primary" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Neural Model</span>
-                </div>
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="w-full sm:w-[240px] h-10 rounded-2xl bg-white/5 border-white/10 text-xs font-bold">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="glass border-white/10 rounded-2xl">
-                    {AI_MODELS.map(model => (
-                      <SelectItem key={model.id} value={model.id} className="text-xs rounded-xl">
-                        <div className="flex flex-col items-start">
-                          <span className="font-bold">{model.name}</span>
-                          <span className="text-[8px] opacity-50 uppercase tracking-tighter">{model.provider}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button 
-                  onClick={runAnalysis} 
-                  disabled={loading}
-                  className="rounded-2xl gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-10 px-6 font-bold shrink-0"
-                >
-                  {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                  Execute Analysis
-                </Button>
-              </div>
-            </header>
-
-            <Tabs defaultValue="strategy" className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10 overflow-x-auto max-w-full">
-                <TabsTrigger value="strategy" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Strategy</TabsTrigger>
-                <TabsTrigger value="prediction" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Forecast</TabsTrigger>
-                <TabsTrigger value="audit" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Audit Monitor</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="strategy" className="space-y-6">
-                {!strategyInsights && !loading ? (
-                  <EmptyInsight icon={Target} title="Strategy Optimizer" desc={`Initialize engine to identify cost savings for ${activeDivision.name}.`} />
-                ) : loading && activeTab === "strategy" ? (
-                  <LoadingGrid />
-                ) : (
-                  strategyInsights && (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-500">
-                      {strategyInsights.suggestions.map((item, idx) => (
-                        <InsightCard key={idx} title={item.title} category={item.category} desc={item.description} impact={item.estimatedImpact} steps={item.actionableSteps} />
-                      ))}
-                    </div>
-                  )
-                )}
-              </TabsContent>
-
-              <TabsContent value="prediction" className="space-y-6">
-                {!cashFlowInsights && !loading ? (
-                  <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc={`Forecast liquidity shortages for the ${activeDivision.division} portfolio.`} />
-                ) : loading && activeTab === "prediction" ? (
-                  <LoadingGrid />
-                ) : (
-                  cashFlowInsights && (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                      <Card className="glass border-primary/20 bg-primary/5 rounded-[2.5rem]">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-primary" />
-                            30-Day Liquidity Forecast
-                          </CardTitle>
-                          <CardDescription>{cashFlowInsights.predictionSummary}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid gap-6 md:grid-cols-2 pb-8">
-                          <StatusCard 
-                            title="Shortage Alert" 
-                            status={cashFlowInsights.potentialShortageDetected ? "Detected" : "None"} 
-                            color={cashFlowInsights.potentialShortageDetected ? "text-destructive" : "text-green-500"} 
-                            desc="Predicted dips below zero threshold."
-                          />
-                          <StatusCard 
-                            title="Surplus Opportunity" 
-                            status={cashFlowInsights.potentialSurplusDetected ? "High" : "Optimal"} 
-                            color="text-primary" 
-                            desc="Periods of high liquidity."
-                          />
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )
-                )}
-              </TabsContent>
-
-              <TabsContent value="audit" className="space-y-6">
-                {!anomalyResults.length && !loading ? (
-                  <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc={`Scan recent ${activeDivision.name} expenditures for suspicious patterns.`} />
-                ) : loading && activeTab === "audit" ? (
-                  <LoadingGrid />
-                ) : (
-                  <div className="grid gap-4 animate-in fade-in duration-500">
-                    {anomalyResults.map((item, idx) => (
-                      <Card key={idx} className={cn(
-                        "glass border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
-                        item.analysis.isAnomaly ? "border-destructive/30 bg-destructive/5" : "border-green-500/10"
-                      )}>
-                        <div className="flex items-center gap-4 min-w-0 flex-1">
-                          <div className={cn("p-3 rounded-xl shrink-0", item.analysis.isAnomaly ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500")}>
-                            {item.analysis.isAnomaly ? <AlertTriangle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-bold truncate">{item.description}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold truncate">₹{item.amount.toLocaleString()} • {item.expenseCategory}</p>
-                          </div>
-                        </div>
-                        <div className="flex-1 md:max-w-md">
-                          <p className="text-xs text-muted-foreground leading-relaxed italic">"{item.analysis.reason}"</p>
-                        </div>
-                        <Badge variant="outline" className={cn(
-                          "rounded-full px-4 shrink-0 uppercase text-[9px] font-bold tracking-widest",
-                          item.analysis.severity === "high" ? "bg-destructive text-white border-none" : "text-muted-foreground"
-                        )}>
-                          Severity: {item.analysis.severity}
-                        </Badge>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-            
-            <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-12">
-              NALAKATH HOLDINGS © 2026 • AI ENGINE V2.4
-            </p>
-          </div>
-        </main>
+    <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden relative">
+      <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/20 pointer-events-none">
+        <div className="glass curvy p-8 text-center border-primary/20 shadow-2xl shadow-primary/10 pointer-events-auto">
+          <Bot className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+          <h2 className="text-2xl font-black uppercase tracking-widest mb-2">AI Insights</h2>
+          <p className="text-muted-foreground text-xs uppercase tracking-[0.2em] font-bold">Training Neural Core • Coming Soon</p>
+        </div>
       </div>
-      <BottomNav />
-    </div>
+      <div className="flex flex-col gap-8 max-w-7xl mx-auto opacity-20 grayscale pointer-events-none">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex flex-col gap-1 min-w-0">
+            <Badge variant="outline" className="w-fit rounded-full px-4 py-1 text-[9px] uppercase tracking-widest font-bold border-primary/40 text-primary bg-primary/5">
+              OPENROUTER AI CORE
+            </Badge>
+            <div className="mt-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline flex items-center gap-3 uppercase truncate">
+                Financial AI
+                <Sparkles className="h-8 w-8 text-primary animate-pulse shrink-0" />
+              </h1>
+              <p className="text-muted-foreground text-sm truncate">Strategic intelligence for {activeDivision.name}.</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 glass p-2 rounded-3xl border-white/5">
+            <div className="flex items-center gap-2 px-3">
+              <Bot className="h-4 w-4 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Neural Model</span>
+            </div>
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger className="w-full sm:w-[240px] h-10 rounded-2xl bg-white/5 border-white/10 text-xs font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="glass border-white/10 rounded-2xl">
+                {AI_MODELS.map(model => (
+                  <SelectItem key={model.id} value={model.id} className="text-xs rounded-xl">
+                    <div className="flex flex-col items-start">
+                      <span className="font-bold">{model.name}</span>
+                      <span className="text-[8px] opacity-50 uppercase tracking-tighter">{model.provider}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={runAnalysis} 
+              disabled={loading}
+              className="rounded-2xl gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-black h-10 px-6 font-bold shrink-0"
+            >
+              {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+              Execute Analysis
+            </Button>
+          </div>
+        </header>
+
+        <Tabs defaultValue="strategy" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="glass p-1 rounded-full h-12 w-fit mb-8 border-white/10 overflow-x-auto max-w-full">
+            <TabsTrigger value="strategy" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Strategy</TabsTrigger>
+            <TabsTrigger value="prediction" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Forecast</TabsTrigger>
+            <TabsTrigger value="audit" className="rounded-full px-6 text-xs uppercase tracking-widest font-bold">Audit Monitor</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="strategy" className="space-y-6">
+            {!strategyInsights && !loading ? (
+              <EmptyInsight icon={Target} title="Strategy Optimizer" desc={`Initialize engine to identify cost savings for ${activeDivision.name}.`} />
+            ) : loading && activeTab === "strategy" ? (
+              <LoadingGrid />
+            ) : (
+              strategyInsights && (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-500">
+                  {strategyInsights.suggestions.map((item, idx) => (
+                    <InsightCard key={idx} title={item.title} category={item.category} desc={item.description} impact={item.estimatedImpact} steps={item.actionableSteps} />
+                  ))}
+                </div>
+              )
+            )}
+          </TabsContent>
+
+          <TabsContent value="prediction" className="space-y-6">
+            {!cashFlowInsights && !loading ? (
+              <EmptyInsight icon={TrendingUp} title="Cash Flow Predictor" desc={`Forecast liquidity shortages for the ${activeDivision.division} portfolio.`} />
+            ) : loading && activeTab === "prediction" ? (
+              <LoadingGrid />
+            ) : (
+              cashFlowInsights && (
+                <div className="space-y-6 animate-in fade-in duration-500">
+                  <Card className="glass border-primary/20 bg-primary/5 rounded-[2.5rem]">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-primary" />
+                        30-Day Liquidity Forecast
+                      </CardTitle>
+                      <CardDescription>{cashFlowInsights.predictionSummary}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-6 md:grid-cols-2 pb-8">
+                      <StatusCard 
+                        title="Shortage Alert" 
+                        status={cashFlowInsights.potentialShortageDetected ? "Detected" : "None"} 
+                        color={cashFlowInsights.potentialShortageDetected ? "text-destructive" : "text-green-500"} 
+                        desc="Predicted dips below zero threshold."
+                      />
+                      <StatusCard 
+                        title="Surplus Opportunity" 
+                        status={cashFlowInsights.potentialSurplusDetected ? "High" : "Optimal"} 
+                        color="text-primary" 
+                        desc="Periods of high liquidity."
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              )
+            )}
+          </TabsContent>
+
+          <TabsContent value="audit" className="space-y-6">
+            {!anomalyResults.length && !loading ? (
+              <EmptyInsight icon={ShieldAlert} title="Audit Scanner" desc={`Scan recent ${activeDivision.name} expenditures for suspicious patterns.`} />
+            ) : loading && activeTab === "audit" ? (
+              <LoadingGrid />
+            ) : (
+              <div className="grid gap-4 animate-in fade-in duration-500">
+                {anomalyResults.map((item, idx) => (
+                  <Card key={idx} className={cn(
+                    "glass border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
+                    item.analysis.isAnomaly ? "border-destructive/30 bg-destructive/5" : "border-green-500/10"
+                  )}>
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className={cn("p-3 rounded-xl shrink-0", item.analysis.isAnomaly ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-500")}>
+                        {item.analysis.isAnomaly ? <AlertTriangle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold truncate">{item.description}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold truncate">₹{item.amount.toLocaleString()} • {item.expenseCategory}</p>
+                      </div>
+                    </div>
+                    <div className="flex-1 md:max-w-md">
+                      <p className="text-xs text-muted-foreground leading-relaxed italic">"{item.analysis.reason}"</p>
+                    </div>
+                    <Badge variant="outline" className={cn(
+                      "rounded-full px-4 shrink-0 uppercase text-[9px] font-bold tracking-widest",
+                      item.analysis.severity === "high" ? "bg-destructive text-white border-none" : "text-muted-foreground"
+                    )}>
+                      Severity: {item.analysis.severity}
+                    </Badge>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+        
+        <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-12">
+          NALAKATH HOLDINGS © 2026 • AI ENGINE V2.4
+        </p>
+      </div>
+    </main>
   );
 }
 

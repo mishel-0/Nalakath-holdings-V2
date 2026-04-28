@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +31,8 @@ function indianNumberFormat(n: number): string {
 }
 
 function numberToWords(num: number): string {
+  if (num === 0) return "RUPEES ZERO ONLY";
+  
   const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
   const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 
@@ -49,7 +49,7 @@ function numberToWords(num: number): string {
     return str;
   };
 
-  return "RUPEES " + inWords(Math.floor(num)).toUpperCase() + "ONLY";
+  return "RUPEES " + inWords(Math.floor(num)).trim().toUpperCase() + " ONLY";
 }
 
 export default function InvoiceGeneratorPage() {
@@ -98,9 +98,15 @@ export default function InvoiceGeneratorPage() {
     const disc_amt = (subtotal * invoiceToPrint.disc) / 100;
     const net = subtotal - disc_amt;
     
-    const cgst = net * 0.09;
-    const sgst = net * 0.09;
-    const total_gst = cgst + sgst;
+    // Calculate actual total GST based on line items
+    let total_gst = 0;
+    invoiceToPrint.items.forEach((item: any) => {
+      const itemNet = (item.qty * item.rate) * (1 - invoiceToPrint.disc / 100);
+      total_gst += (itemNet * item.gst) / 100;
+    });
+
+    const cgst = total_gst / 2;
+    const sgst = total_gst / 2;
     const tds_amt = (net * invoiceToPrint.tds) / 100;
     const final = net + total_gst - tds_amt;
 
@@ -108,10 +114,8 @@ export default function InvoiceGeneratorPage() {
   }, [invoiceToPrint]);
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
+  return (
+    <>
         <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
           <div className="flex flex-col gap-8 max-w-5xl mx-auto">
             <header className="flex flex-col gap-2">
@@ -347,8 +351,8 @@ export default function InvoiceGeneratorPage() {
                     {totals.disc_amt > 0 && (
                       <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818]"><span>Discount ({invoiceToPrint.disc}%)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.disc_amt)}</span></div>
                     )}
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>CGST (9%)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.cgst)}</span></div>
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>SGST (9%)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.sgst)}</span></div>
+                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>CGST</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.cgst)}</span></div>
+                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>SGST</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.sgst)}</span></div>
                     <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818] border-b border-black/5 pb-2"><span>TDS Deductible (Sec. 194C)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.tds_amt)}</span></div>
                     
                     <div style={{ backgroundColor: DARK }} className="relative mt-4 rounded-lg p-4 flex justify-between items-center shadow-xl">
@@ -403,8 +407,6 @@ export default function InvoiceGeneratorPage() {
           </div>
         );
       })()}
-
-      <BottomNav />
-    </div>
+    </>
   );
 }

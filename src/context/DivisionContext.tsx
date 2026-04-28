@@ -19,13 +19,15 @@ const DivisionContext = createContext<DivisionContextType | undefined>(undefined
 export function DivisionProvider({ children }: { children: ReactNode }) {
   const [activeDivision, setActiveDivision] = useState(companies[0]);
 
-  const setDivision = (id: string) => {
+  const setDivision = React.useCallback((id: string) => {
     const found = companies.find(c => c.id === id);
     if (found) setActiveDivision(found);
-  };
+  }, []);
+
+  const value = React.useMemo(() => ({ activeDivision, setDivision }), [activeDivision, setDivision]);
 
   return (
-    <DivisionContext.Provider value={{ activeDivision, setDivision }}>
+    <DivisionContext.Provider value={value}>
       {children}
     </DivisionContext.Provider>
   );

@@ -1,10 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
-import { QuickActionFAB } from "@/components/ui/QuickActionFAB";
+import { useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,8 +36,8 @@ export default function Dashboard() {
   const companyId = activeDivision.id;
 
   const vouchersQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "vouchers"), orderBy("createdAt", "desc"), limit(20)), [db, companyId]);
-  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses")), [db, companyId]);
-  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects")), [db, companyId]);
+  const expensesQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "expenses"), limit(50)), [db, companyId]);
+  const projectsQuery = useMemoFirebase(() => query(collection(db, "companies", companyId, "projects"), limit(20)), [db, companyId]);
   const recentTxQuery = useMemoFirebase(() => 
     query(collection(db, "companies", companyId, "journalEntries"), orderBy("createdAt", "desc"), limit(10)), 
   [db, companyId]);
@@ -51,7 +47,7 @@ export default function Dashboard() {
     return doc(db, "userProfiles", user.uid);
   }, [user, db]);
 
-  const { data: profile, isLoading: isProfileLoading } = useDoc(profileDocRef);
+  const { data: profile } = useDoc(profileDocRef);
   const { data: vouchers } = useCollection(vouchersQuery);
   const { data: expenses } = useCollection(expensesQuery);
   const { data: projects } = useCollection(projectsQuery);
@@ -101,24 +97,9 @@ export default function Dashboard() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [recentTransactions]);
 
-  if (isProfileLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-          <p className="animate-pulse text-primary font-mono tracking-widest uppercase text-xs">Syncing Portfolio...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0 overflow-hidden">
-          <div className="flex flex-col gap-8 max-w-7xl mx-auto animate-in fade-in duration-700">
+    <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
+      <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
@@ -143,11 +124,11 @@ export default function Dashboard() {
               <MetricCard title="Entity Revenue" value={stats.revenue} icon={IndianRupee} trend="up" />
               <MetricCard title="Operating Profit" value={stats.profit} icon={TrendingUp} trend="up" />
               <MetricCard title="Capital Expenses" value={stats.projectCosts} icon={Briefcase} trend="down" />
-              <MetricCard title="Division Alerts" value={stats.alerts.toString()} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} />
+              <MetricCard title="Division Alerts" value={stats.alerts} icon={AlertCircle} trend="none" isAlert={stats.alerts > 0} unit="" />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-7">
-              <Card className="lg:col-span-4 control-center-card overflow-hidden">
+              <Card className="lg:col-span-4 gold-glass control-center-card overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-xl font-bold">
@@ -185,7 +166,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-3 control-center-card overflow-hidden">
+              <Card className="lg:col-span-3 gold-glass control-center-card overflow-hidden">
                 <CardHeader className="bg-primary/5">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <PieChart className="h-5 w-5 text-primary" />
@@ -212,7 +193,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pb-12">
-              <Card className="lg:col-span-2 control-center-card overflow-hidden">
+              <Card className="lg:col-span-2 gold-glass control-center-card overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
                     <History className="h-5 w-5 text-primary" />
@@ -230,7 +211,7 @@ export default function Dashboard() {
                       <p className="py-10 text-center text-muted-foreground text-sm italic">No recent activity logged for this division.</p>
                     ) : (
                       recentTransactions.map((tx) => (
-                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1.5rem] hover:bg-foreground/5 ios-transition group overflow-hidden">
+                        <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1.5rem] glass-hover ios-transition group overflow-hidden">
                           <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className={cn(
                               "h-10 w-10 rounded-2xl flex items-center justify-center shrink-0",
@@ -258,7 +239,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="control-center-card overflow-hidden">
+              <Card className="gold-glass control-center-card overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold flex items-center gap-2 text-primary">
                     <AlertCircle className="h-5 w-5" />
@@ -278,17 +259,23 @@ export default function Dashboard() {
             </p>
           </div>
         </main>
-      </div>
-      <QuickActionFAB />
-      <BottomNav />
-    </div>
   );
 }
 
-function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ElementType;
+  trend: "up" | "down" | "none";
+  isAlert?: boolean;
+  unit?: string;
+}
+
+const MetricCard = memo(function MetricCard({ title, value, icon: Icon, trend, isAlert, unit = "₹" }: MetricCardProps) {
+  const formattedValue = processedValue(value, unit);
   return (
     <Card className={cn(
-      "control-center-card relative overflow-hidden group border-white/5",
+      "control-center-card gold-glass relative overflow-hidden group border-primary/20",
       isAlert && "ring-2 ring-destructive/20"
     )}>
       <Icon className="absolute right-[-10%] top-[-10%] h-32 w-32 opacity-[0.03] text-foreground rotate-12" />
@@ -297,8 +284,8 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 truncate">{title}</p>
         
         <div className="flex items-center justify-between gap-2 overflow-hidden">
-          <div className="text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate flex-1 min-w-0" title={processedValue(value)}>
-            {processedValue(value)}
+          <div className="text-2xl md:text-3xl font-bold font-mono tracking-tighter truncate flex-1 min-w-0" title={formattedValue}>
+            {formattedValue}
           </div>
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
             <Icon className="h-5 w-5 text-primary" />
@@ -318,15 +305,21 @@ function MetricCard({ title, value, icon: Icon, trend, isAlert }: any) {
       </div>
     </Card>
   );
-}
+});
 
-function processedValue(val: any) {
+function processedValue(val: string | number, unit: string = "") {
   const num = Number(val);
-  if (isNaN(num)) return `₹${val}`;
-  return `₹${num.toLocaleString('en-IN')}`;
+  if (isNaN(num)) return String(val);
+  return `${unit}${num.toLocaleString('en-IN')}`;
 }
 
-function DivisionBar({ name, value, color }: any) {
+interface DivisionBarProps {
+  name: string;
+  value: string;
+  color: string;
+}
+
+const DivisionBar = memo(function DivisionBar({ name, value, color }: DivisionBarProps) {
   return (
     <div className="space-y-3 overflow-hidden">
       <div className="flex justify-between text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground overflow-hidden">
@@ -334,16 +327,22 @@ function DivisionBar({ name, value, color }: any) {
         <span className="font-mono shrink-0">{value}</span>
       </div>
       <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
-        <div className={cn("h-full", color)} style={{ width: value }} />
+        <div className={cn("h-full rounded-full ios-transition", color)} style={{ width: value }} />
       </div>
     </div>
   );
+});
+
+interface AlertItemProps {
+  title: string;
+  desc: string;
+  severity: "high" | "medium" | "low";
 }
 
-function AlertItem({ title, desc, severity }: any) {
+const AlertItem = memo(function AlertItem({ title, desc, severity }: AlertItemProps) {
   const colors = { high: "bg-destructive", medium: "bg-orange-500", low: "bg-green-500" };
   return (
-    <div className="flex gap-4 p-5 rounded-[2rem] bg-foreground/5 border border-foreground/5 hover:border-foreground/10 ios-transition group cursor-pointer min-w-0 overflow-hidden">
+    <div className="flex gap-4 p-5 rounded-[2rem] glass-hover border border-foreground/5 ios-transition group cursor-pointer min-w-0 overflow-hidden">
       <div className={cn("mt-1.5 h-2.5 w-2.5 rounded-full shrink-0", colors[severity as keyof typeof colors])} />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold leading-none truncate">{title}</p>
@@ -352,4 +351,4 @@ function AlertItem({ title, desc, severity }: any) {
       <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto self-center shrink-0 group-hover:translate-x-1 ios-transition" />
     </div>
   );
-}
+});

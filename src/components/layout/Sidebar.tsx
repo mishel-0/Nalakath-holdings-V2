@@ -44,6 +44,8 @@ const navigation = [
   { name: "System Logs", href: "/logs", icon: History, adminOnly: true },
 ];
 
+import { motion } from "framer-motion";
+
 export function Sidebar() {
   const pathname = usePathname();
   const { user } = useUser();
@@ -68,25 +70,35 @@ export function Sidebar() {
   });
 
   return (
-    <aside className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-64 border-r border-white/10 glass md:block">
+    <aside className="fixed left-4 top-24 z-30 hidden h-[calc(100vh-8rem)] w-64 glass rounded-[2.5rem] border border-white/5 shadow-2xl md:block overflow-hidden">
       <div className="flex h-full flex-col gap-4 p-4">
         <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1 pt-4">
           {filteredNavigation.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link
+              <motion.div
                 key={item.name}
-                href={item.href}
-                className={cn(
-                  "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ios-transition",
-                  isActive 
-                    ? "bg-primary text-black shadow-lg shadow-primary/20" 
-                    : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
-                )}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <item.icon className={cn("h-5 w-5", isActive ? "text-black" : "text-primary/70 group-hover:text-primary")} />
-                {item.name}
-              </Link>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium ios-transition",
+                    isActive ? "text-black" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-nav"
+                      className="absolute inset-0 bg-primary rounded-2xl -z-10 shadow-lg shadow-primary/20"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <item.icon className={cn("h-5 w-5", isActive ? "text-black" : "text-primary/70 group-hover:text-primary")} />
+                  {item.name}
+                </Link>
+              </motion.div>
             );
           })}
         </nav>

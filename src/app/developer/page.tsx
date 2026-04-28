@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,11 +70,9 @@ export default function DeveloperDashboard() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
+  return (
+    <>
+        <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             
             <header className="flex flex-col gap-2">
@@ -278,9 +274,7 @@ export default function DeveloperDashboard() {
             </p>
           </div>
         </main>
-      </div>
-      <BottomNav />
-    </div>
+    </>
   );
 }
 

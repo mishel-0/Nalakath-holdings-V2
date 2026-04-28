@@ -25,13 +25,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [user, isUserLoading, router, pathname, mounted]);
 
   // Standardized loading state to prevent hydration mismatches
-  if (!mounted || isUserLoading) {
+  if (!mounted) return null;
+
+  if (isUserLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          {/* Static container during hydration, animation activates post-mount */}
           <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/5 shadow-lg shadow-primary/5 flex items-center justify-center">
-            {mounted && <div className="w-8 h-8 rounded-full gold-gradient animate-pulse" />}
+            <div className="w-8 h-8 rounded-full gold-gradient animate-pulse" />
           </div>
           <p className="text-primary font-medium tracking-widest uppercase text-[10px] opacity-50">
             Syncing Security Protocol...
@@ -47,3 +48,5 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
+

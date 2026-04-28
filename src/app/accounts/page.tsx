@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -98,11 +96,8 @@ export default function ChartOfAccountsPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-24 md:mb-0">
+    <>
+      <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
           <div className="flex flex-col gap-8 max-w-7xl mx-auto">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -235,8 +230,7 @@ export default function ChartOfAccountsPage() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
+    </main>
 
       <Dialog open={!!editingAccount} onOpenChange={(open) => !open && setEditingAccount(null)}>
         <DialogContent className="glass border-white/10 sm:max-w-[425px]">
@@ -248,12 +242,12 @@ export default function ChartOfAccountsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="edit-accountNumber">Account #</Label>
-                  <Input id="edit-accountNumber" name="accountNumber" defaultValue={editingAccount.accountNumber} required />
+                  <Input id="edit-accountNumber" name="accountNumber" defaultValue={editingAccount.accountNumber} required className="bg-white/5 border-white/10 rounded-xl" />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="edit-type">Account Type</Label>
                   <Select name="type" defaultValue={editingAccount.chartOfAccountTypeId}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white/5 border-white/10 rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="glass">
@@ -268,11 +262,11 @@ export default function ChartOfAccountsPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-name">Account Name</Label>
-                <Input id="edit-name" name="name" defaultValue={editingAccount.name} required />
+                <Input id="edit-name" name="name" defaultValue={editingAccount.name} required className="bg-white/5 border-white/10 rounded-xl" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-description">Description</Label>
-                <Input id="edit-description" name="description" defaultValue={editingAccount.description} />
+                <Input id="edit-description" name="description" defaultValue={editingAccount.description} className="bg-white/5 border-white/10 rounded-xl" />
               </div>
               <DialogFooter>
                 <Button type="submit" className="w-full gold-gradient text-black font-bold h-12 rounded-xl mt-2">Update Account</Button>
@@ -281,7 +275,6 @@ export default function ChartOfAccountsPage() {
           )}
         </DialogContent>
       </Dialog>
-      <BottomNav />
-    </div>
+    </>
   );
 }

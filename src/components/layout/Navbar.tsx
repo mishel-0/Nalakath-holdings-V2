@@ -19,22 +19,16 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useDivision, companies } from "@/context/DivisionContext";
+import { useTheme } from "@/context/ThemeContext";
+
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Navbar() {
   const { activeDivision, setDivision } = useDivision();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { theme, toggleTheme } = useTheme();
   const { user } = useUser();
   const auth = useAuth();
   const db = useFirestore();
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [theme]);
 
   const profileDocRef = useMemoFirebase(() => {
     if (!user || !db) return null;
@@ -48,35 +42,31 @@ export function Navbar() {
     signOut(auth);
   };
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
-
   return (
-    <header className="sticky top-0 z-40 w-full glass border-b border-white/5 backdrop-blur-3xl">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-8">
+    <header className="sticky top-4 z-40 w-[95%] mx-auto glass rounded-full border border-foreground/5 backdrop-blur-xl shadow-2xl">
+      <div className="flex h-16 items-center justify-between px-6 md:px-10">
         <div className="flex items-center gap-4 lg:gap-8">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 px-3 gap-2 ios-transition hover:bg-foreground/5 rounded-full">
+              <Button variant="ghost" className="h-10 px-4 gap-3 smooth-spring hover:bg-foreground/5 rounded-full border border-foreground/5 shadow-inner">
                 <div className="flex flex-col items-start text-left">
-                   <span className="text-[10px] font-bold uppercase tracking-tighter truncate max-w-[120px]">{activeDivision.name}</span>
-                   <span className="text-[8px] text-muted-foreground uppercase">{activeDivision.division}</span>
+                   <span className="text-[10px] font-black uppercase tracking-tighter truncate max-w-[140px]">{activeDivision.name}</span>
+                   <span className="text-[8px] text-muted-foreground uppercase font-bold">{activeDivision.division}</span>
                 </div>
-                <ChevronDown className="h-3 w-3 opacity-50" />
+                <ChevronDown className="h-3 w-3 opacity-30 group-hover:rotate-180 transition-transform duration-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 glass rounded-3xl">
-              <DropdownMenuLabel className="text-[10px] uppercase tracking-widest font-bold opacity-50">Switch Division</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-foreground/5" />
+            <DropdownMenuContent align="start" className="w-64 glass rounded-[2rem] p-2 animate-in fade-in slide-in-from-top-4 duration-500">
+              <DropdownMenuLabel className="text-[9px] uppercase tracking-widest font-black opacity-30 px-4 py-3">Portfolio Divisions</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-foreground/5 mx-2" />
               {companies.map((company) => (
                 <DropdownMenuItem
                   key={company.id}
                   onClick={() => setDivision(company.id)}
-                  className="flex flex-col items-start gap-1 py-3 cursor-pointer hover:bg-foreground/5 rounded-xl"
+                  className="flex flex-col items-start gap-1 p-4 cursor-pointer glass-hover rounded-2xl mb-1 last:mb-0"
                 >
-                  <span className="font-bold text-sm">{company.name}</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-tight">{company.division}</span>
+                  <span className="font-bold text-sm tracking-tight">{company.name}</span>
+                  <span className="text-[9px] text-muted-foreground uppercase font-black tracking-tighter">{company.division}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -100,7 +90,21 @@ export function Navbar() {
             className="rounded-full hover:bg-foreground/5"
             onClick={toggleTheme}
           >
-            {theme === 'dark' ? <Sun className="h-5 w-5 text-primary" /> : <Moon className="h-5 w-5 text-primary" />}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={theme}
+                initial={{ y: -20, opacity: 0, rotate: -90 }}
+                animate={{ y: 0, opacity: 1, rotate: 0 }}
+                exit={{ y: 20, opacity: 0, rotate: 90 }}
+                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5 text-primary" />
+                ) : (
+                  <Moon className="h-5 w-5 text-primary" />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </Button>
 
           <Button variant="ghost" size="icon" className="rounded-full relative hover:bg-foreground/5">

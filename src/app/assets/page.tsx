@@ -1,9 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -105,125 +102,115 @@ export default function AssetsPage() {
     toast({ variant: "destructive", title: "Asset Removed", description: "Asset deleted from inventory." });
   };
 
-  if (isProfileLoading || (profile && profile.role !== "Admin")) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full gold-gradient animate-pulse shadow-lg shadow-primary/20" />
-          <p className="text-primary font-mono tracking-widest uppercase text-xs">Authorizing...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 px-4 py-6 md:pl-72 md:pr-8 md:py-8 mb-20 md:mb-0">
-          <div className="flex flex-col gap-8 max-w-7xl mx-auto">
-            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Assets</h1>
-                <p className="text-muted-foreground truncate">Inventory for {activeDivision.name}.</p>
-              </div>
-              <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogTrigger asChild>
-                  <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90 px-6">
-                    <Plus className="h-4 w-4" /> Add Asset
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="glass border-white/10 sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Register New Asset</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddAsset} className="space-y-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="name">Asset Name</Label>
-                      <Input id="name" name="name" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="type">Asset Type</Label>
-                      <Input id="type" name="type" placeholder="Machinery, Real Estate, etc." required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="price">Purchase Price (₹)</Label>
-                      <Input id="price" name="price" type="number" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input id="location" name="location" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="purchaseDate">Purchase Date</Label>
-                      <Input id="purchaseDate" name="purchaseDate" type="date" required />
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Register Asset</Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </header>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {isLoading ? (
-                <p className="text-muted-foreground animate-pulse uppercase text-xs font-bold tracking-widest">FETCHING ASSETS...</p>
-              ) : assets?.length === 0 ? (
-                <Card className="glass border-white/5 col-span-full py-12 text-center border-dashed">
-                  <p className="text-muted-foreground">No assets found for this division.</p>
-                </Card>
-              ) : (
-                assets?.map((asset) => (
-                  <Card key={asset.id} className="glass border-white/5 hover:scale-[1.02] ios-transition relative overflow-hidden">
-                    <div className="absolute top-4 right-4 z-10">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/10">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="glass">
-                          <DropdownMenuItem onClick={() => setEditingAsset(asset)} className="text-xs cursor-pointer">
-                            <Pencil className="h-3 w-3 mr-2" /> Edit Asset
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteAsset(asset.id)} className="text-xs text-destructive cursor-pointer">
-                            <Trash2 className="h-3 w-3 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div className="p-3 bg-primary/10 rounded-2xl">
-                          <Layers className="h-6 w-6 text-primary" />
-                        </div>
-                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[10px] tracking-widest font-bold uppercase">
-                          {asset.assetType}
-                        </Badge>
-                      </div>
-                      <CardTitle className="mt-4 text-xl truncate">{asset.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
-                        <MapPin className="h-4 w-4" /> {asset.location}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" /> Purchased {asset.purchaseDate}
-                      </div>
-                      <div className="pt-4 border-t border-white/5">
-                        <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1">Current Book Value</p>
-                        <p className="text-2xl font-bold font-mono text-primary truncate" title={asset.currentBookValue?.toLocaleString('en-IN')}>₹{asset.currentBookValue?.toLocaleString('en-IN')}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
+    <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
+      {isProfileLoading ? (
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+          <div className="w-12 h-12 rounded-full gold-gradient animate-pulse" />
+          <p className="text-primary font-mono text-[10px] uppercase tracking-widest opacity-50">Auditing Physical Capital...</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">Assets</h1>
+              <p className="text-muted-foreground truncate">Inventory for {activeDivision.name}.</p>
             </div>
+            <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+              <DialogTrigger asChild>
+                <Button className="rounded-full gap-2 gold-gradient text-black font-bold hover:opacity-90 px-6">
+                  <Plus className="h-4 w-4" /> Add Asset
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Register New Asset</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleAddAsset} className="space-y-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Asset Name</Label>
+                    <Input id="name" name="name" required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="type">Asset Type</Label>
+                    <Input id="type" name="type" placeholder="Machinery, Real Estate, etc." required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="price">Purchase Price (₹)</Label>
+                    <Input id="price" name="price" type="number" required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input id="location" name="location" required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="purchaseDate">Purchase Date</Label>
+                    <Input id="purchaseDate" name="purchaseDate" type="date" required />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" className="w-full text-black gold-gradient font-bold h-12 rounded-xl">Register Asset</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </header>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {isLoading ? (
+              <p className="text-muted-foreground animate-pulse uppercase text-xs font-bold tracking-widest">FETCHING ASSETS...</p>
+            ) : assets?.length === 0 ? (
+              <Card className="glass border-white/5 col-span-full py-12 text-center border-dashed">
+                <p className="text-muted-foreground">No assets found for this division.</p>
+              </Card>
+            ) : (
+              assets?.map((asset) => (
+                <Card key={asset.id} className="gold-glass control-center-card hover:scale-[1.02] ios-transition relative overflow-hidden border-primary/20">
+                  <div className="absolute top-4 right-4 z-10">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/10">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="glass">
+                        <DropdownMenuItem onClick={() => setEditingAsset(asset)} className="text-xs cursor-pointer">
+                          <Pencil className="h-3 w-3 mr-2" /> Edit Asset
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteAsset(asset.id)} className="text-xs text-destructive cursor-pointer">
+                          <Trash2 className="h-3 w-3 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div className="p-3 bg-primary/10 rounded-2xl">
+                        <Layers className="h-6 w-6 text-primary" />
+                      </div>
+                      <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[10px] tracking-widest font-bold uppercase">
+                        {asset.assetType}
+                      </Badge>
+                    </div>
+                    <CardTitle className="mt-4 text-xl truncate">{asset.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
+                      <MapPin className="h-4 w-4" /> {asset.location}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" /> Purchased {asset.purchaseDate}
+                    </div>
+                    <div className="pt-4 border-t border-white/5">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1">Current Book Value</p>
+                      <p className="text-2xl font-bold font-mono text-primary truncate" title={asset.currentBookValue?.toLocaleString('en-IN')}>₹{asset.currentBookValue?.toLocaleString('en-IN')}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
-        </main>
-      </div>
+        </div>
+      )}
 
       <Dialog open={!!editingAsset} onOpenChange={(open) => !open && setEditingAsset(null)}>
         <DialogContent className="glass border-white/10 sm:max-w-[425px]">
@@ -261,7 +248,6 @@ export default function AssetsPage() {
           )}
         </DialogContent>
       </Dialog>
-      <BottomNav />
-    </div>
+    </main>
   );
 }
