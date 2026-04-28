@@ -21,8 +21,9 @@ const MID = "#6B5C42";
 const BORDER = "#CEBB8A";
 const STRIPE = "#F7F2E8";
 
-function indianNumberFormat(n: number): string {
-  const parts = n.toFixed(2).split(".");
+function fmt(n: number): string {
+  const rounded = Math.round(n * 100) / 100;
+  const parts = rounded.toFixed(2).split(".");
   let lastThree = parts[0].substring(parts[0].length - 3);
   const otherNumbers = parts[0].substring(0, parts[0].length - 3);
   if (otherNumbers !== "") lastThree = "," + lastThree;
@@ -30,26 +31,35 @@ function indianNumberFormat(n: number): string {
   return res;
 }
 
-function numberToWords(num: number): string {
-  if (num === 0) return "RUPEES ZERO ONLY";
-  
-  const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+function numberToWords(n: number): string {
+  const amount = Math.round(n);
+  if (amount === 0) return "RUPEES ZERO ONLY";
 
-  const inWords = (n: any): string => {
-    if ((n = n.toString()).length > 9) return 'overflow';
-    const n_array = ('000000000' + n).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-    if (!n_array) return '';
-    let str = '';
-    str += (Number(n_array[1]) != 0) ? (a[Number(n_array[1])] || b[Number(n_array[1][0])] + ' ' + a[Number(n_array[1][1])]) + 'Crore ' : '';
-    str += (Number(n_array[2]) != 0) ? (a[Number(n_array[2])] || b[Number(n_array[2][0])] + ' ' + a[Number(n_array[2][1])]) + 'Lakh ' : '';
-    str += (Number(n_array[3]) != 0) ? (a[Number(n_array[3])] || b[Number(n_array[3][0])] + ' ' + a[Number(n_array[3][1])]) + 'Thousand ' : '';
-    str += (Number(n_array[4]) != 0) ? (a[Number(n_array[4])] || b[Number(n_array[4][0])] + ' ' + a[Number(n_array[4][1])]) + 'Hundred ' : '';
-    str += (Number(n_array[5]) != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n_array[5])] || b[Number(n_array[5][0])] + ' ' + a[Number(n_array[5][1])]) : '';
-    return str;
+  const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+  const b100 = (x: number): string => {
+    if (x < 20) return ones[x];
+    return tens[Math.floor(x / 10)] + (x % 10 ? ' ' + ones[x % 10] : '');
   };
 
-  return "RUPEES " + inWords(Math.floor(num)).trim().toUpperCase() + " ONLY";
+  const b1000 = (x: number): string => {
+    if (x < 100) return b100(x);
+    return ones[Math.floor(x / 100)] + ' Hundred' + (x % 100 ? ' and ' + b100(x % 100) : '');
+  };
+
+  const parts: string[] = [];
+  const crores = Math.floor(amount / 10000000);
+  const lakhs = Math.floor((amount % 10000000) / 100000);
+  const thousands = Math.floor((amount % 100000) / 1000);
+  const remaining = amount % 1000;
+
+  if (crores) parts.push(b1000(crores) + ' Crore');
+  if (lakhs) parts.push(b1000(lakhs) + ' Lakh');
+  if (thousands) parts.push(b1000(thousands) + ' Thousand');
+  if (remaining) parts.push(b1000(remaining));
+
+  return "RUPEES " + parts.join(' ').toUpperCase() + " ONLY";
 }
 
 export default function InvoiceGeneratorPage() {
@@ -83,8 +93,11 @@ export default function InvoiceGeneratorPage() {
       b_addr1: formData.get("b_addr1"),
       b_city: formData.get("b_city"),
       b_pin: formData.get("b_pin"),
-      tds: Number(formData.get("tds")) || 2.0,
-      disc: Number(formData.get("disc")) || 0.0,
+      tds: Number(formData.get("tds")) || 0,
+      disc: Number(formData.get("disc")) || 0,
+      extra: Number(formData.get("extra")) || 0,
+      extra_lbl: formData.get("extra_lbl") || "Additional Charges",
+      is_cgst: formData.get("gst_type") === "C",
       jur: formData.get("jur") || "Malappuram",
       items: items
     };
@@ -94,24 +107,39 @@ export default function InvoiceGeneratorPage() {
 
   const totals = useMemo(() => {
     if (!invoiceToPrint) return null;
-    const subtotal = invoiceToPrint.items.reduce((acc: number, i: any) => acc + (i.qty * i.rate), 0);
-    const disc_amt = (subtotal * invoiceToPrint.disc) / 100;
-    const net = subtotal - disc_amt;
     
-    // Calculate actual total GST based on line items
-    let total_gst = 0;
+    const subtotal = invoiceToPrint.items.reduce((acc: number, i: any) => acc + (i.qty * i.rate), 0);
+    const disc_amt = Math.round((subtotal * invoiceToPrint.disc / 100) * 100) / 100;
+    const net = subtotal - disc_amt;
+
+    let cgst = 0;
+    let sgst = 0;
+    let igst = 0;
+
     invoiceToPrint.items.forEach((item: any) => {
-      const itemNet = (item.qty * item.rate) * (1 - invoiceToPrint.disc / 100);
-      total_gst += (itemNet * item.gst) / 100;
+      const base = Math.round((item.qty * item.rate * (1 - invoiceToPrint.disc / 100)) * 100) / 100;
+      const g = Math.round((base * item.gst / 100) * 100) / 100;
+      
+      if (invoiceToPrint.is_cgst) {
+        cgst += Math.round((g / 2) * 100) / 100;
+        sgst += Math.round((g / 2) * 100) / 100;
+      } else {
+        igst += g;
+      }
     });
 
-    const cgst = total_gst / 2;
-    const sgst = total_gst / 2;
-    const tds_amt = (net * invoiceToPrint.tds) / 100;
-    const final = net + total_gst - tds_amt;
+    cgst = Math.round(cgst * 100) / 100;
+    sgst = Math.round(sgst * 100) / 100;
+    igst = Math.round(igst * 100) / 100;
+    const total_gst = cgst + sgst + igst;
+    
+    const pre_tds = net + total_gst + invoiceToPrint.extra;
+    const tds_amt = Math.round((net * invoiceToPrint.tds / 100) * 100) / 100;
+    const final = Math.round((pre_tds - tds_amt) * 100) / 100;
 
-    return { subtotal, disc_amt, net, cgst, sgst, tds_amt, total_gst, final };
+    return { subtotal, disc_amt, net, cgst, sgst, igst, total_gst, tds_amt, final };
   }, [invoiceToPrint]);
+
 
   return (
     <>
@@ -229,11 +257,28 @@ export default function InvoiceGeneratorPage() {
                   <div className="grid md:grid-cols-4 gap-6">
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold">TDS % (Sec. 194C)</Label>
-                      <Input name="tds" type="number" step="0.1" defaultValue="2.0" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                      <Input name="tds" type="number" step="0.1" defaultValue="0.0" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold">Discount %</Label>
                       <Input name="disc" type="number" step="0.1" defaultValue="0.0" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-bold">GST Type</Label>
+                      <select name="gst_type" className="w-full bg-white/5 border border-white/10 h-12 rounded-2xl px-4 text-sm appearance-none outline-none focus:ring-1 focus:ring-primary">
+                        <option value="C" className="bg-zinc-900">CGST + SGST (Local)</option>
+                        <option value="I" className="bg-zinc-900">IGST (Inter-state)</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold">Extra Rs.</Label>
+                        <Input name="extra" type="number" defaultValue="0" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold">Label</Label>
+                        <Input name="extra_lbl" defaultValue="Extra" className="bg-white/5 border-white/10 h-12 rounded-2xl" />
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold">Jurisdiction</Label>
@@ -265,11 +310,21 @@ export default function InvoiceGeneratorPage() {
                 <div style={{ backgroundColor: GOLD }} className="absolute bottom-0 left-0 w-full h-0.5" />
                 
                 <div className="flex items-center gap-6">
-                  <div style={{ borderColor: GOLD }} className="h-16 w-16 rounded-full border-2 flex items-center justify-center text-white font-black text-xl">NH</div>
+                  {/* LOGO SEAL */}
+                  <div style={{ borderColor: GOLD }} className="h-20 w-20 rounded-full border-2 flex flex-col items-center justify-center text-white relative overflow-hidden bg-black/20">
+                    <div style={{ borderColor: GOLD }} className="absolute inset-1 rounded-full border opacity-40" />
+                    <span style={{ color: GOLD }} className="text-xl font-black tracking-tighter leading-none mb-0.5">NH</span>
+                    <span className="text-[5px] font-bold uppercase tracking-[0.1em] opacity-80">Nalakath</span>
+                  </div>
+
                   <div>
-                    <h1 style={{ color: GOLD }} className="text-2xl font-black tracking-tight uppercase">NALAKATH CONSTRUCTIONS PVT. LTD.</h1>
-                    <p style={{ color: GOLD3 }} className="text-[10px] italic font-medium opacity-80">Building Trust. Building Kerala.</p>
-                    <p className="text-[8px] text-white/60 mt-1 uppercase tracking-widest font-bold">Nalakath Hub, Areecode, Malappuram | GSTIN: 32XXXXXX1234Z5</p>
+                    <h1 style={{ color: GOLD }} className="text-2xl font-black tracking-tight uppercase leading-none mb-1">NALAKATH CONSTRUCTIONS PVT. LTD.</h1>
+                    <div style={{ backgroundColor: GOLD }} className="h-[0.5px] w-48 mb-2 opacity-50" />
+                    <p style={{ color: GOLD3 }} className="text-[10px] italic font-medium opacity-80 leading-none mb-2">Building Trust. Building Kerala.</p>
+                    <p className="text-[8px] text-white/60 uppercase tracking-widest font-bold leading-relaxed">
+                      Nalakath Hub, Ward No. 4, Areecode, Malappuram, Kerala 673639<br/>
+                      +91 97444 00100  |  info@nalakathindia.com  |  GSTIN: 32XXXXXX1234Z5
+                    </p>
                   </div>
                 </div>
               </div>
@@ -277,7 +332,7 @@ export default function InvoiceGeneratorPage() {
               {/* TITLE BAND */}
               <div style={{ backgroundColor: GOLD }} className="h-8 w-full flex items-center justify-between px-10">
                 <span className="text-sm font-black uppercase text-black">Tax Invoice</span>
-                <span className="text-[9px] font-bold text-black/70 uppercase">Original for Recipient | CGST + SGST | {invoiceToPrint.jur} Jurisdiction</span>
+                <span className="text-[9px] font-bold text-black/70 uppercase">Original for Recipient | {invoiceToPrint.is_cgst ? 'CGST + SGST' : 'IGST'} | {invoiceToPrint.jur} Jurisdiction</span>
               </div>
 
               <div className="p-10 space-y-8">
@@ -300,6 +355,7 @@ export default function InvoiceGeneratorPage() {
                     </div>
                     <div className="mt-6">
                       <p className="text-sm font-black uppercase text-black mb-1">{invoiceToPrint.b_name}</p>
+                      {invoiceToPrint.b_attn && <p style={{ color: MID }} className="text-[9px] font-bold uppercase mb-1">Attn: {invoiceToPrint.b_attn}</p>}
                       <p style={{ color: MID }} className="text-[10px] font-bold uppercase leading-relaxed">{invoiceToPrint.b_addr1 || "NO ADDRESS RECORDED"}</p>
                       <p style={{ color: MID }} className="text-[10px] font-bold uppercase">{invoiceToPrint.b_city} {invoiceToPrint.b_pin}</p>
                       <p style={{ color: MID }} className="text-[10px] font-black mt-1">GSTIN: {invoiceToPrint.b_gstin || "N/A"}</p>
@@ -318,10 +374,11 @@ export default function InvoiceGeneratorPage() {
                   <table className="w-full text-left border-collapse">
                     <thead style={{ backgroundColor: DARK }}>
                       <tr>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10 w-10">#</th>
-                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10">Work Description</th>
+                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10 w-10 text-center">#</th>
+                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest border-r border-white/10">Description of Work / Materials</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">HSN/SAC</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">Qty</th>
+                        <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">Unit</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-right border-r border-white/10">Rate (Rs.)</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-center border-r border-white/10">GST %</th>
                         <th style={{ color: GOLD }} className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-right">Amount (Rs.)</th>
@@ -331,12 +388,13 @@ export default function InvoiceGeneratorPage() {
                       {invoiceToPrint.items.map((item: any, idx: number) => (
                         <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? "white" : STRIPE }} className="border-b border-[#E0D4B0] last:border-0">
                           <td className="p-4 text-center border-r border-[#DDD0A8]">{idx + 1}</td>
-                          <td className="p-4 uppercase border-r border-[#DDD0A8]">{item.description}</td>
+                          <td className="p-4 uppercase border-r border-[#DDD0A8] max-w-[200px] break-words">{item.description}</td>
                           <td className="p-4 text-center border-r border-[#DDD0A8] text-muted-foreground">{item.hsn}</td>
                           <td className="p-4 text-center border-r border-[#DDD0A8] font-black">{item.qty}</td>
-                          <td className="p-4 text-right border-r border-[#DDD0A8] font-mono">{indianNumberFormat(item.rate)}</td>
+                          <td className="p-4 text-center border-r border-[#DDD0A8]">{item.unit}</td>
+                          <td className="p-4 text-right border-r border-[#DDD0A8] font-mono">{fmt(item.rate)}</td>
                           <td className="p-4 text-center border-r border-[#DDD0A8]">{item.gst}%</td>
-                          <td className="p-4 text-right font-black font-mono">{indianNumberFormat(item.qty * item.rate)}</td>
+                          <td className="p-4 text-right font-black font-mono">{fmt(item.qty * item.rate)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -346,18 +404,29 @@ export default function InvoiceGeneratorPage() {
                 {/* TOTALS */}
                 <div className="flex justify-end pt-4">
                   <div className="w-[320px] space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>Subtotal (before GST)</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.subtotal)}</span></div>
+                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>Subtotal (before GST)</span><span className="font-mono text-black">Rs. {fmt(totals.subtotal)}</span></div>
                     {totals.disc_amt > 0 && (
-                      <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818]"><span>Discount ({invoiceToPrint.disc}%)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.disc_amt)}</span></div>
+                      <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818]"><span>Discount ({invoiceToPrint.disc}%)</span><span className="font-mono">- Rs. {fmt(totals.disc_amt)}</span></div>
                     )}
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>CGST</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.cgst)}</span></div>
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>SGST</span><span className="font-mono text-black">Rs. {indianNumberFormat(totals.sgst)}</span></div>
-                    <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818] border-b border-black/5 pb-2"><span>TDS Deductible (Sec. 194C)</span><span className="font-mono">- Rs. {indianNumberFormat(totals.tds_amt)}</span></div>
+                    {invoiceToPrint.is_cgst ? (
+                      <>
+                        <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>CGST</span><span className="font-mono text-black">Rs. {fmt(totals.cgst)}</span></div>
+                        <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>SGST</span><span className="font-mono text-black">Rs. {fmt(totals.sgst)}</span></div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>IGST</span><span className="font-mono text-black">Rs. {fmt(totals.igst)}</span></div>
+                    )}
+                    {invoiceToPrint.extra > 0 && (
+                      <div className="flex justify-between text-[10px] font-bold px-2 text-[#6B5C42]"><span>{invoiceToPrint.extra_lbl}</span><span className="font-mono text-black">Rs. {fmt(invoiceToPrint.extra)}</span></div>
+                    )}
+                    {totals.tds_amt > 0 && (
+                      <div className="flex justify-between text-[10px] font-bold px-2 text-[#A02818] border-b border-black/5 pb-2"><span>TDS Deductible (Sec. 194C)</span><span className="font-mono">- Rs. {fmt(totals.tds_amt)}</span></div>
+                    )}
                     
                     <div style={{ backgroundColor: DARK }} className="relative mt-4 rounded-lg p-4 flex justify-between items-center shadow-xl">
                       <div className="space-y-0.5">
                         <p style={{ color: GOLD }} className="text-[8px] font-black uppercase tracking-[0.2em]">Total Amount Payable</p>
-                        <p style={{ color: GOLD }} className="text-2xl font-black tracking-tight">Rs. {indianNumberFormat(totals.final)}</p>
+                        <p style={{ color: GOLD }} className="text-2xl font-black tracking-tight">Rs. {fmt(totals.final)}</p>
                       </div>
                     </div>
                   </div>
@@ -376,29 +445,63 @@ export default function InvoiceGeneratorPage() {
                       <span className="text-[9px] font-black text-black uppercase">Bank Details</span>
                     </div>
                     <div className="mt-6 space-y-1.5">
-                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Bank:</span><span className="font-black text-black">STATE BANK OF INDIA</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Account No.:</span><span className="font-black text-black font-mono">32XXXXXXXXXX51</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Bank:</span><span className="font-black text-black">STATE BANK OF INDIA, PERINTHALMANNA</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Account Name:</span><span className="font-black text-black">NALAKATH CONSTRUCTIONS PVT. LTD.</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Account No.:</span><span className="font-black text-black font-mono text-[10px]">32XXXXXXXXXX51</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">IFSC Code:</span><span className="font-black text-black font-mono">SBIN0001234</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase tracking-widest text-[8px]">Type:</span><span className="font-black text-black">CURRENT ACCOUNT</span></div>
                     </div>
                   </div>
-                  
-                  <div className="flex flex-col items-center justify-end">
-                    <div className="text-center space-y-1">
-                      <div className="h-[1px] w-48 bg-black mx-auto mb-2" />
-                      <p className="text-[10px] font-black text-black uppercase tracking-[0.1em]">Authorised Signatory</p>
-                      <p className="text-[8px] font-bold text-muted-foreground uppercase">For Nalakath Constructions Pvt. Ltd.</p>
+
+                  <div style={{ borderColor: BORDER, backgroundColor: LIGHT }} className="border rounded-xl p-6 relative overflow-hidden text-[10px]">
+                    <div style={{ backgroundColor: GOLD }} className="absolute top-0 left-0 w-full h-6 px-4 flex items-center">
+                      <span className="text-[9px] font-black text-black uppercase">Terms & Conditions</span>
+                    </div>
+                    <div className="mt-6 space-y-1">
+                      <p className="text-[8px] leading-tight text-zinc-700">1. Payment due within 30 days of invoice date.</p>
+                      <p className="text-[8px] leading-tight text-zinc-700">2. Interest @ 18% p.a. on overdue amounts.</p>
+                      <p className="text-[8px] leading-tight text-zinc-700">3. Materials supplied per approved BOQ specs.</p>
+                      <p className="text-[8px] leading-tight text-zinc-700">4. Disputes subject to {invoiceToPrint.jur} jurisdiction.</p>
+                      <p className="text-[8px] leading-tight text-zinc-700">5. This is a computer-generated invoice.</p>
                     </div>
                   </div>
+                </div>
+
+                {/* SIGNATURE SECTION */}
+                <div className="flex justify-between items-end pt-10">
+                   <div className="max-w-[300px]">
+                      <p style={{ color: MID }} className="text-[8px] italic leading-relaxed">
+                        We declare that this invoice shows the actual price of the goods / services described and that all particulars are true and correct to the best of our knowledge.
+                      </p>
+                   </div>
+                   
+                   <div className="flex flex-col items-center gap-6 relative">
+                      {/* SEAL CIRCLE */}
+                      <div style={{ borderColor: GOLD }} className="h-14 w-14 rounded-full border flex flex-col items-center justify-center opacity-40 absolute -top-8 -left-12 rotate-[-15deg]">
+                         <span style={{ color: GOLD }} className="text-[6px] font-black leading-none">NALAKATH</span>
+                         <span style={{ color: GOLD }} className="text-[5px] font-bold leading-none">CONSTRUCTIONS</span>
+                         <span style={{ color: GOLD }} className="text-[4px] font-medium leading-none">MALAPPURAM</span>
+                      </div>
+
+                      <div className="text-center space-y-1">
+                        <div className="h-[1px] w-48 bg-black mx-auto mb-2" />
+                        <p className="text-[10px] font-black text-black uppercase tracking-[0.1em]">Authorised Signatory</p>
+                        <p className="text-[8px] font-bold text-muted-foreground uppercase">For Nalakath Constructions Pvt. Ltd.</p>
+                      </div>
+                   </div>
                 </div>
               </div>
 
               {/* FOOTER */}
-              <div style={{ backgroundColor: DARK }} className="h-10 w-full flex items-center justify-center border-t border-white/5">
-                <p style={{ color: GOLD3 }} className="text-[8px] font-medium uppercase tracking-[0.3em]">Nalakath Constructions Pvt. Ltd. • Building Trust. Building Kerala.</p>
+              <div style={{ backgroundColor: DARK }} className="h-10 w-full flex items-center justify-between px-10 border-t border-white/5">
+                <p style={{ color: GOLD3 }} className="text-[7px] font-medium uppercase tracking-[0.1em]">
+                  Nalakath Constructions Pvt. Ltd. • Nalakath Hub, Areecode, Malappuram • +91 97444 00100 • nalakathindia.com
+                </p>
+                <p style={{ color: GOLD2 }} className="text-[7px] font-bold uppercase tracking-widest">Page 1 of 1</p>
               </div>
 
               {/* PRINT ACTIONS */}
-              <div className="print:hidden flex gap-4 justify-center mt-6 pt-6 border-t border-zinc-100">
+              <div className="print:hidden flex gap-4 justify-center mt-6 pt-6 border-t border-zinc-100 pb-6">
                 <Button variant="outline" className="rounded-full px-8 h-12 font-bold uppercase text-[10px] tracking-widest" onClick={() => setInvoiceToPrint(null)}>Discard Preview</Button>
                 <Button className="rounded-full px-12 h-12 font-bold uppercase text-[10px] tracking-widest gold-gradient text-black shadow-xl" onClick={() => window.print()}><Printer className="h-4 w-4 mr-2" /> Export to PDF</Button>
               </div>
@@ -409,3 +512,4 @@ export default function InvoiceGeneratorPage() {
     </>
   );
 }
+
