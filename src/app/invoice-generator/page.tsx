@@ -298,11 +298,30 @@ export default function InvoiceGeneratorPage() {
 
       {invoiceToPrint && totals && (() => {
         return (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white overflow-y-auto">
-            <Card className="w-full max-w-4xl bg-white text-[#0C0A07] overflow-hidden rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300 font-sans border-none pb-10">
-              <Button variant="ghost" size="icon" className="absolute top-4 right-4 print:hidden h-10 w-10 bg-black/10 hover:bg-black/20 text-black rounded-full z-[110]" onClick={() => setInvoiceToPrint(null)}>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 print:p-0 print:bg-white print:relative print:inset-auto print:flex-none overflow-y-auto">
+            <style dangerouslySetInnerHTML={{ __html: `
+              @media print {
+                body * { visibility: hidden; }
+                .print-content, .print-content * { visibility: visible; }
+                .print-content { 
+                  position: absolute; 
+                  left: 0; 
+                  top: 0; 
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  box-shadow: none !important;
+                  border: none !important;
+                }
+                @page { size: A4; margin: 0; }
+                .no-print { display: none !important; }
+              }
+            `}} />
+            <Card className="w-full max-w-4xl bg-white text-[#0C0A07] overflow-hidden rounded-none print:shadow-none shadow-2xl relative animate-in zoom-in-95 duration-300 font-sans border-none pb-10 print-content">
+              <Button variant="ghost" size="icon" className="absolute top-4 right-4 print:hidden h-10 w-10 bg-black/10 hover:bg-black/20 text-black rounded-full z-[110] no-print" onClick={() => setInvoiceToPrint(null)}>
                 <X className="h-5 w-5" />
               </Button>
+
               
               {/* HEADER - STRICT PYTHON MODEL */}
               <div style={{ backgroundColor: DARK }} className="h-[108px] w-full relative flex items-center px-10">
