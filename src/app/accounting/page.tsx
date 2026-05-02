@@ -114,8 +114,8 @@ export default function AccountingPage() {
   };
 
   return (
-    <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
-      <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+    <>
+      <div className="flex flex-col gap-8">
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground font-headline uppercase truncate">General Ledger</h1>
@@ -288,7 +288,7 @@ export default function AccountingPage() {
           )}
         </DialogContent>
       </Dialog>
-    </main>
+    </>
   );
 }
 

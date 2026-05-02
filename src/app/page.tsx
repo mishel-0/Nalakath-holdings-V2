@@ -98,8 +98,7 @@ export default function Dashboard() {
   }, [recentTransactions]);
 
   return (
-    <main className="flex-1 px-4 py-8 md:pl-80 md:pr-12 md:pt-32 mb-24 md:mb-0 overflow-hidden">
-      <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+    <div className="flex flex-col gap-8">
             
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
@@ -257,8 +256,7 @@ export default function Dashboard() {
             <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground opacity-30 pb-12">
               NALAKATH HOLDINGS © 2026
             </p>
-          </div>
-        </main>
+    </div>
   );
 }
 

@@ -14,11 +14,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex">
+      <div className="flex relative">
         <Sidebar />
-        {children}
+        <main className="flex-1 w-full md:pl-72 pt-28 pb-32 px-4 md:pr-8">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
       </div>
       <BottomNav />
     </div>

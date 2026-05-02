@@ -435,13 +435,6 @@ export default function ExpensesPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="glass rounded-2xl">
-                                {exp.expenseType === "Client Invoice" && (
-                                  <DropdownMenuItem asChild className="text-xs font-bold text-primary cursor-pointer">
-                                    <Link href="/invoice-generator">
-                                      <FileText className="h-3 w-3 mr-2" /> Open Invoice Engine
-                                    </Link>
-                                  </DropdownMenuItem>
-                                )}
                                 <DropdownMenuItem onClick={() => setEditingExpense(exp)} className="text-xs cursor-pointer">
                                   <Pencil className="h-3 w-3 mr-2" /> Modify Entry
                                 </DropdownMenuItem>

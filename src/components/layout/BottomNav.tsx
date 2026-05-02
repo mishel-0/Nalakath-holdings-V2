@@ -21,7 +21,6 @@ import { useDivision } from "@/context/DivisionContext";
 const mobileNav = [
   { name: "Home", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: HardHat, adminOnly: true, projectsOnly: true },
-  { name: "Invoice", href: "/invoice-generator", icon: FileText, adminOnly: true },
   { name: "Accounting", href: "/accounting", icon: BookOpen },
   { name: "Tax", href: "/tax", icon: Percent },
   { name: "Reports", href: "/reports", icon: BarChart3 },
