@@ -485,10 +485,17 @@ function GeneratorContent() {
       </AnimatePresence>
 
       {/* ── Print styles (only) ── */}
-      <style jsx global>{`
+      <style>{`
         @media print {
-          body > :not(#invoice-document) { display: none !important; }
-          body { background: white !important; margin: 0 !important; padding: 0 !important; }
+          body * { visibility: hidden !important; }
+          #invoice-document, #invoice-document * { visibility: visible !important; }
+          #invoice-document {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 210mm !important;
+            min-height: 297mm !important;
+          }
           @page { size: A4; margin: 0; }
         }
       `}</style>
