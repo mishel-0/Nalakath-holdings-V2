@@ -309,23 +309,23 @@ function GeneratorContent() {
 
               {/* ── ITEMS TABLE ── */}
               <div className="px-8 flex-1 pb-2">
-                <div className="border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="border border-zinc-200 rounded-xl overflow-hidden">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-zinc-950 text-white text-[7.5px] uppercase font-black tracking-wider">
+                      <tr className="text-[7.5px] uppercase font-black tracking-wider border-b border-zinc-200">
                         <th className="px-3 py-3 w-8 text-center text-primary">#</th>
-                        <th className="px-3 py-3">Description of Work / Materials</th>
-                        <th className="px-3 py-3 w-20 text-center">HSN/SAC</th>
-                        <th className="px-3 py-3 w-14 text-center">Qty</th>
-                        <th className="px-3 py-3 w-16 text-center">Unit</th>
-                        <th className="px-3 py-3 w-28 text-right">Rate (Rs.)</th>
-                        <th className="px-3 py-3 w-14 text-center">GST %</th>
+                        <th className="px-3 py-3 text-primary">Description of Work / Materials</th>
+                        <th className="px-3 py-3 w-20 text-center text-primary">HSN/SAC</th>
+                        <th className="px-3 py-3 w-14 text-center text-primary">Qty</th>
+                        <th className="px-3 py-3 w-16 text-center text-primary">Unit</th>
+                        <th className="px-3 py-3 w-28 text-right text-primary">Rate (Rs.)</th>
+                        <th className="px-3 py-3 w-14 text-center text-primary">GST %</th>
                         <th className="px-3 py-3 w-32 text-right text-primary">Amount (Rs.)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
                       {items.map((item, idx) => (
-                        <tr key={item.id} className="text-[8.5px] hover:bg-zinc-50">
+                        <tr key={item.id} className="text-[8.5px]">
                           <td className="px-3 py-3 text-center text-zinc-400 font-bold">{idx + 1}</td>
                           <td className="px-3 py-3 font-bold text-zinc-800">{item.description}</td>
                           <td className="px-3 py-3 text-center text-zinc-500 font-mono">{item.hsn}</td>
@@ -385,7 +385,7 @@ function GeneratorContent() {
                 {/* RIGHT COLUMN */}
                 <div className="space-y-3">
                   {/* Tax Breakdown */}
-                  <div className="bg-zinc-50/80 p-4 rounded-xl border border-zinc-100 space-y-1.5">
+                  <div className="space-y-1.5">
                     <div className="flex justify-between text-[8px] items-center py-1">
                       <span className="text-zinc-500 font-bold uppercase tracking-wider text-[7px]">Subtotal (before GST)</span>
                       <span className="font-black text-zinc-900">Rs. {fmt(t.subtotal)}</span>
@@ -428,13 +428,13 @@ function GeneratorContent() {
                   </div>
 
                   {/* Total Amount */}
-                  <div className="bg-zinc-950 rounded-2xl p-5 text-white text-center relative overflow-hidden">
+                  <div className="bg-zinc-950 rounded-2xl p-4 text-center relative overflow-hidden">
                     <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-primary/10 rounded-full" />
-                    <div className="relative flex flex-col items-center">
-                      <span className="text-[7px] font-black uppercase tracking-[0.3em] text-primary/60 mb-0.5">Total Amount Payable</span>
-                      <div className="flex items-baseline gap-1">
+                    <div className="relative">
+                      <span className="text-[7px] font-black uppercase tracking-[0.3em] text-primary/60 mb-0.5 block">Total Amount Payable</span>
+                      <div className="flex items-baseline justify-center gap-1">
                         <span className="text-base font-black text-white/50">Rs.</span>
-                        <span className="text-3xl font-black tracking-tighter text-primary drop-shadow-[0_0_8px_rgba(201,168,76,0.3)]">{fmt(t.final)}</span>
+                        <span className="text-[28px] font-black tracking-tighter text-primary">{fmt(t.final)}</span>
                       </div>
                     </div>
                   </div>
@@ -451,7 +451,7 @@ function GeneratorContent() {
                     <div className="flex flex-col items-center text-center shrink-0">
                       <div className="w-12 h-12 border-2 border-zinc-200 rounded-full flex items-center justify-center relative opacity-40 mb-1">
                         <div className="absolute inset-1.5 border border-zinc-200 rounded-full border-dashed" />
-                        <div className="text-[4.5px] font-black text-zinc-400 text-center uppercase leading-tight">Nalakath<br />Holdings<br />Malappuram</div>
+                        <div className="text-[4.5px] font-black text-primary text-center uppercase leading-tight">Nalakath<br />Holdings<br />Malappuram</div>
                       </div>
                       <div className="w-28 h-px bg-zinc-900 mb-0.5" />
                       <p className="text-[8px] font-black uppercase tracking-wider text-zinc-900">Authorised Signatory</p>
